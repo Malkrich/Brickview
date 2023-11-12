@@ -1,6 +1,13 @@
+# VS community files
 .vs/
-*.sln
-bin/*
-bin-int/*
+**.sln
+**.vcxproj
+**.vcxproj.filter
+**.vcxproj.user
 
+# building files
+bin/
+bin-int/
+
+# others
 TODO.md
