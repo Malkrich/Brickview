@@ -1,8 +1,8 @@
 #include "Window.h"
 
-#include "Core\Log.h"
+#include "Core/Log.h"
 
-#include "GLFW\glfw3.h"
+#include "GLFW/glfw3.h"
 
 namespace Brickview
 {

@@ -1,8 +1,8 @@
 #include "Application.h"
 
-#include "Core\Log.h"
+#include <glad/glad.h>
 
-#include "GL\glew.h"
+#include "Core/Log.h"
 
 #define BIND_EVENT_FUNCTION(function) std::bind(&function, this, std::placeholders::_1)
 
@@ -30,9 +30,10 @@ namespace Brickview
 
 	void Application::initialize()
 	{
-		if (glewInit() != GLEW_OK)
+		int version = gladLoadGL();
+		if (version == 0)
 		{
-			BV_LOG_ERROR("Glew init error !");
+			BV_LOG_ERROR("Failed to initialize OpenGL context !");
 			return;
 		}
 	}

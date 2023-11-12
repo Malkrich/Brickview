@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "Core\Event\Event.h"
+#include "Core/Event/Event.h"
 
 struct GLFWwindow;
 

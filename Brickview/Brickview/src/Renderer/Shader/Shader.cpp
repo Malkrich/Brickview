@@ -1,10 +1,12 @@
 #include "Shader.h"
 
-#include "Core\Log.h"
-
 #include <iostream>
 #include <fstream>
-#include <GL\glew.h>
+
+#include <glad/glad.h>
+
+#include "Core/Log.h"
+
 
 namespace Utils
 {

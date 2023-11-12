@@ -7,9 +7,15 @@ workspace "Brickview"
         "Release"
     }
 
+    flags
+	{
+		"MultiProcessorCompile"
+	}
+
 outputDir = "%{cfg.buildcfg}-%{cfg.system}"
 
 project "spdlog"
+    location "Brickview/vendors/spdlog"
     kind "StaticLib"
 
     targetdir("bin/" .. outputDir .. "/%{prj.name}")
@@ -41,8 +47,8 @@ project "Brickview"
     includedirs
     {
         "Brickview/Brickview/src",
-        "Brickview/vendors/GLFW/include",
-        "Brickview/vendors/GLEW/include",
+        "Brickview/vendors/GLFW/glfw-3.3.8/include",
+        "Brickview/vendors/glad/include",
         "Brickview/vendors/spdlog/include"
     }
 
@@ -54,20 +60,20 @@ project "Brickview"
 
     links
     {
-        "Brickview/vendors/GLFW/lib-vc2022/glfw3.lib",
-        "Brickview/vendors/GLEW/lib/Release/Win32/glew32s.lib",
-        "opengl32.lib",
+        "GLFW",
+        "glad",
         "spdlog"
-    }
-
-    defines
-    {
-        "GLEW_STATIC"
     }
 
     filter "configurations:Debug"
         defines "BV_DEBUG"
+        runtime "Debug"
 
     filter "configurations:Release"
         defines "BV_RELEASE"
+        runtime "Release"
         optimize "on"
+
+group "Dependencies"
+    include "Brickview/vendors/GLFW"
+    include "Brickview/vendors/glad"
