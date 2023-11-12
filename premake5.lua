@@ -9,6 +9,25 @@ workspace "Brickview"
 
 outputDir = "%{cfg.buildcfg}-%{cfg.system}"
 
+project "spdlog"
+    kind "StaticLib"
+
+    targetdir("bin/" .. outputDir .. "/%{prj.name}")
+    objdir("bin-int/" .. outputDir .. "/%{prj.name}")
+
+    files
+    {
+        "Brickview/vendors/spdlog/src/**.cpp",
+        "Brickview/vendors/spdlog/include/**.h"
+    }
+
+    includedirs
+    {
+        "Brickview/vendors/spdlog/include"
+    }
+
+    defines "SPDLOG_COMPILED_LIB"
+
 project "Brickview"
     location "Brickview/Brickview"
     kind "ConsoleApp"
@@ -23,7 +42,8 @@ project "Brickview"
     {
         "Brickview/Brickview/src",
         "Brickview/vendors/GLFW/include",
-        "Brickview/vendors/GLEW/include"
+        "Brickview/vendors/GLEW/include",
+        "Brickview/vendors/spdlog/include"
     }
 
     files
@@ -36,7 +56,8 @@ project "Brickview"
     {
         "Brickview/vendors/GLFW/lib-vc2022/glfw3.lib",
         "Brickview/vendors/GLEW/lib/Release/Win32/glew32s.lib",
-        "opengl32.lib"
+        "opengl32.lib",
+        "spdlog"
     }
 
     defines
