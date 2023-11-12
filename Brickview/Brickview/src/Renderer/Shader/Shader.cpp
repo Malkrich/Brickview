@@ -1,5 +1,7 @@
 #include "Shader.h"
 
+#include "Core\Log.h"
+
 #include <iostream>
 #include <fstream>
 #include <GL\glew.h>
@@ -37,7 +39,7 @@ namespace Brickview
         if (!success)
         {
             glGetShaderInfoLog(shaderID, 128, nullptr, log);
-            std::cout << "ERROR: SHADER COMPILATION FAILED\n" << log << std::endl;
+            BV_LOG_WARN("Shader compilation failed !");
         }
 
         return shaderID;
@@ -74,7 +76,7 @@ namespace Brickview
             if (!success)
             {
                 glGetProgramInfoLog(m_shaderProgramID, 128, NULL, log);
-                std::cout << "ERROR: SHADER LINKING FAILED\n" << log << std::endl;
+                BV_LOG_WARN("Shader program linking failed !");
             }
         }
 
