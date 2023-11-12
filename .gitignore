@@ -2,7 +2,7 @@
 .vs/
 **.sln
 **.vcxproj
-**.vcxproj.filter
+**.vcxproj.filters
 **.vcxproj.user
 
 # building files
