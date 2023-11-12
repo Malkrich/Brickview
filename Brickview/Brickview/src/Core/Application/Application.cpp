@@ -4,7 +4,7 @@
 
 #include "GL\glew.h"
 
-#define BIND_FUNCTION(function) std::bind(&function, this, std::placeholders::_1)
+#define BIND_EVENT_FUNCTION(function) std::bind(&function, this, std::placeholders::_1)
 
 namespace Brickview
 {
@@ -21,7 +21,7 @@ namespace Brickview
 
 		initialize();
 
-		m_window->setEventCallbackFunction(BIND_FUNCTION(Application::onEvent));
+		m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(Application::onEvent));
 	}
 
 	Application::~Application()
@@ -32,7 +32,7 @@ namespace Brickview
 	{
 		if (glewInit() != GLEW_OK)
 		{
-			BV_LOG_INFO("Glew init error !");
+			BV_LOG_ERROR("Glew init error !");
 			return;
 		}
 	}
@@ -86,8 +86,8 @@ namespace Brickview
 	{
 		EventDispatcher dispatcher;
 
-		dispatcher.dispatch<WindowCloseEvent>(e, BIND_FUNCTION(Application::onWindowClose));
-		dispatcher.dispatch<WindowResizeEvent>(e, BIND_FUNCTION(Application::onWindowResize));
+		dispatcher.dispatch<WindowCloseEvent>(e, BIND_EVENT_FUNCTION(Application::onWindowClose));
+		dispatcher.dispatch<WindowResizeEvent>(e, BIND_EVENT_FUNCTION(Application::onWindowResize));
 	}
 
 	void Application::onWindowClose(const WindowCloseEvent& e)
@@ -97,6 +97,6 @@ namespace Brickview
 
 	void Application::onWindowResize(const WindowResizeEvent& e)
 	{
-		BV_LOG_INFO("on window resize : " << e.getWidth() << "x" << e.getHeight());
+		BV_LOG_TRACE("on window resize : {0}x{1}", e.getWidth(), e.getHeight());
 	}
 }

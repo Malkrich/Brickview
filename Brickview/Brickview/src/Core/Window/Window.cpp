@@ -34,7 +34,7 @@ namespace Brickview
 		/* Initialize the library */
 		if (!glfwInit())
 		{
-			BV_LOG_INFO("glfwInit() failed !");
+			BV_LOG_ERROR("glfwInit() failed !");
 			return;
 		}
 
@@ -45,7 +45,7 @@ namespace Brickview
 
 		if (!m_window)
 		{
-			BV_LOG_INFO("window creation failed !");
+			BV_LOG_ERROR("window creation failed !");
 			glfwTerminate();
 			return;
 		}
