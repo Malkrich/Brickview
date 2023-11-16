@@ -24,8 +24,8 @@ namespace Brickview
 
 		void onEvent(Event& e);
 
-		void onWindowClose(const WindowCloseEvent& e);
-		void onWindowResize(const WindowResizeEvent& e);
+		bool onWindowClose(const WindowCloseEvent& e);
+		bool onWindowResize(const WindowResizeEvent& e);
 
 	private:
 		bool m_running = true;

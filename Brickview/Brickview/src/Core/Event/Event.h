@@ -52,16 +52,20 @@ namespace Brickview
 		typedef std::function<void(Event&)> EventCallbackFn;
 
 	public:
-		EventDispatcher() = default;
+		EventDispatcher(Event& e)
+			: m_event(e)
+		{}
 
 		template<typename T>
-		void dispatch(Event& e, std::function<void(T&)> callbackFunction)
+		void dispatch(std::function<bool(T&)> callbackFunction)
 		{
-			if (!e.m_handle && e.getType() == T::getTypeStatic())
+			if (!m_event.m_handle && m_event.getType() == T::getTypeStatic())
 			{
-				e.m_handle = true;
-				callbackFunction(*((T*)&e));
+				m_event.m_handle = callbackFunction(*((T*)&m_event));
 			}
 		}
+
+	private:
+		Event& m_event;
 	};
 }

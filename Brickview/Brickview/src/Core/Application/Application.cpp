@@ -2,9 +2,8 @@
 
 #include <glad/glad.h>
 
+#include "Core/Core.h"
 #include "Core/Log.h"
-
-#define BIND_EVENT_FUNCTION(function) std::bind(&function, this, std::placeholders::_1)
 
 namespace Brickview
 {
@@ -85,19 +84,21 @@ namespace Brickview
 
 	void Application::onEvent(Event& e)
 	{
-		EventDispatcher dispatcher;
+		EventDispatcher dispatcher(e);
 
-		dispatcher.dispatch<WindowCloseEvent>(e, BIND_EVENT_FUNCTION(Application::onWindowClose));
-		dispatcher.dispatch<WindowResizeEvent>(e, BIND_EVENT_FUNCTION(Application::onWindowResize));
+		dispatcher.dispatch<WindowCloseEvent>(BIND_EVENT_FUNCTION(Application::onWindowClose));
+		dispatcher.dispatch<WindowResizeEvent>(BIND_EVENT_FUNCTION(Application::onWindowResize));
 	}
 
-	void Application::onWindowClose(const WindowCloseEvent& e)
+	bool Application::onWindowClose(const WindowCloseEvent& e)
 	{
 		m_running = false;
+		return true;
 	}
 
-	void Application::onWindowResize(const WindowResizeEvent& e)
+	bool Application::onWindowResize(const WindowResizeEvent& e)
 	{
 		BV_LOG_TRACE("on window resize : {0}x{1}", e.getWidth(), e.getHeight());
+		return true;
 	}
 }
