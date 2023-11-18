@@ -17,7 +17,11 @@ namespace Brickview
 
 		~Application();
 
+		static const Application* get() { return s_instance; }
+
 		void run();
+
+		std::shared_ptr<Window> getWindow() const { return m_window; }
 
 	private:
 		void initialize();
@@ -30,7 +34,7 @@ namespace Brickview
 	private:
 		bool m_running = true;
 
-		std::unique_ptr<Window> m_window;
+		std::shared_ptr<Window> m_window;
 
 		std::shared_ptr<VertexArray> m_vertexArray;
 		std::shared_ptr<VertexBuffer> m_vertexBuffer;
