@@ -1,7 +1,5 @@
+#include "Pch.h"
 #include "Shader.h"
-
-#include <iostream>
-#include <fstream>
 
 #include <glad/glad.h>
 
@@ -16,7 +14,7 @@ namespace Utils
         file.open(fileName.c_str());
 
         if (!file)
-            std::cout << "File named " << fileName << " not found !" << std::endl;
+            BV_LOG_ERROR("File named {0} not found !", fileName);
 
         return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
     }

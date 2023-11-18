@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/Shader.h"
 #include "Core/Window/Window.h"

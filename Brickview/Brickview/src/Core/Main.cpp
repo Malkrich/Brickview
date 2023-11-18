@@ -1,3 +1,4 @@
+#include "Pch.h"
 #include "Core/Application/Application.h"
 #include "Core/Log.h"
 
