@@ -46,6 +46,8 @@ namespace Brickview
 			m_settings.callbackFn = callbackFn;
 		}
 
+		void* getLibWindow() const { return (void*)m_window; }
+
 		void onUpdate();
 
 	private:
