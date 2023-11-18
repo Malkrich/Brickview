@@ -14,26 +14,6 @@ workspace "Brickview"
 
 outputDir = "%{cfg.buildcfg}-%{cfg.system}"
 
-project "spdlog"
-    location "Brickview/vendors/spdlog"
-    kind "StaticLib"
-
-    targetdir("bin/" .. outputDir .. "/%{prj.name}")
-    objdir("bin-int/" .. outputDir .. "/%{prj.name}")
-
-    files
-    {
-        "Brickview/vendors/spdlog/src/**.cpp",
-        "Brickview/vendors/spdlog/include/**.h"
-    }
-
-    includedirs
-    {
-        "Brickview/vendors/spdlog/include"
-    }
-
-    defines "SPDLOG_COMPILED_LIB"
-
 project "Brickview"
     location "Brickview/Brickview"
     kind "ConsoleApp"
@@ -77,3 +57,4 @@ project "Brickview"
 group "Dependencies"
     include "Brickview/vendors/GLFW"
     include "Brickview/vendors/glad"
+    include "Brickview/vendors/spdlog"
