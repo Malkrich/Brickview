@@ -74,5 +74,13 @@ namespace Brickview
 			wSettings.width = width;
 			wSettings.height = height;
 		});
+
+		glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y)
+		{
+			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
+				
+			MouseMoveEvent e((unsigned int)x, (unsigned int)y);
+			wSettings.callbackFn(e);
+		});
 	}
 }
