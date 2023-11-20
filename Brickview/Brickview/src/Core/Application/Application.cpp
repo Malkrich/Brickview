@@ -3,10 +3,15 @@
 
 #include <glad/glad.h>
 
+// Core
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Input.h"
 #include "Core/KeyCodes.h"
+
+// Layers
+#include "Core/Layer/Layer.h"
+#include "Application/ApplicationLayer.h"
 
 namespace Brickview
 {
@@ -17,13 +22,12 @@ namespace Brickview
 		BV_ASSERT(!s_instance, "Application class is already instanciated !");
 		s_instance = this;
 
-		Window::WindowSettings windowSettings;
-		windowSettings.name = "Brickview";
-		m_window.reset(new Window(windowSettings));
-
+		// initialize Application attributes
 		initialize();
 
-		m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(Application::onEvent));
+		// Adding layers
+		Layer* applicationLayer = new ApplicationLayer();
+		m_layerStack->pushLayer(applicationLayer);
 	}
 
 	Application::~Application()
@@ -32,44 +36,27 @@ namespace Brickview
 
 	void Application::initialize()
 	{
+		Window::WindowSettings windowSettings;
+		windowSettings.name = "Brickview";
+		m_window.reset(new Window(windowSettings));
+
+		m_window->setEventCallbackFunction(BV_BIND_EVENT_FUNCTION(Application::onEvent));
+
 		int version = gladLoadGL();
 		if (version == 0)
 		{
 			BV_LOG_ERROR("Failed to initialize OpenGL context !");
 			return;
 		}
+
+		m_layerStack.reset(new LayerStack());
 	}
 
 	void Application::run()
 	{
-		m_colorShader.reset(new Shader("data/color.vs", "data/color.fs"));
-
-		// Vertex buffer and index buffer
-		float positions[] = { -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-							   0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-							   0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-							  -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-							   1.0f,  0.0f, 0.0f, 1.0f, 1.0f, 0.0f};
-
-		unsigned int indices[] = { 0, 1, 2,
-								   2, 3, 0,
-								   1, 4, 2};
-
-		m_vertexArray.reset(new VertexArray());
-
-		m_vertexBuffer.reset(new VertexBuffer(sizeof(positions), positions));
-		m_vertexArray->addVertexBuffer(m_vertexBuffer);
-
-		m_indexBuffer.reset(new IndexBuffer(sizeof(indices), indices));
-		m_vertexArray->setIndexBuffer(m_indexBuffer);
-
 		while(m_running)
 		{
-			/* Render here */
-			glClear(GL_COLOR_BUFFER_BIT);
-			m_colorShader->bind();
-			m_vertexArray->bind();
-			glDrawElements(GL_TRIANGLES, m_vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+			float dt = 0.0f;
 
 			/* GOAL :
 			Renderer::setClearColor(...);
@@ -81,6 +68,9 @@ namespace Brickview
 
 			Renderer::endscene(); */
 
+			for(auto layer : *m_layerStack)
+				layer->onUpdate(dt);
+
 			m_window->onUpdate();
 		}
 	}
@@ -89,8 +79,15 @@ namespace Brickview
 	{
 		EventDispatcher dispatcher(e);
 
-		dispatcher.dispatch<WindowCloseEvent>(BIND_EVENT_FUNCTION(Application::onWindowClose));
-		dispatcher.dispatch<WindowResizeEvent>(BIND_EVENT_FUNCTION(Application::onWindowResize));
+		for (auto it = m_layerStack->end(); it != m_layerStack->begin();)
+		{
+			if(e.isHandled())
+				break;
+
+			(*(--it))->onEvent(e);
+		}
+
+		dispatcher.dispatch<WindowCloseEvent>(BV_BIND_EVENT_FUNCTION(Application::onWindowClose));
 	}
 
 	bool Application::onWindowClose(const WindowCloseEvent& e)
@@ -99,9 +96,4 @@ namespace Brickview
 		return true;
 	}
 
-	bool Application::onWindowResize(const WindowResizeEvent& e)
-	{
-		BV_LOG_TRACE("on window resize : {0}x{1}", e.getWidth(), e.getHeight());
-		return true;
-	}
 }
