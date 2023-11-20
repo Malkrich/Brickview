@@ -2,15 +2,21 @@
 
 namespace Brickview
 {
+	#define WRITE_TYPE_GETTERS(type) inline virtual eventType getType() const override { return type; } \
+									 inline static eventType getTypeStatic() { return type; }
+
 	enum class eventType
 	{
-		windowClose = 0, windowResize
+		windowClose = 0, windowResize,
+		mouseMove
 	};
 
 	class Event
 	{
 	public:
 		inline virtual eventType getType() const = 0;
+
+		inline bool isHandled() const { return m_handle; }
 
 	private:
 		bool m_handle = false;
@@ -23,8 +29,7 @@ namespace Brickview
 	public:
 		WindowCloseEvent() = default;
 
-		inline virtual eventType getType() const { return eventType::windowClose; }
-		inline static eventType getTypeStatic() { return eventType::windowClose; }
+		WRITE_TYPE_GETTERS(eventType::windowClose)
 	};
 
 	class WindowResizeEvent : public Event
@@ -35,13 +40,29 @@ namespace Brickview
 			, m_height(height)
 		{}
 
-		inline virtual eventType getType() const { return eventType::windowResize; }
-		inline static eventType getTypeStatic() { return eventType::windowResize; }
+		WRITE_TYPE_GETTERS(eventType::windowResize)
 
 		inline unsigned int getWidth() const { return m_width; }
 		inline unsigned int getHeight() const { return m_height; }
 	private:
 		unsigned int m_width, m_height;
+	};
+
+	class MouseMoveEvent : public Event
+	{
+	public:
+		MouseMoveEvent(unsigned int posX, unsigned int posY)
+			: m_posX(posX)
+			, m_posY(posY)
+		{}
+
+		WRITE_TYPE_GETTERS(eventType::mouseMove)
+
+		inline unsigned int getPosX() const { return m_posX; }
+		inline unsigned int getPosY() const { return m_posY; }
+
+	private:
+		unsigned int m_posX, m_posY;
 	};
 
 	class EventDispatcher
