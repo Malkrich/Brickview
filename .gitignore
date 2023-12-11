@@ -9,5 +9,8 @@
 bin/
 bin-int/
 
+# ImGui
+Brickview/Brickview/imgui.ini
+
 # others
 TODO.md

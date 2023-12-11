@@ -12,7 +12,8 @@ project "Brickview"
         "src",
         "../vendors/GLFW/glfw-3.3.8/include",
         "../vendors/glad/include",
-        "../vendors/spdlog/include"
+        "../vendors/spdlog/include",
+        "../vendors/imgui/"
     }
 
     files
@@ -28,7 +29,8 @@ project "Brickview"
     {
         "GLFW",
         "glad",
-        "spdlog"
+        "spdlog",
+        "imgui"
     }
 
     filter "configurations:Debug"
