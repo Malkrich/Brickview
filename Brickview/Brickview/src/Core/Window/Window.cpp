@@ -1,9 +1,13 @@
 #include "Pch.h"
 #include "Window.h"
 
-#include "Core/Log.h"
+#include <glad/glad.h>
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <GLFW/glfw3.h>
 
-#include "GLFW/glfw3.h"
+#include "Core/Log.h"
 
 namespace Brickview
 {
@@ -53,6 +57,14 @@ namespace Brickview
 
 		/* Make the window's context current */
 		glfwMakeContextCurrent(m_window);
+
+		// init window
+		int version = gladLoadGL();
+		if (version == 0)
+		{
+			BV_LOG_ERROR("Failed to initialize OpenGL context !");
+			return;
+		}
 
 		// set window settings as user pointer
 		glfwSetWindowUserPointer(m_window, &m_settings);
