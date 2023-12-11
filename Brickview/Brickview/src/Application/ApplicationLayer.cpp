@@ -67,9 +67,7 @@ namespace Brickview
 	void ApplicationLayer::onGuiRender()
 	{
 		// Test
-		ImGui::Begin("Window test");
-		ImGui::Text("Hello there !");
-		ImGui::End();
+		ImGui::ShowDemoWindow();
 	}
 
 }
