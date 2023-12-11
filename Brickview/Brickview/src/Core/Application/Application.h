@@ -3,6 +3,7 @@
 #include "Core/Window/Window.h"
 #include "Core/Event/Event.h"
 #include "Core/Layer/LayerStack.h"
+#include "Renderer/Gui/GuiRenderer.h"
 
 namespace Brickview
 {
@@ -33,6 +34,8 @@ namespace Brickview
 		std::shared_ptr<Window> m_window;
 
 		std::unique_ptr<LayerStack> m_layerStack;
+
+		std::unique_ptr<GuiRenderer> m_guiRenderer;
 
 		// singleton instance
 		static Application* s_instance;
