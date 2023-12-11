@@ -5,6 +5,7 @@
 #include "Core/Log.h"
 
 #include <glad/glad.h>
+#include <imgui.h>
 
 namespace Brickview
 {
@@ -48,6 +49,12 @@ namespace Brickview
 		dispatcher.dispatch<MouseMoveEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onMouseMove));
 	}
 
+	bool ApplicationLayer::onMouseMove(const MouseMoveEvent& e)
+	{
+		//BV_LOG_INFO("Mouse move event : {0},{1}", e.getPosX(), e.getPosY());
+		return true;
+	}
+
 	void ApplicationLayer::onUpdate(float dt)
 	{
 		/* Render here */
@@ -57,10 +64,12 @@ namespace Brickview
 		glDrawElements(GL_TRIANGLES, m_vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
-	bool ApplicationLayer::onMouseMove(const MouseMoveEvent& e)
+	void ApplicationLayer::onGuiRender()
 	{
-		BV_LOG_INFO("Mouse move event : {0},{1}", e.getPosX(), e.getPosY());
-		return true;
+		// Test
+		ImGui::Begin("Window test");
+		ImGui::Text("Hello there !");
+		ImGui::End();
 	}
 
 }

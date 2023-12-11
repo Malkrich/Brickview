@@ -19,6 +19,7 @@ namespace Brickview
 
 		virtual void onEvent(Event& e) override;
 		virtual void onUpdate(float dt) override;
+		virtual void onGuiRender() override;
 
 	private:
 		bool onMouseMove(const MouseMoveEvent& e);
