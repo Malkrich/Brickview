@@ -69,11 +69,8 @@ namespace Brickview
 				layer->onUpdate(dt);
 
 			m_guiRenderer->onNewFrame();
-			// Test
-			ImGui::Begin("Window test");
-			ImGui::Text("Hello there !");
-			ImGui::End();
-
+			for (auto layer : *m_layerStack)
+				layer->onGuiRender();
 			m_guiRenderer->onRender();
 
 			m_window->onUpdate();
