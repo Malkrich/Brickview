@@ -1,11 +1,11 @@
 #include "Pch.h"
 #include "ApplicationLayer.h"
 
-#include "Core/Core.h"
-#include "Core/Log.h"
-
 #include <glad/glad.h>
 #include <imgui.h>
+
+#include "Core/Core.h"
+#include "Core/Log.h"
 
 namespace Brickview
 {
@@ -18,11 +18,11 @@ namespace Brickview
 		m_colorShader.reset(new Shader("data/color.vs", "data/color.fs"));
 
 		// Vertex buffer and index buffer
-		float positions[] = { -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-							   0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-							   0.5f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-							  -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f,
-							   1.0f,  0.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+		float positions[] = { -0.5f, -0.5f, 0.0f,
+							   0.5f, -0.5f, 0.0f,
+							   0.5f,  0.5f, 0.0f,
+							  -0.5f,  0.5f, 0.0f,
+							   1.0f,  0.0f, 0.0f};
 
 		unsigned int indices[] = { 0, 1, 2,
 								   2, 3, 0,
@@ -51,7 +51,7 @@ namespace Brickview
 
 	bool ApplicationLayer::onMouseMove(const MouseMoveEvent& e)
 	{
-		//BV_LOG_INFO("Mouse move event : {0},{1}", e.getPosX(), e.getPosY());
+		BV_LOG_INFO("Mouse move event : {0},{1}", e.getPosX(), e.getPosY());
 		return true;
 	}
 
@@ -59,15 +59,18 @@ namespace Brickview
 	{
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
+
 		m_colorShader->bind();
+		m_colorShader->setUniformVec3("u_color", m_color);
 		m_vertexArray->bind();
 		glDrawElements(GL_TRIANGLES, m_vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
 	}
 
 	void ApplicationLayer::onGuiRender()
 	{
-		// Test
-		ImGui::ShowDemoWindow();
+		ImGui::Begin("Color tests");
+		ImGui::ColorPicker3("Object color", m_color);
+		ImGui::End();
 	}
 
 }

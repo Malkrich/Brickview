@@ -29,6 +29,9 @@ namespace Brickview
 		std::shared_ptr<VertexBuffer> m_vertexBuffer;
 		std::shared_ptr<IndexBuffer> m_indexBuffer;
 		std::shared_ptr<Shader> m_colorShader;
+
+		// TODO : install glm
+		float m_color[3];
 	};
 
 }
