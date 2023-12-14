@@ -57,6 +57,13 @@ namespace Brickview
         glUseProgram(m_shaderProgramID);
     }
 
+    void Shader::setUniformVec3(const std::string& name, const float* data)
+    {
+        // set uniform color
+        int loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
+        glUniform3fv(loc, 1, data);
+    }
+
     void Shader::compileAndLink(const std::string& vertexShaderContent, const std::string& fragmetShaderContent)
     {
         unsigned int vertexShaderID = compileShader(vertexShaderContent, GL_VERTEX_SHADER);

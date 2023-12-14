@@ -9,6 +9,8 @@ namespace Brickview
 
 		void bind() const;
 
+		void setUniformVec3(const std::string& name, const float* data);
+
 	private:
 		void compileAndLink(const std::string& vertexShaderContent, const std::string& fragmentShaderContent);
 
