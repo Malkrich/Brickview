@@ -39,6 +39,9 @@ namespace Brickview
 
 		~Window();
 
+		unsigned int getWidth() const { return m_settings.width; }
+		unsigned int getHeight() const { return m_settings.height; }
+
 		void setEventCallbackFunction(const EventDispatcher::EventCallbackFn& callbackFn)
 		{
 			m_settings.callbackFn = callbackFn;
