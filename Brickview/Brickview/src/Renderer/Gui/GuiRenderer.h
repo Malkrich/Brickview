@@ -10,5 +10,8 @@ namespace Brickview
 
 		void onNewFrame();
 		void onRender();
+
+	private:
+		float m_time = 0.0f;
 	};
 }
