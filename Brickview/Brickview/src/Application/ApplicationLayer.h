@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 #include "Core/Layer/Layer.h"
 #include "Core/Event/Event.h"
 #include "Renderer/Buffer/Buffer.h"

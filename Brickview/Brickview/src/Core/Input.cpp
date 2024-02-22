@@ -24,4 +24,14 @@ namespace Brickview
 		return state == GLFW_PRESS;
 	}
 
+	glm::ivec2 Input::getWindowSize()
+	{
+		glm::ivec2 dimension;
+
+		auto libWindow = (GLFWwindow*)Application::get()->getWindow()->getLibWindow();
+		glfwGetWindowSize(libWindow, &dimension.x, &dimension.y);
+
+		return dimension;
+	}
+
 }

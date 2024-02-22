@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 #include "Renderer/Buffer/Buffer.h"
 
 namespace Brickview

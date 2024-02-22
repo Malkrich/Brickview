@@ -16,6 +16,11 @@ namespace Brickview
 		RenderCommand::setViewportDimension(0, 0, width, height);
 	}
 
+	void Renderer::onWindowResize(const glm::ivec2& windowDimension)
+	{
+		onWindowResize(windowDimension.x, windowDimension.y);
+	}
+
 	void Renderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray)
 	{
 		shader->bind();

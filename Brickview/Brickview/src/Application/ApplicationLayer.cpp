@@ -8,6 +8,7 @@
 // Core
 #include "Core/Core.h"
 #include "Core/Log.h"
+#include "Core/Input.h"
 
 // Renderer
 #include "Renderer/Buffer/Layout.h"
