@@ -57,7 +57,14 @@ namespace Brickview
 	{
 		EventDispatcher dispatcher(e);
 
+		dispatcher.dispatch<WindowResizeEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onWindowResize));
 		dispatcher.dispatch<MouseMoveEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onMouseMove));
+	}
+
+	bool ApplicationLayer::onWindowResize(const WindowResizeEvent& e)
+	{
+		Renderer::onWindowResize(e.getWidth(), e.getHeight());
+		return true;
 	}
 
 	bool ApplicationLayer::onMouseMove(const MouseMoveEvent& e)
@@ -68,8 +75,6 @@ namespace Brickview
 
 	void ApplicationLayer::onUpdate(float dt)
 	{
-		BV_LOG_INFO("Clear color : {0}, {1}, {2}", m_clearColor.r, m_clearColor.g, m_clearColor.b);
-
 		RenderCommand::setClearColor(m_clearColor);
 		RenderCommand::clear();
 

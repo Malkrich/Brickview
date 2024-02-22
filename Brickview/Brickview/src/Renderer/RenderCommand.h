@@ -15,6 +15,8 @@ namespace Brickview
 		static void setClearColor(const glm::vec4& clearColor);
 		static void clear();
 
+		static void setViewportDimension(unsigned int x, unsigned int y, unsigned int width, unsigned int height);
+
 		static void draw(const std::shared_ptr<VertexArray>& vertexArray);
 	};
 

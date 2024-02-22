@@ -26,6 +26,11 @@ namespace Brickview
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
+	void RenderCommand::setViewportDimension(unsigned int x, unsigned int y, unsigned int width, unsigned int height)
+	{
+		glViewport(x, y, width, height);
+	}
+
 	void RenderCommand::draw(const std::shared_ptr<VertexArray>& vertexArray)
 	{
 		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);

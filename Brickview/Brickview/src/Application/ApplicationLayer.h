@@ -24,6 +24,7 @@ namespace Brickview
 		virtual void onGuiRender() override;
 
 	private:
+		bool onWindowResize(const WindowResizeEvent& e);
 		bool onMouseMove(const MouseMoveEvent& e);
 
 	private:

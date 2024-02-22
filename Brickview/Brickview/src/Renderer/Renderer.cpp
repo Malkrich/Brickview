@@ -9,9 +9,11 @@ namespace Brickview
 	void Renderer::init() {}
 	void Renderer::shutdown() {}
 
-	void Renderer::begin()
-	{
+	void Renderer::begin() {}
 
+	void Renderer::onWindowResize(unsigned int width, unsigned int height)
+	{
+		RenderCommand::setViewportDimension(0, 0, width, height);
 	}
 
 	void Renderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray)
