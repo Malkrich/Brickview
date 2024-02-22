@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include "Core/Layer/Layer.h"
 #include "Core/Event/Event.h"
 #include "Renderer/Buffer/Buffer.h"
@@ -30,8 +32,7 @@ namespace Brickview
 		std::shared_ptr<IndexBuffer> m_indexBuffer;
 		std::shared_ptr<Shader> m_colorShader;
 
-		// TODO : install glm
-		float m_color[3] = {0.8f, 0.2f, 0.2f};
+		glm::vec3 m_clearColor;
 	};
 
 }

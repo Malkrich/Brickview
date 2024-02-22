@@ -8,7 +8,17 @@ namespace Brickview
 
 	void RenderCommand::setClearColor(float r, float g, float b, float a)
 	{
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glClearColor(r, g, b, a);
+	}
+
+	void RenderCommand::setClearColor(const glm::vec3& clearColor)
+	{
+		setClearColor(clearColor.r, clearColor.g, clearColor.b, 1.0f);
+	}
+
+	void RenderCommand::setClearColor(const glm::vec4& clearColor)
+	{
+		setClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	}
 
 	void RenderCommand::clear()

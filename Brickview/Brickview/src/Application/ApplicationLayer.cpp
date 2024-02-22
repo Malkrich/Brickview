@@ -3,6 +3,7 @@
 
 // Lib
 #include <imgui.h>
+#include <glm/gtc/type_ptr.hpp>
 
 // Core
 #include "Core/Core.h"
@@ -43,6 +44,8 @@ namespace Brickview
 
 		m_indexBuffer.reset(new IndexBuffer(sizeof(indices), indices));
 		m_vertexArray->setIndexBuffer(m_indexBuffer);
+		
+		m_clearColor = glm::vec3(0.2f, 0.2f, 0.2f);
 	}
 	
 	void ApplicationLayer::onDetach()
@@ -65,21 +68,24 @@ namespace Brickview
 
 	void ApplicationLayer::onUpdate(float dt)
 	{
-		 RenderCommand::setClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-		 RenderCommand::clear();
+		BV_LOG_INFO("Clear color : {0}, {1}, {2}", m_clearColor.r, m_clearColor.g, m_clearColor.b);
+
+		RenderCommand::setClearColor(m_clearColor);
+		RenderCommand::clear();
 
 		// TODO : Renderer::begin(camera);
-		 Renderer::begin();
+		Renderer::begin();
 
 		// TODO : LegoRenderer::submit(legoPiece);
-		 Renderer::submit(m_colorShader, m_vertexArray);
+		Renderer::submit(m_colorShader, m_vertexArray);
 	}
 
 	void ApplicationLayer::onGuiRender()
 	{
-		ImGui::Begin("Set color");
-		ImGui::Text("Set the color of the geometry here :");
-		ImGui::ColorPicker3("Object color", m_color);
+		ImGui::Begin("Render Settings :");
+		ImGui::Text("Clear color :");
+		ImGui::SameLine();
+		ImGui::ColorEdit3("Object color", glm::value_ptr(m_clearColor), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 		ImGui::End();
 	}
 
