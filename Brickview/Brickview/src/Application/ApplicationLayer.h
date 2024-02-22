@@ -32,6 +32,9 @@ namespace Brickview
 		std::shared_ptr<IndexBuffer> m_indexBuffer;
 		std::shared_ptr<Shader> m_colorShader;
 
+		glm::vec3 m_quadPosition = glm::vec3(0.0f);
+		glm::vec3 m_quadScale = glm::vec3(1.0f);
+
 		Camera m_camera;
 
 		glm::vec3 m_clearColor;

@@ -4,6 +4,8 @@
 // Lib
 #include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/transform.hpp>
 
 // Core
 #include "Core/Core.h"
@@ -83,8 +85,10 @@ namespace Brickview
 		// TODO : Renderer::begin(camera);
 		Renderer::begin(m_camera);
 
+		glm::mat4 quadTransform = glm::translate(glm::mat4(1.0f), m_quadPosition) 
+			* glm::scale(glm::mat4(1.0f), m_quadScale);
 		// TODO : LegoRenderer::submit(legoPiece);
-		Renderer::submit(m_colorShader, m_vertexArray);
+		Renderer::submit(m_colorShader, m_vertexArray, quadTransform);
 	}
 
 	void ApplicationLayer::onGuiRender()
@@ -93,13 +97,21 @@ namespace Brickview
 		ImGui::Text("Clear color :");
 		ImGui::SameLine();
 		ImGui::ColorEdit3("Object color", glm::value_ptr(m_clearColor), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+
+		// Camera
 		ImGui::Separator();
 		const glm::vec3& position = m_camera.getPosition();
-		ImGui::SliderFloat3("Camera position", (float*)glm::value_ptr(position), 0.0f, 5.0f);
+		ImGui::SliderFloat3("Camera position", (float*)glm::value_ptr(position), -5.0f, 5.0f);
 		m_camera.setPosition(position);
 		const glm::vec3& rotation = m_camera.getRotation();
 		ImGui::SliderFloat3("Camera rotation", (float*)glm::value_ptr(rotation), -90.0f, 90.0f);
 		m_camera.setRotation(rotation);
+
+		// Quad
+		ImGui::Separator();
+		ImGui::SliderFloat3("Quad position", (float*)glm::value_ptr(m_quadPosition), -5.0f, 5.0f);
+		ImGui::SliderFloat3("Quad scale", (float*)glm::value_ptr(m_quadScale), 0.0f, 1.0f);
+
 		ImGui::End();
 	}
 
