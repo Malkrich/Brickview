@@ -11,6 +11,7 @@
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Input.h"
+#include "Core/FileSystem/ObjLoader.h"
 
 // Renderer
 #include "Renderer/Buffer/Layout.h"
@@ -25,7 +26,8 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
-		m_colorShader.reset(new Shader("data/color.vs", "data/color.fs"));
+		// COLORED QUAD
+		m_colorShader.reset(new Shader("data/shaders/color.vs", "data/shaders/color.fs"));
 
 		// Vertex buffer and index buffer
 		float positions[] = { -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
@@ -41,13 +43,30 @@ namespace Brickview
 		m_vertexBuffer.reset(new VertexBuffer(sizeof(positions), positions));
 		Layout layout = { {"a_position", BufferElementType::Float3},
 						  {"a_color", BufferElementType::Float4} };
-
 		m_vertexBuffer->setBufferLayout(layout);
 		m_vertexArray->addVertexBuffer(m_vertexBuffer);
 
 		m_indexBuffer.reset(new IndexBuffer(sizeof(indices), indices));
 		m_vertexArray->setIndexBuffer(m_indexBuffer);
-		
+
+		// LEGO PIECE
+		m_pieceShader.reset(new Shader("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs"));
+
+		std::vector<glm::vec3> piecePositions;
+		std::vector<unsigned int> pieceIndices;
+		ObjLoader::loadObj("data/models/brick.obj", piecePositions, pieceIndices);
+
+		m_pieceVertexArray.reset(new VertexArray());
+
+		m_pieceVertexBuffer.reset(new VertexBuffer(piecePositions.size() * 3 * sizeof(float), piecePositions.data()));
+		Layout pieceLayout = { { "a_position", BufferElementType::Float3 } };
+		m_pieceVertexBuffer->setBufferLayout(pieceLayout);
+		m_pieceVertexArray->addVertexBuffer(m_pieceVertexBuffer);
+
+		m_pieceIndexBuffer.reset(new IndexBuffer(pieceIndices.size() * sizeof(unsigned int), pieceIndices.data()));
+		m_pieceVertexArray->setIndexBuffer(m_pieceIndexBuffer);
+
+		// CLEAR COLOR
 		m_clearColor = glm::vec3(0.2f, 0.2f, 0.2f);
 	}
 	
@@ -88,7 +107,8 @@ namespace Brickview
 		glm::mat4 quadTransform = glm::translate(glm::mat4(1.0f), m_quadPosition) 
 			* glm::scale(glm::mat4(1.0f), m_quadScale);
 		// TODO : LegoRenderer::submit(legoPiece);
-		Renderer::submit(m_colorShader, m_vertexArray, quadTransform);
+		//Renderer::submit(m_colorShader, m_vertexArray, quadTransform);
+		Renderer::submit(m_pieceShader, m_pieceVertexArray, quadTransform);
 	}
 
 	void ApplicationLayer::onGuiRender()
