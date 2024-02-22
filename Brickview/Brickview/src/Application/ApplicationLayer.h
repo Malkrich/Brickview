@@ -31,7 +31,7 @@ namespace Brickview
 		std::shared_ptr<Shader> m_colorShader;
 
 		// TODO : install glm
-		float m_color[3];
+		float m_color[3] = {0.8f, 0.2f, 0.2f};
 	};
 
 }

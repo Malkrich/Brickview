@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Layout.h"
+
 namespace Brickview
 {
 	class VertexBuffer
@@ -12,8 +14,12 @@ namespace Brickview
 		void bind() const;
 		void unbind() const;
 
+		const Layout& getLayout() const { return m_layout; }
+		void setBufferLayout(const Layout& layout) { m_layout = layout; }
+
 	private:
 		unsigned int m_bufferID;
+		Layout m_layout;
 	};
 
 	class IndexBuffer
