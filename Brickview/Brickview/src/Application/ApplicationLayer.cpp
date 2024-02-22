@@ -1,12 +1,17 @@
 #include "Pch.h"
 #include "ApplicationLayer.h"
 
-#include <glad/glad.h>
+// Lib
 #include <imgui.h>
 
+// Core
 #include "Core/Core.h"
 #include "Core/Log.h"
+
+// Renderer
 #include "Renderer/Buffer/Layout.h"
+#include "Renderer/RenderCommand.h"
+#include "Renderer/Renderer.h"
 
 namespace Brickview
 {
@@ -60,13 +65,14 @@ namespace Brickview
 
 	void ApplicationLayer::onUpdate(float dt)
 	{
-		/* Render here */
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		 RenderCommand::setClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		 RenderCommand::clear();
 
-		m_colorShader->bind();
-		m_vertexArray->bind();
-		glDrawElements(GL_TRIANGLES, m_vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0);
+		// TODO : Renderer::begin(camera);
+		 Renderer::begin();
+
+		// TODO : LegoRenderer::submit(legoPiece);
+		 Renderer::submit(m_colorShader, m_vertexArray);
 	}
 
 	void ApplicationLayer::onGuiRender()
