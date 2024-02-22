@@ -2,6 +2,7 @@
 #include "Shader.h"
 
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Core/Log.h"
 
@@ -62,6 +63,12 @@ namespace Brickview
         // set uniform color
         int loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
         glUniform3fv(loc, 1, data);
+    }
+
+    void Shader::setMat4(const std::string& name, const glm::mat4& data)
+    {
+        int loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(data));
     }
 
     void Shader::compileAndLink(const std::string& vertexShaderContent, const std::string& fragmetShaderContent)
