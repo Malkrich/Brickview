@@ -64,6 +64,7 @@ namespace Brickview
 
 	bool ApplicationLayer::onWindowResize(const WindowResizeEvent& e)
 	{
+		m_camera.setViewportDimension(e.getWidth(), e.getHeight());
 		Renderer::onWindowResize(e.getWidth(), e.getHeight());
 		return true;
 	}
@@ -80,7 +81,7 @@ namespace Brickview
 		RenderCommand::clear();
 
 		// TODO : Renderer::begin(camera);
-		Renderer::begin();
+		Renderer::begin(m_camera);
 
 		// TODO : LegoRenderer::submit(legoPiece);
 		Renderer::submit(m_colorShader, m_vertexArray);
@@ -92,6 +93,13 @@ namespace Brickview
 		ImGui::Text("Clear color :");
 		ImGui::SameLine();
 		ImGui::ColorEdit3("Object color", glm::value_ptr(m_clearColor), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+		ImGui::Separator();
+		const glm::vec3& position = m_camera.getPosition();
+		ImGui::SliderFloat3("Camera position", (float*)glm::value_ptr(position), 0.0f, 5.0f);
+		m_camera.setPosition(position);
+		const glm::vec3& rotation = m_camera.getRotation();
+		ImGui::SliderFloat3("Camera rotation", (float*)glm::value_ptr(rotation), -90.0f, 90.0f);
+		m_camera.setRotation(rotation);
 		ImGui::End();
 	}
 

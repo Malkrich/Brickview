@@ -4,6 +4,7 @@
 #include "Core/Event/Event.h"
 #include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/Shader.h"
+#include "Renderer/Camera.h"
 
 namespace Brickview
 {
@@ -30,6 +31,8 @@ namespace Brickview
 		std::shared_ptr<VertexBuffer> m_vertexBuffer;
 		std::shared_ptr<IndexBuffer> m_indexBuffer;
 		std::shared_ptr<Shader> m_colorShader;
+
+		Camera m_camera;
 
 		glm::vec3 m_clearColor;
 	};

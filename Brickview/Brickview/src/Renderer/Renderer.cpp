@@ -5,11 +5,27 @@
 
 namespace Brickview
 {
+	struct SceneData
+	{
+		glm::mat4 ViewProjectionMatrix;
+	};
 
-	void Renderer::init() {}
-	void Renderer::shutdown() {}
+	static SceneData* s_sceneData = nullptr;
 
-	void Renderer::begin() {}
+	void Renderer::init()
+	{
+		s_sceneData = new SceneData();
+	}
+
+	void Renderer::shutdown()
+	{
+		delete s_sceneData;
+	}
+
+	void Renderer::begin(const Camera& camera)
+	{
+		s_sceneData->ViewProjectionMatrix = camera.getViewProjectionMatrix();
+	}
 
 	void Renderer::onWindowResize(unsigned int width, unsigned int height)
 	{
@@ -24,6 +40,7 @@ namespace Brickview
 	void Renderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray)
 	{
 		shader->bind();
+		shader->setMat4("u_viewProjection", s_sceneData->ViewProjectionMatrix);
 		vertexArray->bind();
 
 		RenderCommand::draw(vertexArray);
