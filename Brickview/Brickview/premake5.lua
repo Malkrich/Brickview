@@ -10,6 +10,7 @@ project "Brickview"
     includedirs
     {
         "src",
+        "../vendors/glm/",
         "../vendors/GLFW/glfw-3.3.8/include",
         "../vendors/glad/include",
         "../vendors/spdlog/include",
@@ -19,7 +20,10 @@ project "Brickview"
     files
     {
         "src/**.h",
-        "src/**.cpp"
+        "src/**.cpp",
+
+        "../vendors/glm/**.hpp",
+        "../vendors/glm/**.inl"
     }
 
     pchheader "Pch.h"
