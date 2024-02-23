@@ -11,7 +11,7 @@
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Input.h"
-#include "Core/FileSystem/ObjLoader.h"
+#include "Files/ObjLoader.h"
 
 // Renderer
 #include "Renderer/Buffer/Layout.h"
