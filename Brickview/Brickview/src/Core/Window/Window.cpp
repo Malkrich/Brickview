@@ -8,6 +8,8 @@
 #include <GLFW/glfw3.h>
 
 #include "Core/Log.h"
+#include "Core/Event/ApplicationEvent.h"
+#include "Core/Event/MouseEvent.h"
 
 namespace Brickview
 {
@@ -93,6 +95,27 @@ namespace Brickview
 				
 			MouseMoveEvent e((unsigned int)x, (unsigned int)y);
 			wSettings.callbackFn(e);
+		});
+
+		glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods)
+		{
+			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
+			
+			switch (action)
+			{
+				case GLFW_PRESS:
+				{
+					MousePressedEvent e(button);
+					wSettings.callbackFn(e);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					MouseReleaseEvent e(button);
+					wSettings.callbackFn(e);
+					break;
+				}
+			}
 		});
 	}
 }
