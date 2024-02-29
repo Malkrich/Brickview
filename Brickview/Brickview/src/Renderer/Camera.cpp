@@ -23,10 +23,7 @@ namespace Brickview
 
 	void Camera::updateViewMatrix()
 	{
-		//m_viewMatrix = glm::lookAt(m_position, m_position + m_lookAt, glm::vec3(0.0f, 0.0f, 1.0f));
-		glm::quat orientation = glm::angleAxis(glm::radians(m_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f))
-			* glm::angleAxis(glm::radians(m_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f))
-			* glm::angleAxis(glm::radians(m_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+		glm::quat orientation = glm::quat(glm::vec3(glm::radians(m_pitch), glm::radians(m_yaw), 0.0f));
 
 		m_viewMatrix = glm::translate(glm::mat4(1.0f), m_position) * glm::toMat4(orientation);
 		m_viewMatrix = glm::inverse(m_viewMatrix);

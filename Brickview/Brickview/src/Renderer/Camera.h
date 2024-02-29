@@ -13,8 +13,14 @@ namespace Brickview
 		const glm::vec3& getPosition() const { return m_position; }
 		void setPosition(const glm::vec3& position) { m_position = position; updateViewMatrix(); }
 
-		const glm::vec3& getRotation() const { return m_rotation; }
-		void setRotation(const glm::vec3& rotation) { m_rotation = rotation; updateViewMatrix(); }
+		float getPitch() const { return m_pitch; }
+		float getYaw() const { return m_yaw; }
+		void setRotation(float pitch, float yaw)
+		{
+			m_pitch = pitch;
+			m_yaw = yaw;
+			updateViewMatrix();
+		}
 
 		glm::mat4 getViewProjectionMatrix() const { return m_projectionMatrix * m_viewMatrix; }
 
@@ -30,8 +36,9 @@ namespace Brickview
 		glm::mat4 m_viewMatrix;
 		glm::mat4 m_projectionMatrix;
 
-		glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 1.0f);
-		glm::vec3 m_rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+		// https://learnopengl.com/Getting-Started/Camera
+		float m_pitch = 0.0f, m_yaw = 0.0f;
 	};
 
 }
