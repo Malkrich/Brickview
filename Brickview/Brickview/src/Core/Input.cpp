@@ -34,4 +34,14 @@ namespace Brickview
 		return dimension;
 	}
 
+	glm::ivec2 Input::getMousePosition()
+	{
+		auto libWindow = (GLFWwindow*)Application::get()->getWindow()->getLibWindow();
+		glm::dvec2 position;
+		glfwGetCursorPos(libWindow, &position.x, &position.y);
+
+		glm::ivec2 mousePosition = {(int)position.x, (int)position.y};
+		return mousePosition;
+	}
+
 }
