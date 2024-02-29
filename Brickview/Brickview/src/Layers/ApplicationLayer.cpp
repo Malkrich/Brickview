@@ -66,6 +66,9 @@ namespace Brickview
 		m_pieceIndexBuffer.reset(new IndexBuffer(pieceIndices.size() * sizeof(unsigned int), pieceIndices.data()));
 		m_pieceVertexArray->setIndexBuffer(m_pieceIndexBuffer);
 
+		// Camera Controller
+		m_cameraControl = CameraController();
+
 		// CLEAR COLOR
 		m_clearColor = glm::vec3(0.2f, 0.2f, 0.2f);
 	}
@@ -77,6 +80,8 @@ namespace Brickview
 
 	void ApplicationLayer::onEvent(Event& e)
 	{
+		m_cameraControl.onEvent(e);
+
 		EventDispatcher dispatcher(e);
 
 		dispatcher.dispatch<WindowResizeEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onWindowResize));
@@ -85,7 +90,6 @@ namespace Brickview
 
 	bool ApplicationLayer::onWindowResize(const WindowResizeEvent& e)
 	{
-		m_camera.setViewportDimension(e.getWidth(), e.getHeight());
 		Renderer::onWindowResize(e.getWidth(), e.getHeight());
 		return true;
 	}
@@ -102,7 +106,7 @@ namespace Brickview
 		RenderCommand::clear();
 
 		// TODO : Renderer::begin(camera);
-		Renderer::begin(m_camera);
+		Renderer::begin(m_cameraControl.getCamera());
 
 		glm::mat4 quadTransform = glm::translate(glm::mat4(1.0f), m_quadPosition) 
 			* glm::scale(glm::mat4(1.0f), m_quadScale);
@@ -117,15 +121,6 @@ namespace Brickview
 		ImGui::Text("Clear color :");
 		ImGui::SameLine();
 		ImGui::ColorEdit3("Object color", glm::value_ptr(m_clearColor), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
-
-		// Camera
-		ImGui::Separator();
-		const glm::vec3& position = m_camera.getPosition();
-		ImGui::SliderFloat3("Camera position", (float*)glm::value_ptr(position), -5.0f, 5.0f);
-		m_camera.setPosition(position);
-		const glm::vec3& rotation = m_camera.getRotation();
-		ImGui::SliderFloat3("Camera rotation", (float*)glm::value_ptr(rotation), -90.0f, 90.0f);
-		m_camera.setRotation(rotation);
 
 		// Quad
 		ImGui::Separator();

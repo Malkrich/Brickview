@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Window/Window.h"
-#include "Core/Event/Event.h"
+#include "Core/Event/ApplicationEvent.h"
 #include "Core/Layer/LayerStack.h"
 #include "Renderer/Gui/GuiRenderer.h"
 

@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Core/Layer/Layer.h"
-#include "Core/Event/Event.h"
+#include "Core/Event/ApplicationEvent.h"
 #include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Camera.h"
+#include "Renderer/CameraController.h"
 
 namespace Brickview
 {
@@ -40,7 +41,7 @@ namespace Brickview
 		glm::vec3 m_quadPosition = glm::vec3(0.0f);
 		glm::vec3 m_quadScale = glm::vec3(1.0f);
 
-		Camera m_camera;
+		CameraController m_cameraControl;
 
 		glm::vec3 m_clearColor;
 	};
