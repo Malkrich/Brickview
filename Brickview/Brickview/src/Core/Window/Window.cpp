@@ -117,5 +117,13 @@ namespace Brickview
 				}
 			}
 		});
+
+		glfwSetScrollCallback(m_window, [](GLFWwindow* window, double offsetX, double offsetY)
+		{
+			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
+
+			MouseScrolledEvent e(offsetX, offsetY);
+			wSettings.callbackFn(e);
+		});
 	}
 }

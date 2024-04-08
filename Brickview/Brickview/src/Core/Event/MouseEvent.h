@@ -57,4 +57,21 @@ namespace Brickview
 		WRITE_TYPE_GETTERS(eventType::mouseRelease)
 	};
 
+	class MouseScrolledEvent : public Event
+	{
+	public:
+		MouseScrolledEvent(double offsetX, double offsetY)
+			: m_offsetX(offsetX)
+			, m_offsetY(offsetY)
+		{}
+
+		inline double getOffsetX() const { return m_offsetX; }
+		inline double getOffsetY() const { return m_offsetY; }
+
+		WRITE_TYPE_GETTERS(eventType::MouseScrolled)
+
+	private:
+		double m_offsetX, m_offsetY;
+	};
+
 }

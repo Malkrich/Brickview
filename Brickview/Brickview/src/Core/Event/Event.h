@@ -8,7 +8,7 @@ namespace Brickview
 	enum class eventType
 	{
 		windowClose = 0, windowResize,
-		mouseMove, mousePressed, mouseRelease
+		mouseMove, mousePressed, mouseRelease, MouseScrolled
 	};
 
 	class Event
