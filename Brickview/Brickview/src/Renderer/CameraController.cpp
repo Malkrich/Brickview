@@ -12,9 +12,27 @@
 namespace Brickview
 {
 
+	namespace Utils
+	{
+		static glm::vec3 SphericalToCartesian(float pitch, float yaw, float distance)
+		{
+			float radPitch = glm::radians(pitch);
+			float radYaw   = glm::radians(yaw);
+			const float pi = glm::pi<float>();
+			glm::vec3 position =
+			{
+				glm::cos(-radPitch) * glm::cos(pi/2.0f - radYaw),
+				glm::sin(-radPitch),
+				glm::cos(-radPitch) * glm::sin(pi/2.0f - radYaw)
+			};
+			position *= distance;
+			return position;
+		}
+	}
+
 	CameraController::CameraController(const glm::vec3& target)
 		: m_targetPoint(target)
-		, m_currentMousePosition(-1, -1)
+		, m_currentMousePosition(-1)
 	{
 		// TEMP
 		m_camera.setPosition({ 0.0f, 0.0f, 2.0f });
@@ -43,22 +61,14 @@ namespace Brickview
 			int mouseOffsetY = e.getPosY() - m_currentMousePosition.y;
 			m_currentMousePosition.x = e.getPosX();
 			m_currentMousePosition.y = e.getPosY();
-			const glm::vec3& cameraPosition = m_camera.getPosition();
-			float pitch = m_camera.getPitch();
-			float yaw = m_camera.getYaw();
 
-			const float sensibility = 0.005f;
-			float theta = sensibility * mouseOffsetX;
-			float beta = sensibility * mouseOffsetY;
+			const float angleSensitivity = 0.05f;
+			const float distanceFromObject = 2.0f;
 
-			glm::vec3 lookAt = cameraPosition - m_targetPoint;
-			const glm::vec3 rightVector = glm::normalize(glm::cross(lookAt, {0.0f, 1.0f, 0.0f}));
+			float newPitch = m_camera.getPitch() - angleSensitivity * mouseOffsetY;
+			float newYaw = m_camera.getYaw() - angleSensitivity * mouseOffsetX;
 
-			glm::vec3 newPosition = glm::rotateY(lookAt, -theta);
-			newPosition = glm::rotate(newPosition, beta, rightVector);
-
-			float newYaw = yaw - glm::degrees(theta);
-			float newPitch = pitch - glm::degrees(beta);
+			glm::vec3 newPosition = Utils::SphericalToCartesian(newPitch, newYaw, distanceFromObject);
 
 			m_camera.setPosition(newPosition);
 			m_camera.setRotation(newPitch, newYaw);

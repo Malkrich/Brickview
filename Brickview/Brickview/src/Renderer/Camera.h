@@ -38,6 +38,7 @@ namespace Brickview
 
 		glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
 		// https://learnopengl.com/Getting-Started/Camera
+		// In degrees
 		float m_pitch = 0.0f, m_yaw = 0.0f;
 	};
 
