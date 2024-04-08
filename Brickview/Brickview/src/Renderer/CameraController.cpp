@@ -31,11 +31,20 @@ namespace Brickview
 	}
 
 	CameraController::CameraController(const glm::vec3& target)
-		: m_targetPoint(target)
-		, m_currentMousePosition(-1)
+		: m_currentMousePosition(-1)
 	{
-		// TEMP
-		m_camera.setPosition({ 0.0f, 0.0f, 2.0f });
+		updatePosition();
+	}
+
+	void CameraController::updatePosition()
+	{
+		float newPitch = m_camera.getPitch() - m_angleSensitivity * m_mouseOffset.y;
+		float newYaw = m_camera.getYaw() - m_angleSensitivity * m_mouseOffset.x;
+
+		glm::vec3 newPosition = Utils::SphericalToCartesian(newPitch, newYaw, m_distanceFromObject);
+
+		m_camera.setPosition(newPosition);
+		m_camera.setRotation(newPitch, newYaw);
 	}
 
 	void CameraController::onEvent(Event& e)
@@ -45,6 +54,7 @@ namespace Brickview
 		dispatcher.dispatch<WindowResizeEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onWindowResize));
 		dispatcher.dispatch<MouseMoveEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseMove));
 		dispatcher.dispatch<MousePressedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMousePressed));
+		dispatcher.dispatch<MouseScrolledEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseScrolled));
 	}
 
 	bool CameraController::onWindowResize(const WindowResizeEvent& e)
@@ -57,21 +67,12 @@ namespace Brickview
 	{
 		if(Input::isMouseButtonPressed(BV_MOUSE_BUTTON_MIDDLE))
 		{
-			int mouseOffsetX = e.getPosX() - m_currentMousePosition.x;
-			int mouseOffsetY = e.getPosY() - m_currentMousePosition.y;
+			m_mouseOffset.x = e.getPosX() - m_currentMousePosition.x;
+			m_mouseOffset.y = e.getPosY() - m_currentMousePosition.y;
 			m_currentMousePosition.x = e.getPosX();
 			m_currentMousePosition.y = e.getPosY();
 
-			const float angleSensitivity = 0.05f;
-			const float distanceFromObject = 2.0f;
-
-			float newPitch = m_camera.getPitch() - angleSensitivity * mouseOffsetY;
-			float newYaw = m_camera.getYaw() - angleSensitivity * mouseOffsetX;
-
-			glm::vec3 newPosition = Utils::SphericalToCartesian(newPitch, newYaw, distanceFromObject);
-
-			m_camera.setPosition(newPosition);
-			m_camera.setRotation(newPitch, newYaw);
+			updatePosition();
 		}
 
 		return false;
@@ -85,4 +86,14 @@ namespace Brickview
 		return false;
 	}
 
+	bool CameraController::onMouseScrolled(const MouseScrolledEvent& e)
+	{
+		static const double scrollSensitivity = 0.3;
+
+		m_distanceFromObject -= e.getOffsetY() * scrollSensitivity;
+
+		updatePosition();
+
+		return false;
+	}
 }
