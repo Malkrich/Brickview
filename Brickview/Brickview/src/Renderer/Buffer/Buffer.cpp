@@ -149,11 +149,6 @@ namespace Brickview
 			glEnableVertexAttribArray(element.Index);
 		}
 
-		// temp : set a pre-set layout ///////
-		//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		//glEnableVertexAttribArray(0);
-		//////////////////////////////////////
-
 		m_vertexBuffers.push_back(vertexBuffer);
 	}
 

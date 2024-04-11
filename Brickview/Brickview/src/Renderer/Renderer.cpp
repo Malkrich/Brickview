@@ -27,6 +27,10 @@ namespace Brickview
 		s_sceneData->ViewProjectionMatrix = camera.getViewProjectionMatrix();
 	}
 
+	void Renderer::end()
+	{
+	}
+
 	void Renderer::onWindowResize(unsigned int width, unsigned int height)
 	{
 		RenderCommand::setViewportDimension(0, 0, width, height);

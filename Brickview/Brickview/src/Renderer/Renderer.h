@@ -17,6 +17,7 @@ namespace Brickview
 		static void onWindowResize(const glm::ivec2& windowDimension);
 
 		static void begin(const Camera& camera);
+		static void end();
 		static void submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform);
 	};
 
