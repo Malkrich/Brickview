@@ -11,6 +11,7 @@
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Input.h"
+#include "Core/KeyCodes.h"
 
 #include "Models/Mesh.h"
 
@@ -88,7 +89,8 @@ namespace Brickview
 		EventDispatcher dispatcher(e);
 
 		dispatcher.dispatch<WindowResizeEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onWindowResize));
-		dispatcher.dispatch<MouseMoveEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onMouseMove));
+		dispatcher.dispatch<MouseMovedEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onMouseMoved));
+		dispatcher.dispatch<KeyPressedEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onKeyPressed));
 	}
 
 	bool ApplicationLayer::onWindowResize(const WindowResizeEvent& e)
@@ -97,9 +99,18 @@ namespace Brickview
 		return true;
 	}
 
-	bool ApplicationLayer::onMouseMove(const MouseMoveEvent& e)
+	bool ApplicationLayer::onMouseMoved(const MouseMovedEvent& e)
 	{
 		//BV_LOG_INFO("Mouse move event : {0},{1}", e.getPosX(), e.getPosY());
+		return true;
+	}
+
+	bool ApplicationLayer::onKeyPressed(const KeyPressedEvent& e)
+	{
+		if (e.getKeyCode() == BV_KEY_KP_0)
+		{
+			m_cameraControl.setTargetPoint(m_quadPosition);
+		}
 		return true;
 	}
 

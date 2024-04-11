@@ -2,6 +2,9 @@
 
 #include "Core/Layer/Layer.h"
 #include "Core/Event/ApplicationEvent.h"
+#include "Core/Event/MouseEvent.h"
+#include "Core/Event/KeyEvent.h"
+
 #include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Camera.h"
@@ -25,7 +28,8 @@ namespace Brickview
 
 	private:
 		bool onWindowResize(const WindowResizeEvent& e);
-		bool onMouseMove(const MouseMoveEvent& e);
+		bool onMouseMoved(const MouseMovedEvent& e);
+		bool onKeyPressed(const KeyPressedEvent& e);
 
 	private:
 		std::shared_ptr<VertexArray> m_vertexArray;
