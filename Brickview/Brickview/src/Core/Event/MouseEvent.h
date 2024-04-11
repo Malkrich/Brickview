@@ -5,10 +5,10 @@
 namespace Brickview
 {
 
-	class MouseMoveEvent : public Event
+	class MouseMovedEvent : public Event
 	{
 	public:
-		MouseMoveEvent(unsigned int posX, unsigned int posY)
+		MouseMovedEvent(unsigned int posX, unsigned int posY)
 			: m_posX(posX)
 			, m_posY(posY)
 		{}
@@ -16,7 +16,7 @@ namespace Brickview
 		inline unsigned int getPosX() const { return m_posX; }
 		inline unsigned int getPosY() const { return m_posY; }
 
-		WRITE_TYPE_GETTERS(eventType::mouseMove)
+		WRITE_TYPE_GETTERS(eventType::mouseMoved)
 
 	private:
 		unsigned int m_posX, m_posY;
@@ -47,14 +47,14 @@ namespace Brickview
 		WRITE_TYPE_GETTERS(eventType::mousePressed)
 	};
 
-	class MouseReleaseEvent : public MouseButtonEvent
+	class MouseReleasedEvent : public MouseButtonEvent
 	{
 	public:
-		MouseReleaseEvent(int button)
+		MouseReleasedEvent(int button)
 			: MouseButtonEvent(button)
 		{}
 
-		WRITE_TYPE_GETTERS(eventType::mouseRelease)
+		WRITE_TYPE_GETTERS(eventType::mouseReleased)
 	};
 
 	class MouseScrolledEvent : public Event

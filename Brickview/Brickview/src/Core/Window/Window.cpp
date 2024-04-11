@@ -10,6 +10,7 @@
 #include "Core/Log.h"
 #include "Core/Event/ApplicationEvent.h"
 #include "Core/Event/MouseEvent.h"
+#include "Core/Event/KeyEvent.h"
 
 namespace Brickview
 {
@@ -89,11 +90,32 @@ namespace Brickview
 			wSettings.height = height;
 		});
 
+		glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+		{
+			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
+
+			switch (action)
+			{
+				case GLFW_PRESS:
+				{
+					KeyPressedEvent e(key);
+					wSettings.callbackFn(e);
+					break;
+				}
+				case GLFW_RELEASE:
+				{
+					KeyReleasedEvent e(key);
+					wSettings.callbackFn(e);
+					break;
+				}
+			}
+		});
+
 		glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y)
 		{
 			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
 				
-			MouseMoveEvent e((unsigned int)x, (unsigned int)y);
+			MouseMovedEvent e((unsigned int)x, (unsigned int)y);
 			wSettings.callbackFn(e);
 		});
 
@@ -111,7 +133,7 @@ namespace Brickview
 				}
 				case GLFW_RELEASE:
 				{
-					MouseReleaseEvent e(button);
+					MouseReleasedEvent e(button);
 					wSettings.callbackFn(e);
 					break;
 				}
