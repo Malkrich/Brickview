@@ -42,6 +42,7 @@ namespace Brickview
 		float newYaw = m_camera.getYaw() - m_angleSensitivity * m_mouseOffset.x;
 
 		glm::vec3 newPosition = Utils::SphericalToCartesian(newPitch, newYaw, m_distanceFromObject);
+		newPosition += m_targetPoint;
 
 		m_camera.setPosition(newPosition);
 		m_camera.setRotation(newPitch, newYaw);
@@ -52,7 +53,7 @@ namespace Brickview
 		EventDispatcher dispatcher(e);
 
 		dispatcher.dispatch<WindowResizeEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onWindowResize));
-		dispatcher.dispatch<MouseMoveEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseMove));
+		dispatcher.dispatch<MouseMovedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseMoved));
 		dispatcher.dispatch<MousePressedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMousePressed));
 		dispatcher.dispatch<MouseScrolledEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseScrolled));
 	}
@@ -63,7 +64,7 @@ namespace Brickview
 		return false;
 	}
 
-	bool CameraController::onMouseMove(const MouseMoveEvent& e)
+	bool CameraController::onMouseMoved(const MouseMovedEvent& e)
 	{
 		if(Input::isMouseButtonPressed(BV_MOUSE_BUTTON_MIDDLE))
 		{
@@ -71,6 +72,23 @@ namespace Brickview
 			m_mouseOffset.y = e.getPosY() - m_currentMousePosition.y;
 			m_currentMousePosition.x = e.getPosX();
 			m_currentMousePosition.y = e.getPosY();
+
+			if (Input::isKeyPressed(BV_KEY_LEFT_SHIFT) || Input::isKeyPressed(BV_KEY_RIGHT_SHIFT))
+			{
+				glm::vec3 lookAt = m_targetPoint - m_camera.getPosition();
+				glm::vec3 up = { 0.0f, 1.0f, 0.0f };
+				glm::vec3 right = glm::normalize( glm::cross(up, lookAt) );
+				up = glm::normalize( glm::cross(lookAt, right) );
+
+				glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
+				translation += right * (float)m_mouseOffset.x;
+				translation += up * (float)m_mouseOffset.y;
+				translation *= m_translationSensitivity;
+				m_targetPoint += translation;
+
+				// reseting mouse offset to prevent the update of the orientation
+				m_mouseOffset = { 0, 0 };
+			}
 
 			updatePosition();
 		}
