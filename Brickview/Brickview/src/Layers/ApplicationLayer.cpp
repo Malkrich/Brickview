@@ -11,7 +11,8 @@
 #include "Core/Core.h"
 #include "Core/Log.h"
 #include "Core/Input.h"
-#include "Files/ObjLoader.h"
+
+#include "Models/Mesh.h"
 
 // Renderer
 #include "Renderer/Buffer/Layout.h"
@@ -52,18 +53,20 @@ namespace Brickview
 		// LEGO PIECE
 		m_pieceShader.reset(new Shader("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs"));
 
-		std::vector<glm::vec3> piecePositions;
-		std::vector<unsigned int> pieceIndices;
-		ObjLoader::loadObj("data/models/brick.obj", piecePositions, pieceIndices);
+
+		std::shared_ptr<Mesh> legoMesh = Mesh::load("data/models/brick.obj");
 
 		m_pieceVertexArray.reset(new VertexArray());
 
-		m_pieceVertexBuffer.reset(new VertexBuffer(piecePositions.size() * 3 * sizeof(float), piecePositions.data()));
-		Layout pieceLayout = { { "a_position", BufferElementType::Float3 } };
+		m_pieceVertexBuffer.reset(new VertexBuffer(legoMesh->getVertexBufferElementCount() * sizeof(float), legoMesh->getVertexBufferData()));
+		Layout pieceLayout = {
+			{ "a_position", BufferElementType::Float3 },
+			{ "a_normal", BufferElementType::Float3 }
+		};
 		m_pieceVertexBuffer->setBufferLayout(pieceLayout);
 		m_pieceVertexArray->addVertexBuffer(m_pieceVertexBuffer);
 
-		m_pieceIndexBuffer.reset(new IndexBuffer(pieceIndices.size() * sizeof(unsigned int), pieceIndices.data()));
+		m_pieceIndexBuffer.reset(new IndexBuffer(legoMesh->getIndexBufferElementCount() * sizeof(unsigned int), legoMesh->getIndexBufferData()));
 		m_pieceVertexArray->setIndexBuffer(m_pieceIndexBuffer);
 
 		// Camera Controller
@@ -111,8 +114,9 @@ namespace Brickview
 		glm::mat4 quadTransform = glm::translate(glm::mat4(1.0f), m_quadPosition) 
 			* glm::scale(glm::mat4(1.0f), m_quadScale);
 		// TODO : LegoRenderer::submit(legoPiece);
-		//Renderer::submit(m_colorShader, m_vertexArray, quadTransform);
 		Renderer::submit(m_pieceShader, m_pieceVertexArray, quadTransform);
+
+		Renderer::end();
 	}
 
 	void ApplicationLayer::onGuiRender()
