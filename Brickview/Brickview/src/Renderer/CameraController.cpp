@@ -18,7 +18,7 @@ namespace Brickview
 		{
 			float radPitch = glm::radians(pitch);
 			float radYaw   = glm::radians(yaw);
-			const float pi = glm::pi<float>();
+			constexpr float pi = glm::pi<float>();
 			glm::vec3 position =
 			{
 				glm::cos(-radPitch) * glm::cos(pi/2.0f - radYaw),
