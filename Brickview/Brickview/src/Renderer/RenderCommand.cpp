@@ -6,6 +6,11 @@
 namespace Brickview
 {
 
+	void RenderCommand::initialise()
+	{
+		glEnable(GL_DEPTH_TEST);
+	}
+
 	void RenderCommand::setClearColor(float r, float g, float b, float a)
 	{
 		glClearColor(r, g, b, a);
@@ -23,7 +28,7 @@ namespace Brickview
 
 	void RenderCommand::clear()
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
 	void RenderCommand::setViewportDimension(unsigned int x, unsigned int y, unsigned int width, unsigned int height)

@@ -14,6 +14,8 @@ namespace Brickview
 
 	void Renderer::init()
 	{
+		RenderCommand::initialise();
+
 		s_sceneData = new SceneData();
 	}
 
