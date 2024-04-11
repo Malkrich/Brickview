@@ -39,12 +39,8 @@ namespace Brickview
 
 		static std::shared_ptr<Mesh> load(const std::filesystem::path& filePath);
 
-		unsigned int getVertexBufferElementCount() const { return m_vertices.size() * 6; }
-		unsigned int getIndexBufferElementCount() const { return m_indices.size() * 3; }
-
-		// TEMP
-		void* getVertexBufferData() const { return (void*)m_vertices.data(); }
-		void* getIndexBufferData() const { return (void*)m_indices.data(); }
+		const std::vector<Vertex>& getVertexBuffer() const { return m_vertices; }
+		const std::vector<TriangleFace>& getIndexBuffer() const { return m_indices; }
 
 	private:
 		std::vector<Vertex> m_vertices;

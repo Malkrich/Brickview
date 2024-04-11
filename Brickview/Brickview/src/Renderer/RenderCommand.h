@@ -11,6 +11,7 @@ namespace Brickview
 		static void initialise();
 
 		static void setClearColor(float r, float g, float b, float a);
+		static void setClearColor(float r, float g, float b);
 		static void setClearColor(const glm::vec3& clearColor);
 		static void setClearColor(const glm::vec4& clearColor);
 		static void clear();

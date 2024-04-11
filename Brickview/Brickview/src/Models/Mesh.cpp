@@ -32,13 +32,10 @@ namespace Brickview
 
 		bool loadObj(const std::filesystem::path& filePath, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices)
 		{
-			std::ifstream file(filePath);
-
-			if (!file.is_open())
-			{
-				BV_LOG_ERROR("File \"{}\" doesnt exist !", filePath.generic_string());
+			if (!std::filesystem::exists(filePath))
 				return false;
-			}
+			
+			std::ifstream file(filePath);
 
 			std::vector<glm::vec3> positions;
 			std::vector<glm::vec3> normals;
