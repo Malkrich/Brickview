@@ -109,9 +109,22 @@ namespace Brickview
 		Renderer::begin(m_cameraControl.getCamera());
 
 		// Lego Piece
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), m_legoPiecePosition) 
-			* glm::scale(glm::mat4(1.0f), m_legoPieceScale);
-		LegoRenderer::drawPiece(m_legoPieceMesh, m_legoPieceMaterial, transform);
+		
+		glm::mat4 transform;
+		const unsigned int length = 2;
+		for (unsigned int i = 0; i < length; i++)
+		{
+			for (unsigned int j = 0; j < length; j++)
+			{
+				transform = glm::translate(glm::mat4(1.0f), m_legoPiecePosition 
+					+ (float)i*glm::vec3(1.0f, 0.0f, 0.0f)
+					+ (float)j*glm::vec3(0.0f, 0.0f, 1.0f))
+					* glm::scale(glm::mat4(1.0f), m_legoPieceScale);
+
+				LegoRenderer::drawPiece(m_legoPieceMesh, m_legoPieceMaterial, transform);
+			}
+		}
+
 
 		// Plane
 		transform = glm::translate(glm::mat4(1.0f), m_planePosition)
