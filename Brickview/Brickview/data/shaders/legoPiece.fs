@@ -8,7 +8,7 @@ out vec4 color;
 
 void main()
 {
-    vec3 lightPosition = vec3(1.0, 2.0, 1.0);
+    vec3 lightPosition = vec3(3.0, 2.0, 0.0);
     vec3 lightDirection = normalize(lightPosition - f_currentPosition);
     
     float diffuse = max(dot(f_normal, lightDirection), 0.0);
