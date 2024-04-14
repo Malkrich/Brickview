@@ -1,6 +1,8 @@
 #include "Pch.h"
 #include "Renderer.h"
 
+#include "Core/Core.h"
+
 #include "RenderCommand.h"
 
 namespace Brickview
@@ -8,6 +10,8 @@ namespace Brickview
 	struct SceneData
 	{
 		glm::mat4 ViewProjectionMatrix;
+
+		glm::vec3 LightPosition;
 	};
 
 	static SceneData* s_sceneData = nullptr;
@@ -24,9 +28,16 @@ namespace Brickview
 		delete s_sceneData;
 	}
 
-	void Renderer::begin(const Camera& camera)
+	const glm::vec3& Renderer::getLightPosition()
+	{
+		BV_ASSERT(s_sceneData, "Scene data is null!");
+		return s_sceneData->LightPosition;
+	}
+
+	void Renderer::begin(const Camera& camera, const glm::vec3& lightPosition)
 	{
 		s_sceneData->ViewProjectionMatrix = camera.getViewProjectionMatrix();
+		s_sceneData->LightPosition = lightPosition;
 	}
 
 	void Renderer::end()
@@ -47,6 +58,7 @@ namespace Brickview
 	{
 		shader->bind();
 		shader->setMat4("u_viewProjection", s_sceneData->ViewProjectionMatrix);
+		shader->setVec3("u_lightPosition", s_sceneData->LightPosition);
 		shader->setMat4("u_transform", transform);
 		vertexArray->bind();
 

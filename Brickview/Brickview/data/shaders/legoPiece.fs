@@ -6,10 +6,12 @@ in vec3 f_color;
 
 out vec4 color;
 
+uniform vec3 u_lightPosition;
+
 void main()
 {
     vec3 lightPosition = vec3(3.0, 2.0, 0.0);
-    vec3 lightDirection = normalize(lightPosition - f_currentPosition);
+    vec3 lightDirection = normalize(u_lightPosition - f_currentPosition);
     
     float diffuse = max(dot(f_normal, lightDirection), 0.0);
 

@@ -15,6 +15,8 @@ namespace Brickview
 		static void shutdown();
 
 		static void drawPiece(std::shared_ptr<Mesh> mesh, const Material& material, const glm::mat4& transform);
+
+		static void drawLight();
 	};
 
 }

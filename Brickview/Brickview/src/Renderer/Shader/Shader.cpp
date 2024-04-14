@@ -58,11 +58,11 @@ namespace Brickview
         glUseProgram(m_shaderProgramID);
     }
 
-    void Shader::setUniformVec3(const std::string& name, const float* data)
+    void Shader::setVec3(const std::string& name, const glm::vec3& data)
     {
         // set uniform color
         int loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
-        glUniform3fv(loc, 1, data);
+        glUniform3fv(loc, 1, glm::value_ptr(data));
     }
 
     void Shader::setMat4(const std::string& name, const glm::mat4& data)

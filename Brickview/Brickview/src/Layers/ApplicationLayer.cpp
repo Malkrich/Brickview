@@ -61,8 +61,9 @@ namespace Brickview
 		m_planeMesh = Mesh::load("data/models/plane.obj");
 		m_planeMaterial.Color = { 0.1f, 0.2f, 0.8f };
 
-		// Camera Controller
 		m_cameraControl = CameraController();
+
+		m_lightPosition = { 2.0f, 2.0f, 0.0f };
 	}
 	
 	void ApplicationLayer::onDetach()
@@ -106,7 +107,8 @@ namespace Brickview
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
 
-		Renderer::begin(m_cameraControl.getCamera());
+		Renderer::begin(m_cameraControl.getCamera(), m_lightPosition);
+		LegoRenderer::drawLight();
 
 		// Lego Piece
 		
@@ -138,6 +140,9 @@ namespace Brickview
 	{
 		ImGui::Begin("Scene:");
 		ImGui::Separator();
+
+		// Light
+		ImGui::SliderFloat3("Light Position", (float*)glm::value_ptr(m_lightPosition), -5.0f, 5.0f);
 
 		// Lego Piece
 		ImGui::SliderFloat3("Lego Piece Position", (float*)glm::value_ptr(m_legoPiecePosition), -5.0f, 5.0f);

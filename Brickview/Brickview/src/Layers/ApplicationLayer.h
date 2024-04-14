@@ -50,6 +50,7 @@ namespace Brickview
 		std::shared_ptr<Mesh> m_planeMesh;
 		Material m_planeMaterial;
 
+		glm::vec3 m_lightPosition;
 		CameraController m_cameraControl;
 	};
 

@@ -9,7 +9,7 @@ namespace Brickview
 
 		void bind() const;
 
-		void setUniformVec3(const std::string& name, const float* data);
+		void setVec3(const std::string& name, const glm::vec3& data);
 		void setMat4(const std::string& name, const glm::mat4& data);
 
 	private:
