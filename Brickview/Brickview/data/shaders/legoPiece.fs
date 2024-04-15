@@ -14,7 +14,7 @@ uniform vec3 u_lightColor;
 
 void main()
 {
-    float ambiant = 0.2;
+    float ambient = 0.2;
     
     vec3 lightDirection = normalize(u_lightPosition - f_currentPosition);
     
@@ -30,6 +30,6 @@ void main()
         specular *= specularLight;
     }
 
-    vec3 finalColor = (diffuse + ambiant + specular) * u_lightColor * f_color;
+    vec3 finalColor = (diffuse + ambient + specular) * u_lightColor * f_color;
     color = vec4(finalColor, 1.0);
 };
