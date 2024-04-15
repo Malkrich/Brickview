@@ -9,6 +9,7 @@
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Camera.h"
 #include "Renderer/CameraController.h"
+#include "Renderer/Light.h"
 
 #include "Models/Mesh.h"
 #include "Material/Material.h"
@@ -50,7 +51,7 @@ namespace Brickview
 		std::shared_ptr<Mesh> m_planeMesh;
 		Material m_planeMaterial;
 
-		glm::vec3 m_lightPosition;
+		Light m_light;
 		CameraController m_cameraControl;
 	};
 

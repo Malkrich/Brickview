@@ -69,7 +69,7 @@ namespace Brickview
 	void LegoRenderer::drawLight()
 	{
 		const glm::vec3& lightPosition = Renderer::getLightPosition();
-		static float scaleFactor = 0.2f;
+		static float scaleFactor = 0.1f;
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), lightPosition) * glm::scale(glm::mat4(1.0f), scaleFactor*glm::vec3(1.0f));
 
 		std::shared_ptr<Mesh> lightMesh = Mesh::load("data/models/cube.obj");
