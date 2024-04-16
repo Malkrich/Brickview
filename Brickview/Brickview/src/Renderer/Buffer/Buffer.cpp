@@ -119,6 +119,11 @@ namespace Brickview
 		glGenVertexArrays(1, &m_bufferID);
 	}
 
+	VertexArray::~VertexArray()
+	{
+		glDeleteVertexArrays(1, &m_bufferID);
+	}
+
 	void VertexArray::bind() const
 	{
 		glBindVertexArray(m_bufferID);

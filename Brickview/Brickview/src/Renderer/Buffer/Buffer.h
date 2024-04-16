@@ -43,6 +43,7 @@ namespace Brickview
 	{
 	public:
 		VertexArray();
+		~VertexArray();
 
 		void bind() const;
 		void unbind() const;
