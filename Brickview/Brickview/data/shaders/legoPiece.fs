@@ -25,7 +25,7 @@ void main()
     {
         float specularLight = 0.5;
         vec3 viewDirection = normalize(u_cameraPosition - f_currentPosition);
-        vec3 reflectionDirection = reflect(-viewDirection, f_normal);
+        vec3 reflectionDirection = reflect(-lightDirection, f_normal);
         specular = pow(max(dot(viewDirection, reflectionDirection), 0.0), 64);
         specular *= specularLight;
     }
