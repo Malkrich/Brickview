@@ -18,6 +18,9 @@ namespace Brickview
 
 	struct SceneData
 	{
+		// Global
+		RenderType RenderType = RenderType::Rendered;
+
 		// Camera
 		glm::vec3 CameraPosition;
 		glm::mat4 ViewProjectionMatrix;
@@ -26,6 +29,7 @@ namespace Brickview
 		Light Light;
 
 		// Shaders
+		std::shared_ptr<Shader> SolidShader;
 		std::shared_ptr<Shader> LegoShader;
 		std::shared_ptr<Shader> LightShader;
 	};
@@ -39,6 +43,12 @@ namespace Brickview
 		s_sceneData = new SceneData();
 
 		// Lego Shader
+		loadShaders();
+	}
+
+	void LegoRenderer::loadShaders()
+	{
+		s_sceneData->SolidShader.reset(new Shader("data/shaders/solid.vs", "data/shaders/solid.fs"));
 		s_sceneData->LegoShader.reset(new Shader("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs"));
 		s_sceneData->LightShader.reset(new Shader("data/shaders/light.vs", "data/shaders/light.fs"));
 	}
@@ -69,6 +79,11 @@ namespace Brickview
 		onWindowResize(windowDimension.x, windowDimension.y);
 	}
 
+	void LegoRenderer::setRenderType(RenderType type)
+	{
+		s_sceneData->RenderType = type;
+	}
+
 	void LegoRenderer::drawPiece(std::shared_ptr<Mesh> mesh, const Material& material, const glm::mat4& transform)
 	{
 		const auto& vertices = mesh->getVertexBuffer();
@@ -92,7 +107,15 @@ namespace Brickview
 		std::shared_ptr<IndexBuffer> ebo = std::make_shared<IndexBuffer>(indices.size() * sizeof(TriangleFace), (void*)indices.data());
 		vao->setIndexBuffer(ebo);
 
-		LegoRenderer::submit(s_sceneData->LegoShader, vao, transform);
+		switch (s_sceneData->RenderType)
+		{
+			case RenderType::Solid:
+				LegoRenderer::submit(s_sceneData->SolidShader, vao, transform);
+				break;
+			case RenderType::Rendered:
+				LegoRenderer::submit(s_sceneData->LegoShader, vao, transform);
+				break;
+		}
 	}
 
 	void LegoRenderer::drawLight()
@@ -125,7 +148,6 @@ namespace Brickview
 	void LegoRenderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->bind();
-		// M V P
 		shader->setMat4("u_viewProjection", s_sceneData->ViewProjectionMatrix);
 		shader->setMat4("u_transform", transform);
 		shader->setVec3("u_cameraPosition", s_sceneData->CameraPosition);

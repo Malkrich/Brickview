@@ -16,7 +16,6 @@
 // Renderer
 #include "Renderer/Buffer/Layout.h"
 #include "Renderer/RenderCommand.h"
-#include "Renderer/LegoRenderer.h"
 
 namespace Brickview
 {
@@ -72,11 +71,14 @@ namespace Brickview
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
 
+		LegoRenderer::setRenderType(m_renderType);
+
 		LegoRenderer::begin(m_cameraControl.getCamera(), m_light);
-		LegoRenderer::drawLight();
+
+		if(m_renderType == RenderType::Rendered)
+			LegoRenderer::drawLight();
 
 		// Lego Piece
-		
 		glm::mat4 transform;
 		for (float i = -0.5f; i < 1.0f; i += 1.0f)
 		{
@@ -97,7 +99,7 @@ namespace Brickview
 	void ApplicationLayer::onGuiRender()
 	{
 		ImGui::Begin("Scene:");
-		ImGui::Separator();
+		ImGui::SeparatorText("Elements:");
 
 		// Light
 		ImGui::SliderFloat3("Light Position", (float*)glm::value_ptr(m_light.Position), -5.0f, 5.0f);
@@ -108,6 +110,14 @@ namespace Brickview
 		ImGui::SliderFloat3("Lego Piece Position", (float*)glm::value_ptr(m_legoPiecePosition), -5.0f, 5.0f);
 		ImGui::SliderFloat3("Lego Piece Scale", (float*)glm::value_ptr(m_legoPieceScale), 0.0f, 1.0f);
 		ImGui::ColorEdit3("Lego Piece Color", (float*)glm::value_ptr(m_legoPieceMaterial.Color));
+
+		// Render Type
+		ImGui::SeparatorText("Render Settings:");
+		bool isRendering = m_renderType == RenderType::Rendered;
+		if (ImGui::Checkbox("Rendering ?", &isRendering))
+			m_renderType = isRendering ? RenderType::Rendered : RenderType::Solid;
+		if (ImGui::Button("Reload Shaders"))
+			LegoRenderer::loadShaders();
 
 		ImGui::End();
 	}

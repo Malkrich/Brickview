@@ -10,14 +10,23 @@
 namespace Brickview
 {
 
+	enum class RenderType
+	{
+		Solid = 0,
+		Rendered
+	};
+
 	class LegoRenderer
 	{
 	public:
 		static void init();
+		static void loadShaders();
 		static void shutdown();
 
 		static void onWindowResize(unsigned int width, unsigned int height);
 		static void onWindowResize(const glm::ivec2& windowDimension);
+
+		static void setRenderType(RenderType type);
 
 		static void drawPiece(std::shared_ptr<Mesh> mesh, const Material& material, const glm::mat4& transform);
 		static void drawLight();
