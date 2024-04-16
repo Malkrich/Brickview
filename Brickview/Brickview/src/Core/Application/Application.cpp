@@ -12,7 +12,7 @@
 #include "Core/KeyCodes.h"
 
 // Renderer
-#include "Renderer/Renderer.h"
+#include "Renderer/LegoRenderer.h"
 
 // Layers
 #include "Core/Layer/Layer.h"
@@ -33,7 +33,7 @@ namespace Brickview
 
 	Application::~Application()
 	{
-		Renderer::shutdown();
+		LegoRenderer::shutdown();
 	}
 
 	void Application::initialize()
@@ -53,7 +53,7 @@ namespace Brickview
 		m_layerStack->pushLayer(applicationLayer);
 
 		// Renderer
-		Renderer::init();
+		LegoRenderer::init();
 	}
 
 	void Application::run()

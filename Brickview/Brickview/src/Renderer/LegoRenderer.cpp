@@ -1,10 +1,8 @@
 #include "Pch.h"
 #include "LegoRenderer.h"
 
-#include "Renderer/Renderer.h"
-#include "Renderer/Buffer/Buffer.h"
-#include "Renderer/Buffer/Layout.h"
-#include "Renderer/Shader/Shader.h"
+#include "Core/Core.h"
+#include "RenderCommand.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
@@ -18,26 +16,57 @@ namespace Brickview
 		glm::vec3 Color;
 	};
 
-	struct RenderData
+	struct SceneData
 	{
+		// Camera
+		glm::vec3 CameraPosition;
+		glm::mat4 ViewProjectionMatrix;
+
+		// Light
+		Light Light;
+
+		// Shaders
 		std::shared_ptr<Shader> LegoShader;
 		std::shared_ptr<Shader> LightShader;
 	};
 
-	static RenderData* s_data;
+	static SceneData* s_sceneData = nullptr;
 
 	void LegoRenderer::init()
 	{
-		s_data = new RenderData();
+		RenderCommand::initialise();
+
+		s_sceneData = new SceneData();
 
 		// Lego Shader
-		s_data->LegoShader.reset(new Shader("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs"));
-		s_data->LightShader.reset(new Shader("data/shaders/light.vs", "data/shaders/light.fs"));
+		s_sceneData->LegoShader.reset(new Shader("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs"));
+		s_sceneData->LightShader.reset(new Shader("data/shaders/light.vs", "data/shaders/light.fs"));
 	}
 
 	void LegoRenderer::shutdown()
 	{
-		delete s_data;
+		delete s_sceneData;
+	}
+
+	void LegoRenderer::begin(const Camera& camera, const Light& light)
+	{
+		s_sceneData->ViewProjectionMatrix = camera.getViewProjectionMatrix();
+		s_sceneData->CameraPosition = camera.getPosition();
+		s_sceneData->Light = light;
+	}
+
+	void LegoRenderer::end()
+	{
+	}
+
+	void LegoRenderer::onWindowResize(unsigned int width, unsigned int height)
+	{
+		RenderCommand::setViewportDimension(0, 0, width, height);
+	}
+
+	void LegoRenderer::onWindowResize(const glm::ivec2& windowDimension)
+	{
+		onWindowResize(windowDimension.x, windowDimension.y);
 	}
 
 	void LegoRenderer::drawPiece(std::shared_ptr<Mesh> mesh, const Material& material, const glm::mat4& transform)
@@ -63,14 +92,13 @@ namespace Brickview
 		std::shared_ptr<IndexBuffer> ebo = std::make_shared<IndexBuffer>(indices.size() * sizeof(TriangleFace), (void*)indices.data());
 		vao->setIndexBuffer(ebo);
 
-		Renderer::submit(s_data->LegoShader, vao, transform);
+		LegoRenderer::submit(s_sceneData->LegoShader, vao, transform);
 	}
 
 	void LegoRenderer::drawLight()
 	{
-		const glm::vec3& lightPosition = Renderer::getLightPosition();
 		static float scaleFactor = 0.1f;
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), lightPosition) * glm::scale(glm::mat4(1.0f), scaleFactor*glm::vec3(1.0f));
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_sceneData->Light.Position) * glm::scale(glm::mat4(1.0f), scaleFactor * glm::vec3(1.0f));
 
 		std::shared_ptr<Mesh> lightMesh = Mesh::load("data/models/cube.obj");
 
@@ -91,7 +119,23 @@ namespace Brickview
 		std::shared_ptr<IndexBuffer> ebo = std::make_shared<IndexBuffer>(indices.size() * sizeof(TriangleFace), (void*)indices.data());
 		vao->setIndexBuffer(ebo);
 
-		Renderer::submit(s_data->LightShader, vao, transform);
+		LegoRenderer::submit(s_sceneData->LightShader, vao, transform);
+	}
+
+	void LegoRenderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
+	{
+		shader->bind();
+		// M V P
+		shader->setMat4("u_viewProjection", s_sceneData->ViewProjectionMatrix);
+		shader->setMat4("u_transform", transform);
+		shader->setVec3("u_cameraPosition", s_sceneData->CameraPosition);
+		// Light
+		shader->setVec3("u_lightPosition", s_sceneData->Light.Position);
+		shader->setVec3("u_lightColor", s_sceneData->Light.Color);
+
+		vertexArray->bind();
+
+		RenderCommand::draw(vertexArray);
 	}
 
 }

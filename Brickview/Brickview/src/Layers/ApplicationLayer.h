@@ -21,7 +21,7 @@ namespace Brickview
 	{
 	public:
 		ApplicationLayer() = default;
-		virtual ~ApplicationLayer();
+		virtual ~ApplicationLayer() = default;
 
 		virtual void onAttach() override;
 		virtual void onDetach() override;
@@ -36,20 +36,10 @@ namespace Brickview
 		bool onKeyPressed(const KeyPressedEvent& e);
 
 	private:
-		std::shared_ptr<VertexArray> m_vertexArray;
-		std::shared_ptr<VertexBuffer> m_vertexBuffer;
-		std::shared_ptr<IndexBuffer> m_indexBuffer;
-		std::shared_ptr<Shader> m_colorShader;
-
 		glm::vec3 m_legoPiecePosition = glm::vec3(0.0f);
 		glm::vec3 m_legoPieceScale = glm::vec3(1.0f);
 		std::shared_ptr<Mesh> m_legoPieceMesh;
 		Material m_legoPieceMaterial;
-
-		glm::vec3 m_planePosition = glm::vec3(0.0f);
-		glm::vec3 m_planeScale = glm::vec3(1.0f);
-		std::shared_ptr<Mesh> m_planeMesh;
-		Material m_planeMaterial;
 
 		Light m_light;
 		CameraController m_cameraControl;
