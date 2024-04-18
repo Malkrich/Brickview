@@ -35,13 +35,13 @@ namespace Brickview
 		std::shared_ptr<Shader> LightShader;
 	};
 
-	static SceneData* s_sceneData = nullptr;
+	static SceneData* s_rendererData = nullptr;
 
 	void LegoRenderer::init()
 	{
 		RenderCommand::initialise();
 
-		s_sceneData = new SceneData();
+		s_rendererData = new SceneData();
 
 		// Lego Shader
 		loadShaders();
@@ -49,21 +49,21 @@ namespace Brickview
 
 	void LegoRenderer::loadShaders()
 	{
-		s_sceneData->SolidShader.reset(new Shader("data/shaders/solid.vs", "data/shaders/solid.fs"));
-		s_sceneData->LegoShader.reset(new Shader("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs"));
-		s_sceneData->LightShader.reset(new Shader("data/shaders/light.vs", "data/shaders/light.fs"));
+		s_rendererData->SolidShader.reset(new Shader("data/shaders/solid.vs", "data/shaders/solid.fs"));
+		s_rendererData->LegoShader.reset(new Shader("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs"));
+		s_rendererData->LightShader.reset(new Shader("data/shaders/light.vs", "data/shaders/light.fs"));
 	}
 
 	void LegoRenderer::shutdown()
 	{
-		delete s_sceneData;
+		delete s_rendererData;
 	}
 
 	void LegoRenderer::begin(const Camera& camera, const Light& light)
 	{
-		s_sceneData->ViewProjectionMatrix = camera.getViewProjectionMatrix();
-		s_sceneData->CameraPosition = camera.getPosition();
-		s_sceneData->Light = light;
+		s_rendererData->ViewProjectionMatrix = camera.getViewProjectionMatrix();
+		s_rendererData->CameraPosition = camera.getPosition();
+		s_rendererData->Light = light;
 	}
 
 	void LegoRenderer::end()
@@ -82,7 +82,7 @@ namespace Brickview
 
 	void LegoRenderer::setRenderType(RenderType type)
 	{
-		s_sceneData->RenderType = type;
+		s_rendererData->RenderType = type;
 	}
 
 	void LegoRenderer::drawPiece(std::shared_ptr<Mesh> mesh, const Material& material, const glm::mat4& transform)
@@ -108,13 +108,13 @@ namespace Brickview
 		std::shared_ptr<IndexBuffer> ebo = std::make_shared<IndexBuffer>(indices.size() * sizeof(TriangleFace), (void*)indices.data());
 		vao->setIndexBuffer(ebo);
 
-		switch (s_sceneData->RenderType)
+		switch (s_rendererData->RenderType)
 		{
 			case RenderType::Solid:
-				LegoRenderer::submit(s_sceneData->SolidShader, vao, transform);
+				LegoRenderer::submit(s_rendererData->SolidShader, vao, transform);
 				break;
 			case RenderType::Rendered:
-				LegoRenderer::submit(s_sceneData->LegoShader, vao, transform);
+				LegoRenderer::submit(s_rendererData->LegoShader, vao, transform);
 				break;
 		}
 	}
@@ -122,7 +122,7 @@ namespace Brickview
 	void LegoRenderer::drawLight()
 	{
 		static float scaleFactor = 0.1f;
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_sceneData->Light.Position) * glm::scale(glm::mat4(1.0f), scaleFactor * glm::vec3(1.0f));
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), s_rendererData->Light.Position) * glm::scale(glm::mat4(1.0f), scaleFactor * glm::vec3(1.0f));
 
 		std::shared_ptr<Mesh> lightMesh = Mesh::load("data/models/cube.obj");
 
@@ -143,19 +143,19 @@ namespace Brickview
 		std::shared_ptr<IndexBuffer> ebo = std::make_shared<IndexBuffer>(indices.size() * sizeof(TriangleFace), (void*)indices.data());
 		vao->setIndexBuffer(ebo);
 
-		LegoRenderer::submit(s_sceneData->LightShader, vao, transform);
+		LegoRenderer::submit(s_rendererData->LightShader, vao, transform);
 	}
 
 	void LegoRenderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->bind();
 		UniformMap uniforms;
-		uniforms["u_viewProjection"] = UniformData(s_sceneData->ViewProjectionMatrix);
+		uniforms["u_viewProjection"] = UniformData(s_rendererData->ViewProjectionMatrix);
 		uniforms["u_transform"] = UniformData(transform);
-		uniforms["u_cameraPosition"] = UniformData(s_sceneData->CameraPosition);
-		uniforms["u_lightPosition"] = UniformData(s_sceneData->Light.Position);
-		uniforms["u_lightColor"] = UniformData(s_sceneData->Light.Color);
-		shader->setAttributes(uniforms);
+		uniforms["u_cameraPosition"] = UniformData(s_rendererData->CameraPosition);
+		uniforms["u_lightPosition"] = UniformData(s_rendererData->Light.Position);
+		uniforms["u_lightColor"] = UniformData(s_rendererData->Light.Color);
+		shader->setUniforms(uniforms);
 
 		vertexArray->bind();
 

@@ -40,7 +40,7 @@ namespace Brickview
 
 		void bind() const;
 
-		void setAttributes(const UniformMap& uniforms);
+		void setUniforms(const UniformMap& uniforms);
 
 	private:
 		void setFloat3(const std::string& name, const void* data);
