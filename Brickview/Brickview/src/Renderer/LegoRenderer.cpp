@@ -5,6 +5,7 @@
 #include "RenderCommand.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtc/type_ptr.hpp>>
 #include <glm/gtx/transform.hpp>
 
 namespace Brickview
@@ -148,12 +149,13 @@ namespace Brickview
 	void LegoRenderer::submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
 	{
 		shader->bind();
-		shader->setMat4("u_viewProjection", s_sceneData->ViewProjectionMatrix);
-		shader->setMat4("u_transform", transform);
-		shader->setVec3("u_cameraPosition", s_sceneData->CameraPosition);
-		// Light
-		shader->setVec3("u_lightPosition", s_sceneData->Light.Position);
-		shader->setVec3("u_lightColor", s_sceneData->Light.Color);
+		UniformMap uniforms;
+		uniforms["u_viewProjection"] = UniformData(s_sceneData->ViewProjectionMatrix);
+		uniforms["u_transform"] = UniformData(transform);
+		uniforms["u_cameraPosition"] = UniformData(s_sceneData->CameraPosition);
+		uniforms["u_lightPosition"] = UniformData(s_sceneData->Light.Position);
+		uniforms["u_lightColor"] = UniformData(s_sceneData->Light.Color);
+		shader->setAttributes(uniforms);
 
 		vertexArray->bind();
 

@@ -2,10 +2,9 @@
 #include "Shader.h"
 
 #include <glad/glad.h>
-#include <glm/gtc/type_ptr.hpp>
 
+#include "Core/Core.h"
 #include "Core/Log.h"
-
 
 namespace Utils
 {
@@ -58,17 +57,35 @@ namespace Brickview
         glUseProgram(m_shaderProgramID);
     }
 
-    void Shader::setVec3(const std::string& name, const glm::vec3& data)
+    void Shader::setAttributes(const UniformMap& uniforms)
+    {
+        for (const auto& [name, uniform] : uniforms)
+        {
+            switch (uniform.Type)
+            {
+                case UniformType::Float3:
+                    setFloat3(name, uniform.Data);
+                    continue;
+                case UniformType::Mat4:
+                    setMat4(name, uniform.Data);
+                    continue;
+            }
+
+            BV_ASSERT(false, "Uniform type not implemented");
+        }
+    }
+
+    void Shader::setFloat3(const std::string& name, const void* data)
     {
         // set uniform color
         int loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
-        glUniform3fv(loc, 1, glm::value_ptr(data));
+        glUniform3fv(loc, 1, (float*)data);
     }
 
-    void Shader::setMat4(const std::string& name, const glm::mat4& data)
+    void Shader::setMat4(const std::string& name, const void* data)
     {
         int loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
-        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(data));
+        glUniformMatrix4fv(loc, 1, GL_FALSE, (float*)data);
     }
 
     void Shader::compileAndLink(const std::string& vertexShaderContent, const std::string& fragmetShaderContent)
