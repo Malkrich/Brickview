@@ -42,6 +42,7 @@ namespace Brickview
 
 	void RenderCommand::draw(const std::shared_ptr<VertexArray>& vertexArray)
 	{
+		vertexArray->bind();
 		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
