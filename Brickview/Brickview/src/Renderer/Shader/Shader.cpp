@@ -57,6 +57,11 @@ namespace Brickview
         glUseProgram(m_shaderProgramID);
     }
 
+    void Shader::unbind() const
+    {
+        glUseProgram(0);
+    }
+
     void Shader::setUniforms(const UniformMap& uniforms)
     {
         for (const auto& [name, uniform] : uniforms)

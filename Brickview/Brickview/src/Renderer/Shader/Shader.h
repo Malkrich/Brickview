@@ -39,6 +39,7 @@ namespace Brickview
 		Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
 
 		void bind() const;
+		void unbind() const;
 
 		void setUniforms(const UniformMap& uniforms);
 
