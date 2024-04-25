@@ -8,11 +8,14 @@ namespace Brickview
 	{
 	public:
 		VertexBuffer(unsigned int size, const void* data);
+		VertexBuffer(unsigned int size);
 
 		~VertexBuffer();
 
 		void bind() const;
 		void unbind() const;
+
+		void setData(unsigned int size, void* data);
 
 		const Layout& getLayout() const { return m_layout; }
 		void setBufferLayout(const Layout& layout) { m_layout = layout; }
@@ -26,13 +29,15 @@ namespace Brickview
 	{
 	public:
 		IndexBuffer(unsigned int size, const void* data);
+		IndexBuffer(unsigned int size);
 
 		~IndexBuffer();
 
 		void bind() const;
 		void unbind() const;
-
 		unsigned int getCount() const { return m_count; }
+
+		void setData(unsigned int size, void* data);
 
 	private:
 		unsigned int m_count;

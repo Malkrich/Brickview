@@ -68,9 +68,24 @@ namespace Brickview
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
+	VertexBuffer::VertexBuffer(unsigned int size)
+	{
+		glGenBuffers(1, &m_bufferID);
+		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+	}
+
 	VertexBuffer::~VertexBuffer()
 	{
 		glDeleteBuffers(1, &m_bufferID);
+	}
+
+	void VertexBuffer::setData(unsigned int size, void* data)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
+		void* vbo = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		memcpy(vbo, data, size);
+		glUnmapBuffer(GL_ARRAY_BUFFER);
 	}
 
 	void VertexBuffer::bind() const
@@ -95,9 +110,26 @@ namespace Brickview
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
+	IndexBuffer::IndexBuffer(unsigned int size)
+		: m_count(size / sizeof(unsigned int))
+	{
+		glGenBuffers(1, &m_bufferID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+	}
+
 	IndexBuffer::~IndexBuffer()
 	{
 		glDeleteBuffers(1, &m_bufferID);
+	}
+
+	void IndexBuffer::setData(unsigned int size, void* data)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
+		void* ebo = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+		memcpy(ebo, data, size);
+		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		m_count = size / sizeof(unsigned int);
 	}
 
 	void IndexBuffer::bind() const
@@ -115,8 +147,8 @@ namespace Brickview
 	/*********************************************************/
 
 	VertexArray::VertexArray()
-	{    
-		glGenVertexArrays(1, &m_bufferID);
+	{
+		glCreateVertexArrays(1, &m_bufferID);
 	}
 
 	VertexArray::~VertexArray()
@@ -136,7 +168,7 @@ namespace Brickview
 
 	void VertexArray::addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
 	{
-		glBindVertexArray(m_bufferID);
+		bind();
 		vertexBuffer->bind();
 
 		const Layout& layout = vertexBuffer->getLayout();
@@ -159,7 +191,7 @@ namespace Brickview
 
 	void VertexArray::setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
 	{
-		glBindVertexArray(m_bufferID);
+		bind();
 		indexBuffer->bind();
 
 		m_indexBuffer = indexBuffer;
