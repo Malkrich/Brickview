@@ -15,10 +15,23 @@
 
 // Renderer
 #include "Renderer/Buffer/Layout.h"
+#include "Renderer/Buffer/Buffer.h"
 #include "Renderer/RenderCommand.h"
+#include "Renderer/Renderer/RenderedRenderer.h"
 
 namespace Brickview
 {
+	ApplicationLayer::ApplicationLayer()
+	{
+		RenderCommand::initialise();
+		RenderedRenderer::init();
+	}
+
+	ApplicationLayer::~ApplicationLayer()
+	{
+		RenderedRenderer::shutdown();
+	}
+
 	void ApplicationLayer::onAttach()
 	{
 		m_legoPieceMesh = Mesh::load("data/models/brick.obj");
@@ -26,7 +39,7 @@ namespace Brickview
 
 		m_cameraControl = CameraController();
 
-		m_light.Position = { 2.0f, 2.0f, 0.0f };
+		m_light.Position = { 0.0f, 0.0f, 0.0f };
 		m_light.Color = { 1.0f, 1.0f, 1.0f };
 	}
 	
@@ -47,7 +60,7 @@ namespace Brickview
 
 	bool ApplicationLayer::onWindowResize(const WindowResizeEvent& e)
 	{
-		LegoRenderer::onWindowResize(e.getWidth(), e.getHeight());
+		RenderCommand::setViewportDimension(0, 0, e.getWidth(), e.getHeight());
 		return true;
 	}
 
@@ -71,29 +84,15 @@ namespace Brickview
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
 
-		LegoRenderer::setRenderType(m_renderType);
+		RenderedRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-		LegoRenderer::begin(m_cameraControl.getCamera(), m_light);
+		auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition);
+		RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial, transform1);
+		//auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition + glm::vec3(1.0f, 0.0f, 0.0f));
+		//auto cubeMesh = Mesh::load("data/models/cube.obj");
+		//RenderedRenderer::submitMesh(cubeMesh, m_legoPieceMaterial, transform2);
 
-		if(m_renderType == RenderType::Rendered)
-			LegoRenderer::drawLight();
-
-		// Lego Piece
-		glm::mat4 transform;
-		for (float i = -0.5f; i < 1.0f; i += 1.0f)
-		{
-			for (float j = -0.5f; j < 1.0f; j += 1.0f)
-			{
-				transform = glm::translate(glm::mat4(1.0f), m_legoPiecePosition 
-					+ i*glm::vec3(1.0f, 0.0f, 0.0f)
-					+ j*glm::vec3(0.0f, 0.0f, 1.0f))
-					* glm::scale(glm::mat4(1.0f), m_legoPieceScale);
-
-				LegoRenderer::drawPiece(m_legoPieceMesh, m_legoPieceMaterial, transform);
-			}
-		}
-
-		LegoRenderer::end();
+		RenderedRenderer::end();
 	}
 
 	void ApplicationLayer::onGuiRender()
@@ -113,11 +112,9 @@ namespace Brickview
 
 		// Render Type
 		ImGui::SeparatorText("Render Settings:");
-		bool isRendering = m_renderType == RenderType::Rendered;
-		if (ImGui::Checkbox("Rendering ?", &isRendering))
-			m_renderType = isRendering ? RenderType::Rendered : RenderType::Solid;
-		if (ImGui::Button("Reload Shaders"))
-			LegoRenderer::loadShaders();
+		static bool drawLights = false;
+		if (ImGui::Checkbox("Draw lights", &drawLights))
+			RenderedRenderer::drawLights(drawLights);
 
 		ImGui::End();
 	}

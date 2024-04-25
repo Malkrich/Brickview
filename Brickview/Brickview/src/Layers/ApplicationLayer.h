@@ -21,8 +21,8 @@ namespace Brickview
 	class ApplicationLayer : public Layer
 	{
 	public:
-		ApplicationLayer() = default;
-		virtual ~ApplicationLayer() = default;
+		ApplicationLayer();
+		virtual ~ApplicationLayer();
 
 		virtual void onAttach() override;
 		virtual void onDetach() override;
@@ -41,7 +41,7 @@ namespace Brickview
 		glm::vec3 m_legoPieceScale = glm::vec3(1.0f);
 		std::shared_ptr<Mesh> m_legoPieceMesh;
 		Material m_legoPieceMaterial;
-
+			
 		Light m_light;
 		CameraController m_cameraControl;
 
