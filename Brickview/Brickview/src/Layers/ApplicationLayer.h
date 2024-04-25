@@ -10,7 +10,6 @@
 #include "Renderer/Camera.h"
 #include "Renderer/CameraController.h"
 #include "Renderer/Light.h"
-#include "Renderer/LegoRenderer.h"
 
 #include "Models/Mesh.h"
 #include "Material/Material.h"
@@ -44,8 +43,6 @@ namespace Brickview
 			
 		Light m_light;
 		CameraController m_cameraControl;
-
-		RenderType m_renderType = RenderType::Solid;
 	};
 
 }
