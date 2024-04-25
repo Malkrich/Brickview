@@ -7,6 +7,7 @@
 
 // Core
 #include "Core/Core.h"
+#include "Core/Time.h"
 #include "Core/Log.h"
 #include "Core/Input.h"
 #include "Core/KeyCodes.h"
@@ -60,17 +61,9 @@ namespace Brickview
 	{
 		while(m_running)
 		{
-			float dt = 0.0f;
-
-			/* GOAL :
-			Renderer::setClearColor(...);
-			Renderer::clear();
-
-			Renderer::beginScene(camera);
-
-			Renderer::submit(shader, vertexArray);
-
-			Renderer::endscene(); */
+			float time = Time::getTime();
+			float dt = time - m_currentTime;
+			m_currentTime = time;
 
 			for(auto layer : *m_layerStack)
 				layer->onUpdate(dt);

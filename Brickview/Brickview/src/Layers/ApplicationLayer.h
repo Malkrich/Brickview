@@ -36,13 +36,17 @@ namespace Brickview
 		bool onKeyPressed(const KeyPressedEvent& e);
 
 	private:
-		glm::vec3 m_legoPiecePosition = glm::vec3(0.0f);
-		glm::vec3 m_legoPieceScale = glm::vec3(1.0f);
 		std::shared_ptr<Mesh> m_legoPieceMesh;
-		Material m_legoPieceMaterial;
-			
+
+		glm::vec3 m_legoPiecePosition1;
+		Material m_legoPieceMaterial1;
+		glm::vec3 m_legoPiecePosition2;
+		Material m_legoPieceMaterial2;
+
 		Light m_light;
 		CameraController m_cameraControl;
+
+		float m_dt = 0.0f;
 	};
 
 }

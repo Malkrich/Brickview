@@ -8,6 +8,14 @@
 
 namespace Brickview
 {
+	struct RenderSatistics
+	{
+		unsigned int DrawCalls = 0;
+
+		// Meshes
+		unsigned int MeshVertexCount = 0;
+		unsigned int MeshIndicesCount = 0;
+	};
 
 	class RenderedRenderer
 	{
@@ -21,7 +29,9 @@ namespace Brickview
 		static void submitMesh(const std::shared_ptr<Mesh>& mesh, const Material& material, const glm::mat4& transform);
 
 		static void end();
+		static void flush();
 
+		static const RenderSatistics& getStats();
 	private:
 		static void submitLight();
 	};

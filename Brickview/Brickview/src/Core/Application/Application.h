@@ -39,5 +39,7 @@ namespace Brickview
 
 		// singleton instance
 		static Application* s_instance;
+
+		float m_currentTime;
 	};
 }

@@ -31,6 +31,9 @@ namespace Brickview
 	
 	struct RenderedRendererData
 	{
+		const unsigned int MaxVertices = 1024;
+		const unsigned int MaxIndices = MaxVertices;
+
 		// Mesh
 		std::shared_ptr<Shader> MeshShader = nullptr;
 		UniformMap MeshUniforms = {};
@@ -51,6 +54,9 @@ namespace Brickview
 		// Camera
 		glm::mat4 ViewProjectionMatrix;
 		glm::vec3 CameraPosition;
+
+		// Stats
+		RenderSatistics Statistics;
 	};
 
 	static RenderedRendererData* s_rendererData = nullptr;
@@ -63,14 +69,14 @@ namespace Brickview
 		s_rendererData->LightShader = std::make_shared<Shader>("data/shaders/light.vs", "data/shaders/light.fs");
 
 		// Mesh
-		s_rendererData->MeshBufferGroup.Vbo = std::make_shared<VertexBuffer>(1024);
+		s_rendererData->MeshBufferGroup.Vbo = std::make_shared<VertexBuffer>(s_rendererData->MaxVertices);
 		Layout meshLayout = {
 			{ "a_position", BufferElementType::Float3 },
 			{ "a_normal", BufferElementType::Float3 },
 			{ "a_color", BufferElementType::Float3 }
 		};
 		s_rendererData->MeshBufferGroup.Vbo->setBufferLayout(meshLayout);
-		s_rendererData->MeshBufferGroup.Ebo = std::make_shared<IndexBuffer>(1024);
+		s_rendererData->MeshBufferGroup.Ebo = std::make_shared<IndexBuffer>(s_rendererData->MaxIndices);
 
 		s_rendererData->MeshBufferGroup.Vao = std::make_shared<VertexArray>();
 		s_rendererData->MeshBufferGroup.Vao->addVertexBuffer(s_rendererData->MeshBufferGroup.Vbo);
@@ -78,12 +84,12 @@ namespace Brickview
 		s_rendererData->MeshBufferGroup.Vao->unbind();
 
 		// Light
-		s_rendererData->LightBufferGroup.Vbo = std::make_shared<VertexBuffer>(1024);
+		s_rendererData->LightBufferGroup.Vbo = std::make_shared<VertexBuffer>(s_rendererData->MaxVertices);
 		Layout lightLayout = {
 			{ "a_position", BufferElementType::Float3 }
 		};
 		s_rendererData->LightBufferGroup.Vbo->setBufferLayout(lightLayout);
-		s_rendererData->LightBufferGroup.Ebo = std::make_shared<IndexBuffer>(1024);
+		s_rendererData->LightBufferGroup.Ebo = std::make_shared<IndexBuffer>(s_rendererData->MaxIndices);
 
 		s_rendererData->LightBufferGroup.Vao = std::make_shared<VertexArray>();
 		s_rendererData->LightBufferGroup.Vao->addVertexBuffer(s_rendererData->LightBufferGroup.Vbo);
@@ -105,7 +111,11 @@ namespace Brickview
 		s_rendererData->CameraPosition = camera.getPosition();
 		s_rendererData->Light = light;
 
-		submitLight();
+		s_rendererData->Statistics.DrawCalls = 0;
+
+		if(s_rendererData->DrawLights)
+			submitLight();
+
 	}
 
 	void RenderedRenderer::drawLights(bool drawLights)
@@ -118,16 +128,33 @@ namespace Brickview
 		// TODO: auto vertices = mesh->getVertexBuffer(VertexElement::Position | VertexElement::Normal | VertexElement::Color);
 		const auto& vertices = mesh->getVertexBuffer();
 		const auto& indices = mesh->getIndexBuffer();
-		std::vector<MeshVertex> legoVertices;
-		legoVertices.reserve(vertices.size());
-		for (const auto& v : vertices)
+
+		if (vertices.size() + s_rendererData->MeshVertices.size() > s_rendererData->MaxVertices
+			|| indices.size() + s_rendererData->MeshIndices.size() > s_rendererData->MaxIndices)
 		{
-			glm::vec3 p = transform * glm::vec4(v.Position, 1.0f);
-			legoVertices.push_back({ p, v.Normal, material.Color });
+			flush();
 		}
 
-		s_rendererData->MeshVertices = legoVertices;
-		s_rendererData->MeshIndices = indices;
+		unsigned int offset = s_rendererData->MeshVertices.size();
+		s_rendererData->MeshVertices.reserve(s_rendererData->MeshVertices.size() + vertices.size());
+		s_rendererData->MeshIndices.reserve(s_rendererData->MeshIndices.size() + indices.size());
+		for (const auto& v : vertices)
+		{
+			glm::vec3 p = transform * glm::vec4(v.Position, 1.0);
+			s_rendererData->MeshVertices.push_back({ p, v.Normal, material.Color });
+		}
+		for (const auto& f : indices)
+		{
+			TriangleFace face;
+			face[0] = f[0] + offset;
+			face[1] = f[1] + offset;
+			face[2] = f[2] + offset;
+			s_rendererData->MeshIndices.push_back(face);
+		}
+		
+		// Update stats
+		s_rendererData->Statistics.MeshVertexCount = s_rendererData->MeshVertices.size();
+		s_rendererData->Statistics.MeshIndicesCount = s_rendererData->MeshIndices.size() * 3;
 
 		s_rendererData->MeshUniforms["u_viewProjection"] = s_rendererData->ViewProjectionMatrix;
 		s_rendererData->MeshUniforms["u_cameraPosition"] = s_rendererData->CameraPosition;
@@ -146,16 +173,23 @@ namespace Brickview
 
 		const auto& vertices = s_rendererData->LightMesh->getVertexBuffer();
 		const auto& indices = s_rendererData->LightMesh->getIndexBuffer();
-		std::vector<LightVertex> lightVertices;
-		lightVertices.reserve(vertices.size());
+
+		unsigned int offset = s_rendererData->LightVertices.size();
+		s_rendererData->LightVertices.reserve(s_rendererData->LightVertices.size() + vertices.size());
+		s_rendererData->LightIndices.reserve(s_rendererData->LightIndices.size() + indices.size());
 		for (const auto& v : vertices)
 		{
-			glm::vec3 p = lightTransform * glm::vec4(v.Position, 1.0);
-			lightVertices.push_back({ p });
+			glm::vec3 p = lightTransform * glm::vec4(v.Position, 1.0f);
+			s_rendererData->LightVertices.push_back({ p });
 		}
-
-		s_rendererData->LightVertices = lightVertices;
-		s_rendererData->LightIndices = indices;
+		for (const auto& f : indices)
+		{
+			TriangleFace face;
+			face[0] = f[0] + offset;
+			face[1] = f[1] + offset;
+			face[2] = f[2] + offset;
+			s_rendererData->LightIndices.push_back(face);
+		}
 
 		s_rendererData->LightUniforms["u_viewProjection"] = s_rendererData->ViewProjectionMatrix;
 		s_rendererData->LightUniforms["u_lightColor"] = s_rendererData->Light.Color;
@@ -164,40 +198,60 @@ namespace Brickview
 		//RenderQueue::submit(s_rendererData->LightVertexArray, s_rendererData->LightShader, uniforms);
 	}
 
-	void RenderedRenderer::end()
+	void RenderedRenderer::flush()
 	{
 		// Meshes
-		s_rendererData->MeshBufferGroup.Vao->bind();
-		s_rendererData->MeshBufferGroup.Vbo->setData(
-			s_rendererData->MeshVertices.size() * sizeof(MeshVertex),
-			(void*)s_rendererData->MeshVertices.data());
-		s_rendererData->MeshBufferGroup.Ebo->setData(
-			s_rendererData->MeshIndices.size() * sizeof(TriangleFace),
-			(void*)s_rendererData->MeshIndices.data());
+		if (s_rendererData->MeshVertices.size() != 0)
+		{
+			s_rendererData->MeshBufferGroup.Vao->bind();
+			s_rendererData->MeshBufferGroup.Vbo->setData(
+				s_rendererData->MeshVertices.size() * sizeof(MeshVertex),
+				(void*)s_rendererData->MeshVertices.data());
+			s_rendererData->MeshBufferGroup.Ebo->setData(
+				s_rendererData->MeshIndices.size() * sizeof(TriangleFace),
+				(void*)s_rendererData->MeshIndices.data());
 
-		s_rendererData->MeshShader->bind();
-		s_rendererData->MeshShader->setUniforms(s_rendererData->MeshUniforms);
+			s_rendererData->MeshShader->bind();
+			s_rendererData->MeshShader->setUniforms(s_rendererData->MeshUniforms);
 
-		RenderCommand::draw(s_rendererData->MeshBufferGroup.Vao);
-		s_rendererData->MeshBufferGroup.Vao->unbind();
+			RenderCommand::draw(s_rendererData->MeshBufferGroup.Vao);
+			s_rendererData->Statistics.DrawCalls++;
+			s_rendererData->MeshBufferGroup.Vao->unbind();
+			s_rendererData->MeshVertices.clear();
+			s_rendererData->MeshIndices.clear();
+		}
 
 		// Lights
-		s_rendererData->LightBufferGroup.Vao->bind();
-		s_rendererData->LightBufferGroup.Vbo->setData(
-			s_rendererData->LightVertices.size() * sizeof(LightVertex),
-			(void*)s_rendererData->LightVertices.data());
-		s_rendererData->LightBufferGroup.Ebo->setData(
-			s_rendererData->LightIndices.size() * sizeof(TriangleFace),
-			(void*)s_rendererData->LightIndices.data());
+		if (s_rendererData->LightVertices.size() != 0)
+		{
+			s_rendererData->LightBufferGroup.Vao->bind();
+			s_rendererData->LightBufferGroup.Vbo->setData(
+				s_rendererData->LightVertices.size() * sizeof(LightVertex),
+				(void*)s_rendererData->LightVertices.data());
+			s_rendererData->LightBufferGroup.Ebo->setData(
+				s_rendererData->LightIndices.size() * sizeof(TriangleFace),
+				(void*)s_rendererData->LightIndices.data());
 
-		s_rendererData->LightShader->bind();
-		s_rendererData->LightShader->setUniforms(s_rendererData->LightUniforms);
+			s_rendererData->LightShader->bind();
+			s_rendererData->LightShader->setUniforms(s_rendererData->LightUniforms);
 
-		RenderCommand::draw(s_rendererData->LightBufferGroup.Vao);
-		s_rendererData->LightBufferGroup.Vao->unbind();
+			RenderCommand::draw(s_rendererData->LightBufferGroup.Vao);
+			s_rendererData->Statistics.DrawCalls++;
+			s_rendererData->LightBufferGroup.Vao->unbind();
+			s_rendererData->LightVertices.clear();
+			s_rendererData->LightIndices.clear();
+		}
+	}
 
+	void RenderedRenderer::end()
+	{
+		flush();
 		// TODO
 		//RenderQueue::flush();
 	}
 
+	const RenderSatistics& RenderedRenderer::getStats()
+	{
+		return s_rendererData->Statistics;
+	}
 }

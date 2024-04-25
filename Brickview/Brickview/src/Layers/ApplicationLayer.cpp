@@ -35,11 +35,18 @@ namespace Brickview
 	void ApplicationLayer::onAttach()
 	{
 		m_legoPieceMesh = Mesh::load("data/models/brick.obj");
-		m_legoPieceMaterial.Color = { 0.8f, 0.2f, 0.1f };
+
+		// Piece 1
+		m_legoPiecePosition1 = { -1.0f, 0.0f, 0.0f };
+		m_legoPieceMaterial1.Color = { 0.8f, 0.2f, 0.1f };
+
+		// Piece 2
+		m_legoPiecePosition2 = { 1.0f, 0.0f, 0.0f };
+		m_legoPieceMaterial2.Color = { 0.2f, 0.2f, 0.8f };
 
 		m_cameraControl = CameraController();
 
-		m_light.Position = { 0.0f, 0.0f, 0.0f };
+		m_light.Position = { 0.0f, 1.5f, 0.0f };
 		m_light.Color = { 1.0f, 1.0f, 1.0f };
 	}
 	
@@ -74,23 +81,24 @@ namespace Brickview
 	{
 		if (e.getKeyCode() == BV_KEY_KP_0)
 		{
-			m_cameraControl.setTargetPoint(m_legoPiecePosition);
+			m_cameraControl.setTargetPoint(m_legoPiecePosition1);
 		}
 		return true;
 	}
 
 	void ApplicationLayer::onUpdate(float dt)
 	{
+		m_dt = dt;
+
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
 
 		RenderedRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-		auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition);
-		RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial, transform1);
-		//auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition + glm::vec3(1.0f, 0.0f, 0.0f));
-		//auto cubeMesh = Mesh::load("data/models/cube.obj");
-		//RenderedRenderer::submitMesh(cubeMesh, m_legoPieceMaterial, transform2);
+		auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition1);
+		RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial1, transform1);
+		auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition2);
+		RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial2, transform2);
 
 		RenderedRenderer::end();
 	}
@@ -105,16 +113,30 @@ namespace Brickview
 		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
 		ImGui::Separator();
 
-		// Lego Piece
-		ImGui::SliderFloat3("Lego Piece Position", (float*)glm::value_ptr(m_legoPiecePosition), -5.0f, 5.0f);
-		ImGui::SliderFloat3("Lego Piece Scale", (float*)glm::value_ptr(m_legoPieceScale), 0.0f, 1.0f);
-		ImGui::ColorEdit3("Lego Piece Color", (float*)glm::value_ptr(m_legoPieceMaterial.Color));
+		// Lego Piece 1
+		ImGui::SliderFloat3("Lego Piece Position 1", (float*)glm::value_ptr(m_legoPiecePosition1), -5.0f, 5.0f);
+		ImGui::ColorEdit3("Lego Piece Color 1", (float*)glm::value_ptr(m_legoPieceMaterial1.Color));
+
+		// Lego Piece 1
+		ImGui::SliderFloat3("Lego Piece Position 2", (float*)glm::value_ptr(m_legoPiecePosition2), -5.0f, 5.0f);
+		ImGui::ColorEdit3("Lego Piece Color 2", (float*)glm::value_ptr(m_legoPieceMaterial2.Color));
 
 		// Render Type
 		ImGui::SeparatorText("Render Settings:");
 		static bool drawLights = false;
 		if (ImGui::Checkbox("Draw lights", &drawLights))
 			RenderedRenderer::drawLights(drawLights);
+
+		ImGui::End();
+
+		ImGui::Begin("Render statistics");
+
+		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);
+		ImGui::Text("Fps: %.3f", m_dt == 0.0f ? 0.0f : 1.0f / m_dt);
+
+		ImGui::Text("Draw calls: %i", RenderedRenderer::getStats().DrawCalls);
+		ImGui::Text("Mesh vertex count: %i", RenderedRenderer::getStats().MeshVertexCount);
+		ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
 
 		ImGui::End();
 	}
