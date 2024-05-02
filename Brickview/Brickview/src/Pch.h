@@ -3,7 +3,6 @@
 // basics
 #include <string>
 #include <fstream>
-#include <filesystem>
 #include <memory>
 #include <functional>
 #include <cmath>
@@ -13,6 +12,3 @@
 #include <set>
 #include <unordered_map>
 #include <map>
-
-// glm
-#include <glm/glm.hpp>

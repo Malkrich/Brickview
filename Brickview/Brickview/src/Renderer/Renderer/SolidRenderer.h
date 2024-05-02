@@ -1,17 +1,18 @@
 #pragma once
 
-#include "Renderer/Renderer/Renderer.h"
+#include "Models/Mesh.h"
+#include "Renderer/Light.h"
 
 namespace Brickview
 {
 
-	class SolidRenderer : public Renderer
+	class SolidRenderer
 	{
 	public:
-		SolidRenderer();
+		static void init();
 
-		virtual void submitMesh(const Mesh& mesh) override;
-		virtual void submitLight(const Light& light) override;
+		static void submitMesh(const Mesh& mesh);
+		static void submitLight(const Light& light);
 	};
 
 }

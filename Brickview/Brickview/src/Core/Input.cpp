@@ -1,9 +1,10 @@
 #include "Pch.h"
 #include "Input.h"
 
+#include "Core/Application.h"
+#include "Core/Window.h"
+
 #include "GLFW/glfw3.h"
-#include "Application/Application.h"
-#include "Core/Window/Window.h"
 
 namespace Brickview
 {

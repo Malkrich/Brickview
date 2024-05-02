@@ -1,26 +1,14 @@
-#include "Pch.h"
 #include "ApplicationLayer.h"
 
-// Lib
 #include <imgui.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/transform.hpp>
-
-// Core
-#include "Core/Core.h"
-#include "Core/Log.h"
-#include "Core/Input.h"
-#include "Core/KeyCodes.h"
-
-// Renderer
-#include "Renderer/Buffer/Layout.h"
-#include "Renderer/Buffer/Buffer.h"
-#include "Renderer/RenderCommand.h"
-#include "Renderer/Renderer/RenderedRenderer.h"
 
 namespace Brickview
 {
+
 	ApplicationLayer::ApplicationLayer()
 	{
 		RenderCommand::initialise();
@@ -49,7 +37,7 @@ namespace Brickview
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
 		m_light.Color = { 1.0f, 1.0f, 1.0f };
 	}
-	
+
 	void ApplicationLayer::onDetach()
 	{
 	}

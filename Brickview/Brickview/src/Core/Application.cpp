@@ -17,7 +17,6 @@
 
 // Layers
 #include "Core/Layer/Layer.h"
-#include "Layers/ApplicationLayer.h"
 
 namespace Brickview
 {
@@ -50,8 +49,6 @@ namespace Brickview
 
 		// Layers
 		m_layerStack.reset(new LayerStack());
-		Layer* applicationLayer = new ApplicationLayer();
-		m_layerStack->pushLayer(applicationLayer);
 
 		// Renderer
 		RenderQueue::init();

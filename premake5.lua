@@ -1,6 +1,7 @@
 workspace "Brickview"
     architecture "x86"
-
+    startproject "BrickviewApp"
+    
     configurations
     {
         "Debug",
@@ -15,6 +16,9 @@ workspace "Brickview"
 outputDir = "%{cfg.buildcfg}-%{cfg.system}"
 
 group "Application"
+    include "Brickview/BrickviewApp"
+
+group "Core"
     include "Brickview/Brickview"
 
 group "Dependencies"

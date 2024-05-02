@@ -1,18 +1,6 @@
 #pragma once
 
-#include "Core/Layer/Layer.h"
-#include "Core/Event/ApplicationEvent.h"
-#include "Core/Event/MouseEvent.h"
-#include "Core/Event/KeyEvent.h"
-
-#include "Renderer/Buffer/Buffer.h"
-#include "Renderer/Shader/Shader.h"
-#include "Renderer/Camera.h"
-#include "Renderer/CameraController.h"
-#include "Renderer/Light.h"
-
-#include "Models/Mesh.h"
-#include "Material/Material.h"
+#include <Brickview.h>
 
 namespace Brickview
 {
@@ -26,7 +14,7 @@ namespace Brickview
 		virtual void onAttach() override;
 		virtual void onDetach() override;
 
-		virtual void onEvent(Event& e) override;
+		virtual void onEvent(Brickview::Event& e) override;
 		virtual void onUpdate(float dt) override;
 		virtual void onGuiRender() override;
 

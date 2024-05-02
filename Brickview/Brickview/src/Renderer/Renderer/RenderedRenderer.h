@@ -4,7 +4,7 @@
 
 #include "Renderer/Camera.h"
 #include "Renderer/Light.h"
-#include "Material/Material.h"
+#include "Renderer/Material.h"
 
 namespace Brickview
 {

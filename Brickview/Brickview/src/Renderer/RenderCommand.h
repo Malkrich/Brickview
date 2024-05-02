@@ -2,6 +2,8 @@
 
 #include "Renderer/Buffer/Buffer.h"
 
+#include <glm/glm.hpp>
+
 namespace Brickview
 {
 

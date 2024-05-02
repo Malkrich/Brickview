@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core/Window/Window.h"
+#include "Core/Window.h"
 #include "Core/Event/ApplicationEvent.h"
 #include "Core/Layer/LayerStack.h"
 #include "Renderer/Gui/GuiRenderer.h"
@@ -16,10 +16,11 @@ namespace Brickview
 		~Application();
 
 		static const Application* get() { return s_instance; }
+		std::shared_ptr<Window> getWindow() const { return m_window; }
 
 		void run();
 
-		std::shared_ptr<Window> getWindow() const { return m_window; }
+		void pushLayer(Layer* layer) { m_layerStack->pushLayer(layer); }
 
 	private:
 		void initialize();
@@ -42,4 +43,6 @@ namespace Brickview
 
 		float m_currentTime;
 	};
+
+	Application* createApplication();
 }

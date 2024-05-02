@@ -1,45 +1,35 @@
-project "Brickview"
-    kind "StaticLib"
+project "BrickviewApp"
+    kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
     staticruntime "off"
 
     targetdir("bin/" .. outputDir .. "/%{prj.name}")
     objdir("bin-int/" .. outputDir .. "/%{prj.name}")
-
+    
     includedirs
     {
         "src",
+        "../Brickview/src",
         "../vendors/glm/",
-        "../vendors/GLFW/glfw-3.3.8/include",
-        "../vendors/glad/include",
-        "../vendors/spdlog/include",
-        "../vendors/imgui/"
+        "../vendors/imgui/",
+        "../vendors/spdlog/include"
     }
 
     files
     {
         "src/**.h",
-        "src/**.cpp",
-
-        "../vendors/glm/**.hpp",
-        "../vendors/glm/**.inl"
+        "src/**.cpp"
     }
-
-    pchheader "Pch.h"
-    pchsource "src/Pch.cpp"
 
     links
     {
-        "GLFW",
-        "glad",
-        "spdlog",
-        "imgui"
+        "Brickview"
     }
 
     filter "system:windows"
         systemversion "latest"
-    
+
     filter "configurations:Debug"
         defines "BV_DEBUG"
         runtime "Debug"

@@ -1,6 +1,10 @@
 #pragma once
 
+#include <filesystem>
+
 #include "Core/Core.h"
+
+#include <glm/glm.hpp>
 
 namespace Brickview
 {
