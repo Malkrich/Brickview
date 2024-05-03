@@ -11,18 +11,23 @@ namespace Brickview
 
 	ApplicationLayer::ApplicationLayer()
 	{
-		RenderCommand::initialise();
+		//Renderer::init();
+		RenderCommand::init();
 		RenderedRenderer::init();
+		SolidRenderer::init();
 	}
 
 	ApplicationLayer::~ApplicationLayer()
 	{
+		//Renderer::shutdown();
 		RenderedRenderer::shutdown();
+		SolidRenderer::shutdown();
 	}
 
 	void ApplicationLayer::onAttach()
 	{
 		m_legoPieceMesh = Mesh::load("data/models/brick.obj");
+		m_planeMesh = Mesh::load("data/models/plane.obj");
 
 		// Piece 1
 		m_legoPiecePosition1 = { -1.0f, 0.0f, 0.0f };
@@ -80,15 +85,28 @@ namespace Brickview
 
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
+		if (m_solidView)
+		{
+			SolidRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-		RenderedRenderer::begin(m_cameraControl.getCamera(), m_light);
+			auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition1);
+			SolidRenderer::submitMesh(m_legoPieceMesh, transform1);
+			auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition2);
+			SolidRenderer::submitMesh(m_legoPieceMesh, transform2);
 
-		auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition1);
-		RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial1, transform1);
-		auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition2);
-		RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial2, transform2);
+			SolidRenderer::end();
+		}
+		else
+		{
+			RenderedRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-		RenderedRenderer::end();
+			auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition1);
+			RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial1, transform1);
+			auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition2);
+			RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial2, transform2);
+
+			RenderedRenderer::end();
+		}
 	}
 
 	void ApplicationLayer::onGuiRender()
@@ -111,9 +129,11 @@ namespace Brickview
 
 		// Render Type
 		ImGui::SeparatorText("Render Settings:");
-		static bool drawLights = false;
-		if (ImGui::Checkbox("Draw lights", &drawLights))
-			RenderedRenderer::drawLights(drawLights);
+		//static bool drawLights = false;
+		//if (ImGui::Checkbox("Draw lights", &drawLights))
+		//	RenderedRenderer::drawLights(drawLights);
+
+		ImGui::Checkbox("Solid view", &m_solidView);
 
 		ImGui::End();
 
@@ -122,9 +142,9 @@ namespace Brickview
 		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);
 		ImGui::Text("Fps: %.3f", m_dt == 0.0f ? 0.0f : 1.0f / m_dt);
 
-		ImGui::Text("Draw calls: %i", RenderedRenderer::getStats().DrawCalls);
-		ImGui::Text("Mesh vertex count: %i", RenderedRenderer::getStats().MeshVertexCount);
-		ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
+		//ImGui::Text("Draw calls: %i", RenderedRenderer::getStats().DrawCalls);
+		//ImGui::Text("Mesh vertex count: %i", RenderedRenderer::getStats().MeshVertexCount);
+		//ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
 
 		ImGui::End();
 	}

@@ -25,6 +25,7 @@ namespace Brickview
 
 	private:
 		std::shared_ptr<Mesh> m_legoPieceMesh;
+		std::shared_ptr<Mesh> m_planeMesh;
 
 		glm::vec3 m_legoPiecePosition1;
 		Material m_legoPieceMaterial1;
@@ -33,6 +34,7 @@ namespace Brickview
 
 		Light m_light;
 		CameraController m_cameraControl;
+		bool m_solidView = false;
 
 		float m_dt = 0.0f;
 	};
