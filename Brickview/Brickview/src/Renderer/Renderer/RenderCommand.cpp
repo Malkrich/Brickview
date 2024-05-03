@@ -6,7 +6,7 @@
 namespace Brickview
 {
 
-	void RenderCommand::initialise()
+	void RenderCommand::init()
 	{
 		glEnable(GL_DEPTH_TEST);
 	}

@@ -15,12 +15,16 @@
 #include "Core/Window.h"
 
 // Render
-#include "Renderer/RenderCommand.h"
-#include "Renderer/Renderer/RenderedRenderer.h"
+#include "Renderer/Renderer/Renderer.h"
 #include "Renderer/Camera.h"
 #include "Renderer/CameraController.h"
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
+
+// TMP
+#include "Renderer/Renderer/SolidRenderer.h"
+#include "Renderer/Renderer/RenderedRenderer.h"
+#include "Renderer/Renderer/RenderCommand.h"
 
 // 3D
 #include "Models/Mesh.h"
