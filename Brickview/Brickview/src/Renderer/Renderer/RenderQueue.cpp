@@ -3,7 +3,7 @@
 
 #include "Core/Core.h"
 
-#include "Renderer/RenderCommand.h"
+#include "RenderCommand.h"
 
 namespace Brickview
 {
