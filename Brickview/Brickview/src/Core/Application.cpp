@@ -12,9 +12,6 @@
 #include "Core/Input.h"
 #include "Core/KeyCodes.h"
 
-// Renderer
-#include "Renderer/Renderer/RenderQueue.h"
-
 // Layers
 #include "Core/Layer/Layer.h"
 
@@ -33,7 +30,6 @@ namespace Brickview
 
 	Application::~Application()
 	{
-		RenderQueue::shutdown();
 	}
 
 	void Application::initialize()
@@ -49,9 +45,6 @@ namespace Brickview
 
 		// Layers
 		m_layerStack.reset(new LayerStack());
-
-		// Renderer
-		RenderQueue::init();
 	}
 
 	void Application::run()
