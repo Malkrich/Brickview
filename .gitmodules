@@ -1,3 +1,6 @@
 [submodule "Brickview/vendors/imgui"]
 	path = Brickview/vendors/imgui
 	url = git@github.com:Malkrich/imgui.git
+[submodule "Brickview/vendors/spdlog"]
+	path = Brickview/vendors/spdlog
+	url = git@github.com:Malkrich/spdlog.git
