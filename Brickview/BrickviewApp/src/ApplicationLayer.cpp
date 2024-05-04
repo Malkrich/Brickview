@@ -129,9 +129,9 @@ namespace Brickview
 
 		// Render Type
 		ImGui::SeparatorText("Render Settings:");
-		//static bool drawLights = false;
-		//if (ImGui::Checkbox("Draw lights", &drawLights))
-		//	RenderedRenderer::drawLights(drawLights);
+		static bool drawLights = false;
+		if (ImGui::Checkbox("Draw lights", &drawLights))
+			RenderedRenderer::drawLights(drawLights);
 
 		ImGui::Checkbox("Solid view", &m_solidView);
 
@@ -142,9 +142,9 @@ namespace Brickview
 		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);
 		ImGui::Text("Fps: %.3f", m_dt == 0.0f ? 0.0f : 1.0f / m_dt);
 
-		//ImGui::Text("Draw calls: %i", RenderedRenderer::getStats().DrawCalls);
-		//ImGui::Text("Mesh vertex count: %i", RenderedRenderer::getStats().MeshVertexCount);
-		//ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
+		ImGui::Text("Draw calls: %i", RenderedRenderer::getStats().DrawCalls);
+		ImGui::Text("Mesh vertex count: %i", RenderedRenderer::getStats().MeshVertexCount);
+		ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
 
 		ImGui::End();
 	}
