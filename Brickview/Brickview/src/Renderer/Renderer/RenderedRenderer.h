@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Models/Mesh.h"
-
 #include "Renderer/Camera.h"
+#include "Models/Mesh.h"
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
 

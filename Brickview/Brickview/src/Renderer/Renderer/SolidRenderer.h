@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Models/Mesh.h"
-#include "Renderer/Light.h"
-
 #include "Renderer/Camera.h"
+#include "Models/Mesh.h"
 #include "Renderer/Light.h"
 
 #include <glm/glm.hpp>

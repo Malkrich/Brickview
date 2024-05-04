@@ -5,8 +5,6 @@
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Buffer/Layout.h"
 
-#include "RenderCommand.h"
-
 namespace Brickview
 {
 	namespace SolidRendererTypes
