@@ -1,9 +1,8 @@
 #pragma once
 
-#include <filesystem>
-
 #include "Core/Core.h"
 
+#include <filesystem>
 #include <glm/glm.hpp>
 
 namespace Brickview
@@ -43,8 +42,8 @@ namespace Brickview
 
 		static std::shared_ptr<Mesh> load(const std::filesystem::path& filePath);
 
-		const std::vector<Vertex>& getVertexBuffer() const { return m_vertices; }
-		const std::vector<TriangleFace>& getIndexBuffer() const { return m_indices; }
+		const std::vector<Vertex>& getVertices() const { return m_vertices; }
+		const std::vector<TriangleFace>& getIndices() const { return m_indices; }
 
 	private:
 		std::vector<Vertex> m_vertices;

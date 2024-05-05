@@ -74,8 +74,8 @@ namespace Brickview
 
 	void SolidRenderer::submitMesh(const std::shared_ptr<Mesh>& mesh, const glm::mat4& transform)
 	{
-		const auto& vertices = mesh->getVertexBuffer();
-		const auto& indices = mesh->getIndexBuffer();
+		const auto& vertices = mesh->getVertices();
+		const auto& indices = mesh->getIndices();
 
 		if (vertices.size() + s_solidRendererData->MeshVertices.size() > s_solidRendererData->MaxVertices
 			|| indices.size() + s_solidRendererData->MeshIndices.size() > s_solidRendererData->MaxIndices)

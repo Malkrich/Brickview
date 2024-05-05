@@ -5,6 +5,8 @@
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Buffer/Layout.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace Brickview
 {
 	namespace RenderedRendererTypes
@@ -114,9 +116,8 @@ namespace Brickview
 
 	void RenderedRenderer::submitMesh(const std::shared_ptr<Mesh>& mesh, const Material& material, const glm::mat4& transform)
 	{
-		// TODO: auto vertices = mesh->getVertexBuffer(VertexElement::Position | VertexElement::Normal | VertexElement::Color);
-		const auto& vertices = mesh->getVertexBuffer();
-		const auto& indices = mesh->getIndexBuffer();
+		const auto& vertices = mesh->getVertices();
+		const auto& indices = mesh->getIndices();
 
 		if (vertices.size() + s_renderedRendererData->MeshVertices.size() > s_renderedRendererData->MaxVertices
 			|| indices.size() + s_renderedRendererData->MeshIndices.size() > s_renderedRendererData->MaxIndices)
@@ -157,8 +158,8 @@ namespace Brickview
 		glm::mat4 lightTransform = glm::translate(glm::mat4(1.0f), s_renderedRendererData->Light.Position)
 			* glm::scale(glm::mat4(1.0f), lightScale * glm::vec3(1.0f));
 
-		const auto& vertices = s_renderedRendererData->LightMesh->getVertexBuffer();
-		const auto& indices = s_renderedRendererData->LightMesh->getIndexBuffer();
+		const auto& vertices = s_renderedRendererData->LightMesh->getVertices();
+		const auto& indices = s_renderedRendererData->LightMesh->getIndices();
 
 		unsigned int offset = s_renderedRendererData->LightVertices.size();
 		s_renderedRendererData->LightVertices.reserve(s_renderedRendererData->LightVertices.size() + vertices.size());
