@@ -52,20 +52,17 @@ namespace Brickview
 	{
 		EventDispatcher dispatcher(e);
 
-		dispatcher.dispatch<WindowResizeEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onWindowResize));
 		dispatcher.dispatch<MouseMovedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseMoved));
 		dispatcher.dispatch<MousePressedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMousePressed));
+		dispatcher.dispatch<MouseReleasedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseReleased));
 		dispatcher.dispatch<MouseScrolledEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseScrolled));
-	}
-
-	bool CameraController::onWindowResize(const WindowResizeEvent& e)
-	{
-		m_camera.setViewportDimension(e.getWidth(), e.getHeight());
-		return false;
 	}
 
 	bool CameraController::onMouseMoved(const MouseMovedEvent& e)
 	{
+		if (!m_isCameraControlled)
+			return false;
+
 		if(Input::isMouseButtonPressed(BV_MOUSE_BUTTON_MIDDLE))
 		{
 			m_mouseOffset.x = e.getPosX() - m_currentMousePosition.x;
@@ -98,14 +95,28 @@ namespace Brickview
 
 	bool CameraController::onMousePressed(const MousePressedEvent& e)
 	{
-		if (e.getMouseButton() == BV_MOUSE_BUTTON_MIDDLE)
+		if (e.getMouseButton() == BV_MOUSE_BUTTON_MIDDLE && m_isViewportHovered)
+		{
 			m_currentMousePosition = Input::getMousePosition();
+			m_isCameraControlled = true;
+		}
+
+		return false;
+	}
+
+	bool CameraController::onMouseReleased(const MouseReleasedEvent& e)
+	{
+		if (e.getMouseButton() == BV_MOUSE_BUTTON_MIDDLE)
+			m_isCameraControlled = false;
 
 		return false;
 	}
 
 	bool CameraController::onMouseScrolled(const MouseScrolledEvent& e)
 	{
+		if (!m_isViewportHovered)
+			return false;
+
 		static const double scrollSensitivity = 0.3;
 
 		m_distanceFromObject -= e.getOffsetY() * scrollSensitivity;
