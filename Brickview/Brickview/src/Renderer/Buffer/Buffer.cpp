@@ -83,6 +83,9 @@ namespace Brickview
 	void VertexBuffer::setData(unsigned int size, void* data)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
+		// We first need to invalidate the buffer data and the copy the new buffer data
+		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+
 		void* vbo = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 		memcpy(vbo, data, size);
 		glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -126,6 +129,9 @@ namespace Brickview
 	void IndexBuffer::setData(unsigned int size, void* data)
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
+		// We first need to invalidate the buffer data and the copy the new buffer data
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+		
 		void* ebo = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 		memcpy(ebo, data, size);
 		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
