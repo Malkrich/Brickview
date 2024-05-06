@@ -62,8 +62,6 @@ namespace Brickview
 
 	void BatchRendererManager::flush()
 	{
-		BV_LOG_INFO("Render queue has {} submission.", m_renderSubmissions.size());
-
 		for (const auto& [name, submission] : m_renderSubmissions)
 		{
 			if (!submission.Visible)
