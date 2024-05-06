@@ -26,6 +26,11 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
+		FrameBufferSpecifications fbSpec;
+		fbSpec.Width = Input::getWindowSize().x;
+		fbSpec.Height = Input::getWindowSize().y;
+		m_frameBuffer = std::make_unique<FrameBuffer>(fbSpec);
+
 		m_legoPieceMesh = Mesh::load("data/models/brick.obj");
 		m_planeMesh = Mesh::load("data/models/plane.obj");
 
@@ -60,7 +65,7 @@ namespace Brickview
 
 	bool ApplicationLayer::onWindowResize(const WindowResizeEvent& e)
 	{
-		RenderCommand::setViewportDimension(0, 0, e.getWidth(), e.getHeight());
+		//RenderCommand::setViewportDimension(0, 0, e.getWidth(), e.getHeight());
 		return true;
 	}
 
@@ -83,8 +88,11 @@ namespace Brickview
 	{
 		m_dt = dt;
 
+		m_frameBuffer->bind();
+
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
+
 		if (m_solidView)
 		{
 			SolidRenderer::begin(m_cameraControl.getCamera(), m_light);
@@ -107,12 +115,16 @@ namespace Brickview
 
 			RenderedRenderer::end();
 		}
+		
+		m_frameBuffer->unbind();
 	}
 
 	void ApplicationLayer::onGuiRender()
 	{
+		beginDockspace();
+
 		ImGui::Begin("Scene:");
-		ImGui::SeparatorText("Elements:");
+		ImGui::SeparatorText("Scene hierarchy:");
 
 		// Light
 		ImGui::SliderFloat3("Light Position", (float*)glm::value_ptr(m_light.Position), -5.0f, 5.0f);
@@ -122,23 +134,25 @@ namespace Brickview
 		// Lego Piece 1
 		ImGui::SliderFloat3("Lego Piece Position 1", (float*)glm::value_ptr(m_legoPiecePosition1), -5.0f, 5.0f);
 		ImGui::ColorEdit3("Lego Piece Color 1", (float*)glm::value_ptr(m_legoPieceMaterial1.Color));
+		ImGui::Separator();
 
 		// Lego Piece 1
 		ImGui::SliderFloat3("Lego Piece Position 2", (float*)glm::value_ptr(m_legoPiecePosition2), -5.0f, 5.0f);
 		ImGui::ColorEdit3("Lego Piece Color 2", (float*)glm::value_ptr(m_legoPieceMaterial2.Color));
+		ImGui::Separator();
+
+		ImGui::End();
+
+		ImGui::Begin("Renderer");
 
 		// Render Type
 		ImGui::SeparatorText("Render Settings:");
 		static bool drawLights = false;
 		if (ImGui::Checkbox("Draw lights", &drawLights))
 			RenderedRenderer::drawLights(drawLights);
-
 		ImGui::Checkbox("Solid view", &m_solidView);
 
-		ImGui::End();
-
-		ImGui::Begin("Render statistics");
-
+		ImGui::SeparatorText("Render statistics:");
 		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);
 		ImGui::Text("Fps: %.3f", m_dt == 0.0f ? 0.0f : 1.0f / m_dt);
 
@@ -147,6 +161,87 @@ namespace Brickview
 		ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
 
 		ImGui::End();
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2( 0, 0 ));
+		ImGui::Begin("Viewport");
+
+		bool hovered = ImGui::IsWindowHovered();
+		m_cameraControl.setViewportHovered(hovered);
+
+		// Resize
+		ImVec2 newViewportDim = ImGui::GetContentRegionAvail();
+		if (m_viewportDim.x != newViewportDim.x || m_viewportDim.y != newViewportDim.y)
+		{
+			m_viewportDim.x = (uint32_t)newViewportDim.x;
+			m_viewportDim.y = (uint32_t)newViewportDim.y;
+			m_frameBuffer->resize(m_viewportDim.x, m_viewportDim.y);
+			m_cameraControl.resize(m_viewportDim.x, m_viewportDim.y);
+		}
+		ImVec2 imSize = { (float)m_viewportDim.x, (float)m_viewportDim.y };
+		uint32_t textureID = m_frameBuffer->getColorAttachment();
+		ImGui::Image((void*)textureID, imSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+		ImGui::End();
+		ImGui::PopStyleVar();
+
+		endDockspace();
 	}
 
+	void ApplicationLayer::beginDockspace()
+	{
+		// From: https://github.com/TheCherno/Hazel/blob/master/Hazelnut/src/EditorLayer.cpp
+		// Note: Switch this to true to enable dockspace
+		static bool dockspaceOpen = true;
+		static bool opt_fullscreen_persistant = true;
+		bool opt_fullscreen = opt_fullscreen_persistant;
+		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
+		// because it would be confusing to have two docking targets within each others.
+		ImGuiWindowFlags window_flags = /*ImGuiWindowFlags_MenuBar |*/ ImGuiWindowFlags_NoDocking;
+		if (opt_fullscreen)
+		{
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		}
+
+		// When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background and handle the pass-thru hole, so we ask Begin() to not render a background.
+		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+			window_flags |= ImGuiWindowFlags_NoBackground;
+
+		// Important: note that we proceed even if Begin() returns false (aka window is collapsed).
+		// This is because we want to keep our DockSpace() active. If a DockSpace() is inactive, 
+		// all active windows docked into it will lose their parent and become undocked.
+		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
+		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+		ImGui::PopStyleVar();
+
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
+
+		// DockSpace
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiStyle& style = ImGui::GetStyle();
+		float minWinSizeX = style.WindowMinSize.x;
+		style.WindowMinSize.x = 300.0f;
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+		}
+
+		style.WindowMinSize.x = minWinSizeX;
+	}
+
+	void ApplicationLayer::endDockspace()
+	{
+		ImGui::End();
+	}
 }

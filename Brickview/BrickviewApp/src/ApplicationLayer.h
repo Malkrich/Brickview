@@ -19,11 +19,19 @@ namespace Brickview
 		virtual void onGuiRender() override;
 
 	private:
+		// Events
 		bool onWindowResize(const WindowResizeEvent& e);
 		bool onMouseMoved(const MouseMovedEvent& e);
 		bool onKeyPressed(const KeyPressedEvent& e);
 
+		// Gui
+		void beginDockspace();
+		void endDockspace();
+
 	private:
+		std::unique_ptr<FrameBuffer> m_frameBuffer = nullptr;
+		glm::ivec2 m_viewportDim;
+
 		std::shared_ptr<Mesh> m_legoPieceMesh;
 		std::shared_ptr<Mesh> m_planeMesh;
 
