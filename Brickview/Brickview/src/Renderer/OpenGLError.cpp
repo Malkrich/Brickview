@@ -1,14 +1,12 @@
 #include "Pch.h"
 #include "OpenGLError.h"
 
-#include "Core/Log.h"
-
 #include <glad/glad.h>
 
 namespace Brickview
 {
 
-    void checkGLError(const char *file, int line)
+    void checkGLError(const char *file, int32_t line)
     {
         GLenum err (glGetError());
 

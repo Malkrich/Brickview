@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "RenderedRenderer.h"
-
 #include "Renderer/Renderer/BatchRendererManager.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Buffer/Layout.h"
@@ -25,21 +24,21 @@ namespace Brickview
 
 		struct RendererData
 		{
-			const unsigned int MaxVertices = 1024;
-			const unsigned int MaxIndices = MaxVertices;
+			const uint32_t MaxVertices = 1024;
+			const uint32_t MaxIndices = MaxVertices;
 
 			// Mesh
-			std::shared_ptr<Shader> MeshShader = nullptr;
+			Ref<Shader> MeshShader = nullptr;
 			UniformMap MeshUniforms = {};
 			std::vector<MeshVertex> MeshVertices;
 			std::vector<TriangleFace> MeshIndices;
 
 			// Light
-			std::shared_ptr<Shader> LightShader = nullptr;
+			Ref<Shader> LightShader = nullptr;
 			UniformMap LightUniforms = {};
 			std::vector<LightVertex> LightVertices;
 			std::vector<TriangleFace> LightIndices;
-			std::shared_ptr<Mesh> LightMesh;
+			Ref<Mesh> LightMesh;
 
 			bool DrawLights = false;
 			Light Light;
@@ -52,7 +51,7 @@ namespace Brickview
 			RenderSatistics Statistics;
 
 			// Queue
-			std::unique_ptr<BatchRendererManager> RendererManager = nullptr;
+			Scope<BatchRendererManager> RendererManager = nullptr;
 		};
 	}
 
@@ -62,10 +61,10 @@ namespace Brickview
 	{
 		s_renderedRendererData = new RenderedRendererTypes::RendererData();
 
-		s_renderedRendererData->MeshShader = std::make_shared<Shader>("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs");
-		s_renderedRendererData->LightShader = std::make_shared<Shader>("data/shaders/light.vs", "data/shaders/light.fs");
+		s_renderedRendererData->MeshShader = createRef<Shader>("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs");
+		s_renderedRendererData->LightShader = createRef<Shader>("data/shaders/light.vs", "data/shaders/light.fs");
 
-		s_renderedRendererData->RendererManager = std::make_unique<BatchRendererManager>();
+		s_renderedRendererData->RendererManager = createScope<BatchRendererManager>();
 
 		// Mesh
 		Layout meshLayout = {
@@ -114,7 +113,7 @@ namespace Brickview
 		s_renderedRendererData->RendererManager->setVisible("Lights", drawLights);
 	}
 
-	void RenderedRenderer::submitMesh(const std::shared_ptr<Mesh>& mesh, const Material& material, const glm::mat4& transform)
+	void RenderedRenderer::submitMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
 	{
 		const auto& vertices = mesh->getVertices();
 		const auto& indices = mesh->getIndices();
@@ -125,7 +124,7 @@ namespace Brickview
 			flush();
 		}
 
-		unsigned int offset = s_renderedRendererData->MeshVertices.size();
+		uint32_t offset = s_renderedRendererData->MeshVertices.size();
 		s_renderedRendererData->MeshVertices.reserve(s_renderedRendererData->MeshVertices.size() + vertices.size());
 		s_renderedRendererData->MeshIndices.reserve(s_renderedRendererData->MeshIndices.size() + indices.size());
 		for (const auto& v : vertices)
@@ -161,7 +160,7 @@ namespace Brickview
 		const auto& vertices = s_renderedRendererData->LightMesh->getVertices();
 		const auto& indices = s_renderedRendererData->LightMesh->getIndices();
 
-		unsigned int offset = s_renderedRendererData->LightVertices.size();
+		uint32_t offset = s_renderedRendererData->LightVertices.size();
 		s_renderedRendererData->LightVertices.reserve(s_renderedRendererData->LightVertices.size() + vertices.size());
 		s_renderedRendererData->LightIndices.reserve(s_renderedRendererData->LightIndices.size() + indices.size());
 		for (const auto& v : vertices)

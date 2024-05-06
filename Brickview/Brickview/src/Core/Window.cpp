@@ -1,16 +1,14 @@
 #include "Pch.h"
 #include "Window.h"
+#include "Core/Event/ApplicationEvent.h"
+#include "Core/Event/MouseEvent.h"
+#include "Core/Event/KeyEvent.h"
 
 #include <glad/glad.h>
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
-
-#include "Core/Log.h"
-#include "Core/Event/ApplicationEvent.h"
-#include "Core/Event/MouseEvent.h"
-#include "Core/Event/KeyEvent.h"
 
 namespace Brickview
 {
@@ -114,7 +112,7 @@ namespace Brickview
 		glfwSetCursorPosCallback(m_window, [](GLFWwindow* window, double x, double y)
 		{
 			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
-				
+
 			MouseMovedEvent e((unsigned int)x, (unsigned int)y);
 			wSettings.callbackFn(e);
 		});

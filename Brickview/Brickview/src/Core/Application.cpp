@@ -1,19 +1,15 @@
 #include "Pch.h"
 #include "Application.h"
+// Core
+#include "Core/Time.h"
+#include "Core/Input.h"
+#include "Core/KeyCodes.h"
+// Layers
+#include "Core/Layer/Layer.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-
-// Core
-#include "Core/Core.h"
-#include "Core/Time.h"
-#include "Core/Log.h"
-#include "Core/Input.h"
-#include "Core/KeyCodes.h"
-
-// Layers
-#include "Core/Layer/Layer.h"
 
 namespace Brickview
 {
@@ -37,14 +33,14 @@ namespace Brickview
 		// Window
 		Window::WindowSettings windowSettings;
 		windowSettings.name = "Brickview";
-		m_window.reset(new Window(windowSettings));
+		m_window = createRef<Window>(windowSettings);
 		m_window->setEventCallbackFunction(BV_BIND_EVENT_FUNCTION(Application::onEvent));
 
 		// GUI
-		m_guiRenderer.reset(new GuiRenderer());
+		m_guiRenderer = createScope<GuiRenderer>();
 
 		// Layers
-		m_layerStack.reset(new LayerStack());
+		m_layerStack = createScope<LayerStack>();
 	}
 
 	void Application::run()

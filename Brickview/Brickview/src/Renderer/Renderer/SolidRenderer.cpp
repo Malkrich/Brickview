@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "SolidRenderer.h"
-
 #include "Renderer/Renderer/BatchRendererManager.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Buffer/Layout.h"
@@ -17,11 +16,11 @@ namespace Brickview
 
 		struct RendererData
 		{
-			const unsigned int MaxVertices = 1024;
-			const unsigned int MaxIndices = MaxVertices;
+			const uint32_t MaxVertices = 1024;
+			const uint32_t MaxIndices = MaxVertices;
 
 			// Mesh
-			std::shared_ptr<Shader> MeshShader = nullptr;
+			Ref<Shader> MeshShader = nullptr;
 			UniformMap MeshUniforms = {};
 			std::vector<MeshVertex> MeshVertices;
 			std::vector<TriangleFace> MeshIndices;
@@ -34,7 +33,7 @@ namespace Brickview
 			glm::vec3 CameraPosition;
 
 			// Render submissions
-			std::unique_ptr<BatchRendererManager> RendererManager;
+			Scope<BatchRendererManager> RendererManager;
 		};
 	}
 
@@ -44,9 +43,9 @@ namespace Brickview
 	{
 		s_solidRendererData = new SolidRendererTypes::RendererData();
 
-		s_solidRendererData->MeshShader = std::make_shared<Shader>("data/shaders/solid.vs", "data/shaders/solid.fs");
+		s_solidRendererData->MeshShader = createRef<Shader>("data/shaders/solid.vs", "data/shaders/solid.fs");
 
-		s_solidRendererData->RendererManager = std::make_unique<BatchRendererManager>();
+		s_solidRendererData->RendererManager = createScope<BatchRendererManager>();
 
 		// Mesh
 		Layout meshLayout = {
@@ -72,7 +71,7 @@ namespace Brickview
 		s_solidRendererData->Light = light;
 	}
 
-	void SolidRenderer::submitMesh(const std::shared_ptr<Mesh>& mesh, const glm::mat4& transform)
+	void SolidRenderer::submitMesh(const Ref<Mesh>& mesh, const glm::mat4& transform)
 	{
 		const auto& vertices = mesh->getVertices();
 		const auto& indices = mesh->getIndices();

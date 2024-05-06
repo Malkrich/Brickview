@@ -1,13 +1,10 @@
 #include "Pch.h"
 #include "CameraController.h"
+#include "Core/Input.h"
+#include "Core/KeyCodes.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>
-
-#include "Core/Core.h"
-#include "Core/Log.h"
-#include "Core/Input.h"
-#include "Core/KeyCodes.h"
 
 namespace Brickview
 {

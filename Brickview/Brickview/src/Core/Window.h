@@ -4,7 +4,6 @@
 
 struct GLFWwindow;
 
-
 namespace Brickview
 {
 
@@ -20,7 +19,7 @@ namespace Brickview
 				, height(720)
 			{}
 
-			WindowSettings(const std::string& nameParam, unsigned int widthParam, unsigned int heightParam)
+			WindowSettings(const std::string& nameParam, uint32_t widthParam, uint32_t heightParam)
 				: name(nameParam)
 				, width(widthParam), height(heightParam)
 			{}
@@ -28,8 +27,8 @@ namespace Brickview
 		public:
 			std::string name;
 
-			unsigned int width;
-			unsigned int height;
+			uint32_t width;
+			uint32_t height;
 
 			EventDispatcher::EventCallbackFn callbackFn;
 		};
@@ -39,8 +38,8 @@ namespace Brickview
 
 		~Window();
 
-		unsigned int getWidth() const { return m_settings.width; }
-		unsigned int getHeight() const { return m_settings.height; }
+		uint32_t getWidth() const { return m_settings.width; }
+		uint32_t getHeight() const { return m_settings.height; }
 
 		void setEventCallbackFunction(const EventDispatcher::EventCallbackFn& callbackFn)
 		{

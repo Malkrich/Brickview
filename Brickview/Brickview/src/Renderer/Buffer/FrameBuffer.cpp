@@ -1,7 +1,5 @@
 #include "Pch.h"
 #include "FrameBuffer.h"
-
-#include "Core/Core.h"
 #include "Renderer/OpenGLError.h"
 
 #include <glad/glad.h>

@@ -7,41 +7,41 @@ namespace Brickview
 	class VertexBuffer
 	{
 	public:
-		VertexBuffer(unsigned int size, const void* data);
-		VertexBuffer(unsigned int size);
+		VertexBuffer(uint32_t size, const void* data);
+		VertexBuffer(uint32_t size);
 
 		~VertexBuffer();
 
 		void bind() const;
 		void unbind() const;
 
-		void setData(unsigned int size, void* data);
+		void setData(uint32_t size, void* data);
 
 		const Layout& getLayout() const { return m_layout; }
 		void setBufferLayout(const Layout& layout) { m_layout = layout; }
 
 	private:
-		unsigned int m_bufferID;
+		uint32_t m_bufferID;
 		Layout m_layout;
 	};
 
 	class IndexBuffer
 	{
 	public:
-		IndexBuffer(unsigned int size, const void* data);
-		IndexBuffer(unsigned int size);
+		IndexBuffer(uint32_t size, const void* data);
+		IndexBuffer(uint32_t size);
 
 		~IndexBuffer();
 
 		void bind() const;
 		void unbind() const;
-		unsigned int getCount() const { return m_count; }
+		uint32_t getCount() const { return m_count; }
 
-		void setData(unsigned int size, void* data);
+		void setData(uint32_t size, void* data);
 
 	private:
-		unsigned int m_count;
-		unsigned int m_bufferID;
+		uint32_t m_bufferID;
+		uint32_t m_count;
 	};
 
 	class VertexArray
@@ -53,16 +53,16 @@ namespace Brickview
 		void bind() const;
 		void unbind() const;
 
-		void addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer);
-		void setIndexBuffer(const  std::shared_ptr<IndexBuffer>& indexBuffer);
+		void addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer);
+		void setIndexBuffer(const  Ref<IndexBuffer>& indexBuffer);
 
-		const std::vector<std::shared_ptr<VertexBuffer>>& getVertexBuffers() const { return m_vertexBuffers; }
-		const std::shared_ptr<IndexBuffer>& getIndexBuffer() const { return m_indexBuffer; }
+		const std::vector<Ref<VertexBuffer>>& getVertexBuffers() const { return m_vertexBuffers; }
+		const Ref<IndexBuffer>& getIndexBuffer() const { return m_indexBuffer; }
 
 	private:
 		unsigned int m_bufferID;
 
-		std::vector<std::shared_ptr<VertexBuffer>> m_vertexBuffers;
-		std::shared_ptr<IndexBuffer> m_indexBuffer;
+		std::vector<Ref<VertexBuffer>> m_vertexBuffers;
+		Ref<IndexBuffer> m_indexBuffer;
 	};
 }

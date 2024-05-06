@@ -20,10 +20,10 @@ namespace Brickview
 		{}
 
 		std::string Name;
-		unsigned int Index = 0;
+		uint32_t Index = 0;
 		BufferElementType Type;
 		bool Normalized;
-		unsigned int Offset = 0;
+		uint32_t Offset = 0;
 	};
 
 	class Layout
@@ -32,7 +32,7 @@ namespace Brickview
 		Layout() = default;
 		Layout(const std::initializer_list<BufferElement>& elements);
 
-		unsigned int getStride() const { return m_stride; }
+		uint32_t getStride() const { return m_stride; }
 
 		std::vector<BufferElement>::iterator begin() { return m_elements.begin(); }
 		std::vector<BufferElement>::iterator end() { return m_elements.end(); }
@@ -43,7 +43,7 @@ namespace Brickview
 		void computeOffsetAndStride();
 
 	private:
-		unsigned int m_stride = 0;
+		uint32_t m_stride = 0;
 		std::vector<BufferElement> m_elements;
 	};
 

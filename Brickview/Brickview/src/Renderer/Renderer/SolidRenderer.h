@@ -19,7 +19,7 @@ namespace Brickview
 		static void end();
 		static void flush();
 
-		static void submitMesh(const std::shared_ptr<Mesh>& mesh, const glm::mat4& transform);
+		static void submitMesh(const Ref<Mesh>& mesh, const glm::mat4& transform);
 	};
 
 }

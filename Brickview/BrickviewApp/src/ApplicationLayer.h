@@ -29,11 +29,11 @@ namespace Brickview
 		void endDockspace();
 
 	private:
-		std::unique_ptr<FrameBuffer> m_frameBuffer = nullptr;
+		Scope<FrameBuffer> m_frameBuffer = nullptr;
 		glm::ivec2 m_viewportDim;
 
-		std::shared_ptr<Mesh> m_legoPieceMesh;
-		std::shared_ptr<Mesh> m_planeMesh;
+		Ref<Mesh> m_legoPieceMesh;
+		Ref<Mesh> m_planeMesh;
 
 		glm::vec3 m_legoPiecePosition1;
 		Material m_legoPieceMaterial1;

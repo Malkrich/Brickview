@@ -1,8 +1,5 @@
 #include "Pch.h"
 #include "BatchRendererManager.h"
-
-#include "Core/Core.h"
-
 #include "RenderCommand.h"
 
 namespace Brickview
@@ -11,17 +8,17 @@ namespace Brickview
 	void BatchRendererManager::addSubmission(const std::string& name,
 		uint32_t vertexBufferSize, uint32_t indexBufferSize,
 		const Layout& layout,
-		const std::shared_ptr<Shader>& shader)
+		const Ref<Shader>& shader)
 	{
 		RenderSubmission submission;
 		
 		// Buffers
 		BufferGroup buffers;
-		buffers.Vbo = std::make_shared<VertexBuffer>(vertexBufferSize);
+		buffers.Vbo = createRef<VertexBuffer>(vertexBufferSize);
 		buffers.Vbo->setBufferLayout(layout);
-		buffers.Ebo = std::make_shared<IndexBuffer>(indexBufferSize);
+		buffers.Ebo = createRef<IndexBuffer>(indexBufferSize);
 
-		buffers.Vao = std::make_shared<VertexArray>();
+		buffers.Vao = createRef<VertexArray>();
 		buffers.Vao->addVertexBuffer(buffers.Vbo);
 		buffers.Vao->setIndexBuffer(buffers.Ebo);
 		buffers.Vao->unbind();

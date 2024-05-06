@@ -17,9 +17,9 @@ namespace Brickview
 		{
 			struct ObjVertexIndex
 			{
-				unsigned int PositionIndex;
+				uint32_t PositionIndex;
 				// TODO : unsigned int TextureIndex;
-				unsigned int NormalIndex;
+				uint32_t NormalIndex;
 			};
 
 			ObjVertexIndex Indices[3];
@@ -67,9 +67,9 @@ namespace Brickview
 				if (prefix == "f")
 				{
 
-					unsigned int index = 0;
-					unsigned int faceIndex = 0;
-					unsigned int counter = 0;
+					uint32_t index = 0;
+					uint32_t faceIndex = 0;
+					uint32_t counter = 0;
 
 					ObjFace face = {};
 					while (ss >> index)
@@ -91,20 +91,18 @@ namespace Brickview
 							ss.ignore(1, ' ');
 						}
 					}
-
 					faces.push_back(face);
-
 				}
 			}
 
-			std::map<ObjFace::ObjVertexIndex, unsigned int> indexOfVertex;
-			unsigned int currentIndex = 0;
+			std::map<ObjFace::ObjVertexIndex, uint32_t> indexOfVertex;
+			uint32_t currentIndex = 0;
 
 			for (const auto& face : faces)
 			{
 				TriangleFace f;
 
-				for (unsigned int i = 0; i < 3; i++)
+				for (uint32_t i = 0; i < 3; i++)
 				{
 					Vertex v = {
 						positions[ face.Indices[i].PositionIndex ], 
@@ -122,16 +120,13 @@ namespace Brickview
 					else
 						f[i] = indexOfVertex.at(face.Indices[i]);
 				}
-
 				indices.push_back(f);
 			}
-
 			return true;
 		}
-
 	}
 
-	std::shared_ptr<Mesh> Mesh::load(const std::filesystem::path& filePath)
+	Ref<Mesh> Mesh::load(const std::filesystem::path& filePath)
 	{
 		std::vector<Vertex> vertices;
 		std::vector<TriangleFace> indices;
@@ -142,7 +137,7 @@ namespace Brickview
 			return nullptr;
 		}
 
-		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(vertices, indices);
+		Ref<Mesh> mesh = createRef<Mesh>(vertices, indices);
 		return mesh;
 	}
 

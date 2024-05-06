@@ -3,7 +3,6 @@
 #include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Buffer/Layout.h"
-
 #include "Models/Mesh.h"
 #include "Renderer/Light.h"
 
@@ -11,15 +10,15 @@ namespace Brickview
 {
 	struct BufferGroup
 	{
-		std::shared_ptr<VertexArray>  Vao = nullptr;
-		std::shared_ptr<VertexBuffer> Vbo = nullptr;
-		std::shared_ptr<IndexBuffer>  Ebo = nullptr;
+		Ref<VertexArray>  Vao = nullptr;
+		Ref<VertexBuffer> Vbo = nullptr;
+		Ref<IndexBuffer>  Ebo = nullptr;
 	};
 
 	struct RenderSubmission
 	{
 		BufferGroup Buffers;
-		std::shared_ptr<Shader> Shader;
+		Ref<Shader> Shader;
 		UniformMap Uniforms;
 		bool Visible = true;
 	};
@@ -32,7 +31,7 @@ namespace Brickview
 		void addSubmission(const std::string& name,
 			uint32_t vertexBufferSize, uint32_t indexBufferSize,
 			const Layout& layout,
-			const std::shared_ptr<Shader>& shader);
+			const Ref<Shader>& shader);
 
 		void setData(const std::string& name,
 			uint32_t vertexBufferSize, void* vertexBufferData,

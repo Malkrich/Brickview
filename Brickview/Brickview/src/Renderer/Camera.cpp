@@ -14,7 +14,7 @@ namespace Brickview
 		updateViewMatrix();
 	}
 
-	void Camera::setViewportDimension(unsigned int width, unsigned int height)
+	void Camera::setViewportDimension(uint32_t width, uint32_t height)
 	{
 		m_viewportWidth = (float)width;
 		m_viewportHeight = (float)height;

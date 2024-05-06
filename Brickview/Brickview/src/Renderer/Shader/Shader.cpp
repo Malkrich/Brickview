@@ -3,9 +3,6 @@
 
 #include <glad/glad.h>
 
-#include "Core/Core.h"
-#include "Core/Log.h"
-
 namespace Utils
 {
     static std::string readFile(const std::string& fileName)
@@ -22,16 +19,26 @@ namespace Utils
 
 namespace Brickview
 {
-    static unsigned int compileShader(const std::string& shaderContent, GLenum shaderType)
+    #define UNIFORM_PTR(data) (void*)glm::value_ptr(data)
+    UniformData::UniformData(const glm::vec3& data)
+        : Type(UniformType::Float3)
+        , Data(UNIFORM_PTR(data))
+    {}
+    UniformData::UniformData(const glm::mat4& data)
+        : Type(UniformType::Mat4)
+        , Data(UNIFORM_PTR(data))
+    {}
+
+    static uint32_t compileShader(const std::string& shaderContent, GLenum shaderType)
     {
-        int success;
+        int32_t success;
         char log[128];
 
-        int shaderID;
+        int32_t shaderID;
         shaderID = glCreateShader(shaderType);
 
         const char* rawShaderContent = shaderContent.c_str();
-        glShaderSource(shaderID, 1, &rawShaderContent, NULL);
+        glShaderSource(shaderID, 1, &rawShaderContent, nullptr);
 
         glCompileShader(shaderID);
 
@@ -83,20 +90,20 @@ namespace Brickview
     void Shader::setFloat3(const std::string& name, const void* data)
     {
         // set uniform color
-        int loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
+        int32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
         glUniform3fv(loc, 1, (float*)data);
     }
 
     void Shader::setMat4(const std::string& name, const void* data)
     {
-        int loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
+        int32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
         glUniformMatrix4fv(loc, 1, GL_FALSE, (float*)data);
     }
 
     void Shader::compileAndLink(const std::string& vertexShaderContent, const std::string& fragmetShaderContent)
     {
-        unsigned int vertexShaderID = compileShader(vertexShaderContent, GL_VERTEX_SHADER);
-        unsigned int fragmentShaderID = compileShader(fragmetShaderContent, GL_FRAGMENT_SHADER);
+        uint32_t vertexShaderID = compileShader(vertexShaderContent, GL_VERTEX_SHADER);
+        uint32_t fragmentShaderID = compileShader(fragmetShaderContent, GL_FRAGMENT_SHADER);
 
         m_shaderProgramID = glCreateProgram();
         glAttachShader(m_shaderProgramID, vertexShaderID);
@@ -106,12 +113,12 @@ namespace Brickview
 
         // DEBUG
         {
-            int success;
+            int32_t success;
             char log[128];
             glGetProgramiv(m_shaderProgramID, GL_LINK_STATUS, &success);
             if (!success)
             {
-                glGetProgramInfoLog(m_shaderProgramID, 128, NULL, log);
+                glGetProgramInfoLog(m_shaderProgramID, 128, nullptr, log);
                 BV_LOG_WARN("Shader program linking failed !");
             }
         }

@@ -10,6 +10,6 @@ namespace Brickview
 {
 
 	//https://blog.nobel-joergensen.com/2013/01/29/debugging-opengl-using-glgeterror/
-	void checkGLError(const char *file, int line);
+	void checkGLError(const char *file, int32_t line);
 
 }

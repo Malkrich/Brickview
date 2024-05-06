@@ -12,3 +12,7 @@
 #include <set>
 #include <unordered_map>
 #include <map>
+
+// Brickview core
+#include "Core/Core.h"
+#include "Core/Log.h"

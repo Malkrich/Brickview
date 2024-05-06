@@ -8,21 +8,21 @@ namespace Brickview
 	class KeyEvent : public Event
 	{
 	public:
-		inline unsigned int getKeyCode() const { return m_keyCode; }
+		inline uint32_t getKeyCode() const { return m_keyCode; }
 
 	protected:
-		KeyEvent(unsigned int keyCode)
+		KeyEvent(uint32_t keyCode)
 			: m_keyCode(keyCode)
 		{}
 
 	private:
-		unsigned int m_keyCode;
+		uint32_t m_keyCode;
 	};
 
 	class KeyPressedEvent : public KeyEvent
 	{
 	public:
-		KeyPressedEvent(unsigned int keyCode)
+		KeyPressedEvent(uint32_t keyCode)
 			: KeyEvent(keyCode)
 		{}
 
@@ -32,7 +32,7 @@ namespace Brickview
 	class KeyReleasedEvent : public KeyEvent
 	{
 	public:
-		KeyReleasedEvent(unsigned int keyCode)
+		KeyReleasedEvent(uint32_t keyCode)
 			: KeyEvent(keyCode)
 		{}
 

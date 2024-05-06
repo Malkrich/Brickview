@@ -1,7 +1,6 @@
 #include "ApplicationLayer.h"
 
 #include <imgui.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -29,7 +28,7 @@ namespace Brickview
 		FrameBufferSpecifications fbSpec;
 		fbSpec.Width = Input::getWindowSize().x;
 		fbSpec.Height = Input::getWindowSize().y;
-		m_frameBuffer = std::make_unique<FrameBuffer>(fbSpec);
+		m_frameBuffer = createScope<FrameBuffer>(fbSpec);
 
 		m_legoPieceMesh = Mesh::load("data/models/brick.obj");
 		m_planeMesh = Mesh::load("data/models/plane.obj");

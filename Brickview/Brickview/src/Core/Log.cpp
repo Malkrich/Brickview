@@ -6,7 +6,7 @@
 
 namespace Brickview
 {
-	std::shared_ptr<spdlog::logger> Log::s_logger;
+	std::shared_ptr<spdlog::logger> Log::s_logger = nullptr;
 
 	void Log::init()
 	{

@@ -16,7 +16,7 @@ namespace Brickview
 		~Application();
 
 		static const Application* get() { return s_instance; }
-		std::shared_ptr<Window> getWindow() const { return m_window; }
+		Ref<Window> getWindow() const { return m_window; }
 
 		void run();
 
@@ -32,11 +32,11 @@ namespace Brickview
 	private:
 		bool m_running = true;
 
-		std::shared_ptr<Window> m_window;
+		Ref<Window> m_window = nullptr;
 
-		std::unique_ptr<LayerStack> m_layerStack;
+		Scope<LayerStack> m_layerStack = nullptr;
 
-		std::unique_ptr<GuiRenderer> m_guiRenderer;
+		Scope<GuiRenderer> m_guiRenderer = nullptr;
 
 		// singleton instance
 		static Application* s_instance;

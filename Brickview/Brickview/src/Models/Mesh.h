@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Core/Core.h"
+#include <glm/glm.hpp>
 
 #include <filesystem>
-#include <glm/glm.hpp>
 
 namespace Brickview
 {
@@ -16,23 +15,23 @@ namespace Brickview
 
 	struct TriangleFace
 	{
-		unsigned int getIndex1() const { return indices[0]; }
-		unsigned int getIndex2() const { return indices[1]; }
-		unsigned int getIndex3() const { return indices[2]; }
+		uint32_t getIndex1() const { return indices[0]; }
+		uint32_t getIndex2() const { return indices[1]; }
+		uint32_t getIndex3() const { return indices[2]; }
 
-		unsigned int& operator[](unsigned int i)
+		uint32_t& operator[](uint32_t i)
 		{ 
 			BV_ASSERT(i < 3, "Index of a triangle has to be less than 3.");
 			return indices[i]; 
 		}
-		unsigned int operator[](unsigned int i) const
+		uint32_t operator[](uint32_t i) const
 		{
 			BV_ASSERT(i < 3, "Index of a triangle has to be less than 3.");
 			return indices[i];
 		}
 
 	private:
-		unsigned int indices[3];
+		uint32_t indices[3];
 	};
 
 	class Mesh
@@ -40,7 +39,7 @@ namespace Brickview
 	public:
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<TriangleFace>& indices);
 
-		static std::shared_ptr<Mesh> load(const std::filesystem::path& filePath);
+		static Ref<Mesh> load(const std::filesystem::path& filePath);
 
 		const std::vector<Vertex>& getVertices() const { return m_vertices; }
 		const std::vector<TriangleFace>& getIndices() const { return m_indices; }

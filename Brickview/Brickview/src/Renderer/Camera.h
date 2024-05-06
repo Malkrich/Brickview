@@ -10,7 +10,7 @@ namespace Brickview
 	public:
 		Camera();
 
-		void setViewportDimension(unsigned int width, unsigned int height);
+		void setViewportDimension(uint32_t width, uint32_t height);
 
 		const glm::vec3& getPosition() const { return m_position; }
 		void setPosition(const glm::vec3& position) { m_position = position; updateViewMatrix(); }

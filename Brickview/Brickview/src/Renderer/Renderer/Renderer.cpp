@@ -1,6 +1,5 @@
 #include "Pch.h"
 #include "Renderer.h"
-
 #include "RenderCommand.h"
 #include "RenderedRenderer.h"
 #include "SolidRenderer.h"
@@ -36,7 +35,7 @@ namespace Brickview
 		s_rendererData->RendererType = type;
 	}
 
-	void Renderer::submitMesh(const std::shared_ptr<Mesh>& mesh, const Material& material, const glm::mat4& transform)
+	void Renderer::submitMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
 	{
 		switch (s_rendererData->RendererType)
 		{

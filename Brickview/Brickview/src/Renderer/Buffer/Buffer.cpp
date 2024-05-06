@@ -3,13 +3,11 @@
 
 #include <glad/glad.h>
 
-#include "Core/Core.h"
-
 namespace Utils
 {
 	using BufferElementType = Brickview::BufferElementType;
 
-	static unsigned int getElementCount(BufferElementType type)
+	static uint32_t getElementCount(BufferElementType type)
 	{
 		switch(type)
 		{
@@ -61,14 +59,14 @@ namespace Brickview
 	/*************   VERTEX BUFFER   *************************/
 	/*********************************************************/
 
-	VertexBuffer::VertexBuffer(unsigned int size, const void* data)
+	VertexBuffer::VertexBuffer(uint32_t size, const void* data)
 	{
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
-	VertexBuffer::VertexBuffer(unsigned int size)
+	VertexBuffer::VertexBuffer(uint32_t size)
 	{
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
@@ -80,7 +78,7 @@ namespace Brickview
 		glDeleteBuffers(1, &m_bufferID);
 	}
 
-	void VertexBuffer::setData(unsigned int size, void* data)
+	void VertexBuffer::setData(uint32_t size, void* data)
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
 		// We first need to invalidate the buffer data and the copy the new buffer data
@@ -105,16 +103,16 @@ namespace Brickview
 	/*************   INDEX BUFFER   **************************/
 	/*********************************************************/
 
-	IndexBuffer::IndexBuffer(unsigned int size, const void* data)
-		: m_count(size / sizeof(unsigned int))
+	IndexBuffer::IndexBuffer(uint32_t size, const void* data)
+		: m_count(size / sizeof(uint32_t))
 	{
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
-	IndexBuffer::IndexBuffer(unsigned int size)
-		: m_count(size / sizeof(unsigned int))
+	IndexBuffer::IndexBuffer(uint32_t size)
+		: m_count(size / sizeof(uint32_t))
 	{
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
@@ -126,7 +124,7 @@ namespace Brickview
 		glDeleteBuffers(1, &m_bufferID);
 	}
 
-	void IndexBuffer::setData(unsigned int size, void* data)
+	void IndexBuffer::setData(uint32_t size, void* data)
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
 		// We first need to invalidate the buffer data and the copy the new buffer data
@@ -172,7 +170,7 @@ namespace Brickview
 		glBindVertexArray(0);
 	}
 
-	void VertexArray::addVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
+	void VertexArray::addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
 	{
 		bind();
 		vertexBuffer->bind();
@@ -195,7 +193,7 @@ namespace Brickview
 		m_vertexBuffers.push_back(vertexBuffer);
 	}
 
-	void VertexArray::setIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
+	void VertexArray::setIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
 	{
 		bind();
 		indexBuffer->bind();

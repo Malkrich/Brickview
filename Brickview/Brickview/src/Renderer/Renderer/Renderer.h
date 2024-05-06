@@ -22,7 +22,7 @@ namespace Brickview
 
 		static void setRenderType(RendererType type);
 
-		static void submitMesh(const std::shared_ptr<Mesh>& mesh, const Material& material, const glm::mat4& transform);
+		static void submitMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform);
 	};
 
 }

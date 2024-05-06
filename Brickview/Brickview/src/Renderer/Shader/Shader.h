@@ -2,33 +2,25 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
-
 namespace Brickview
 {
 	enum class UniformType
 	{
+		None = 0,
 		Bool,
 		Int, Int2, Int3, Int4,
 		Float, Float2, Float3, Float4,
 		Mat2, Mat3, Mat4,
 	};
 
-#define UNIFORM_PTR(data) (void*)glm::value_ptr(data)
 	struct UniformData
 	{
 		UniformData() = default;
+		UniformData::UniformData(const glm::vec3& data);
+		UniformData::UniformData(const glm::mat4& data);
 
-		UniformData(const glm::vec3& data)
-			: Type(UniformType::Float3)
-			, Data(UNIFORM_PTR(data))
-		{}
-		UniformData(const glm::mat4& data)
-			: Type(UniformType::Mat4)
-			, Data(UNIFORM_PTR(data))
-		{}
-
-		UniformType Type;
-		void* Data;
+		UniformType Type = UniformType::None;
+		void* Data = nullptr;
 	};
 
 	using UniformMap = std::unordered_map<std::string, UniformData>;
@@ -50,6 +42,6 @@ namespace Brickview
 		void compileAndLink(const std::string& vertexShaderContent, const std::string& fragmentShaderContent);
 
 	private:
-		unsigned int m_shaderProgramID;
+		uint32_t m_shaderProgramID;
 	};
 }

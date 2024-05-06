@@ -1,13 +1,11 @@
 #include "Pch.h"
 #include "Layout.h"
 
-#include "Core/Core.h"
-
 namespace Utils
 {
 	using BufferElementType = Brickview::BufferElementType;
 
-	static unsigned int getElementSize(BufferElementType type)
+	static uint32_t getElementSize(BufferElementType type)
 	{
 		switch (type)
 		{
@@ -41,13 +39,13 @@ namespace Brickview
 
 	void Layout::computeOffsetAndStride()
 	{
-		unsigned int offset = 0;
-		unsigned int index = 0;
+		uint32_t offset = 0;
+		uint32_t index = 0;
 		for(auto& element : m_elements)
 		{
 			element.Index = index;
 			element.Offset = offset;
-			unsigned int elementSize = Utils::getElementSize(element.Type);
+			uint32_t elementSize = Utils::getElementSize(element.Type);
 			m_stride += elementSize;
 			offset += elementSize;
 			index++;
