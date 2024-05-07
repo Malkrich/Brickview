@@ -42,6 +42,7 @@ namespace Brickview
 		void setMat4(const std::string& name, const void* data);
 
 	private:
+		std::string m_name;
 		uint32_t m_shaderProgramID = 0;
 	};
 }
