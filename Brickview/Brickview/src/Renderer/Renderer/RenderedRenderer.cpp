@@ -61,8 +61,8 @@ namespace Brickview
 	{
 		s_renderedRendererData = new RenderedRendererTypes::RendererData();
 
-		s_renderedRendererData->MeshShader = createRef<Shader>("data/shaders/legoPiece.vs", "data/shaders/legoPiece.fs");
-		s_renderedRendererData->LightShader = createRef<Shader>("data/shaders/light.vs", "data/shaders/light.fs");
+		s_renderedRendererData->MeshShader = createRef<Shader>("data/shaders/legoPiece.glsl");
+		s_renderedRendererData->LightShader = createRef<Shader>("data/shaders/light.glsl");
 
 		s_renderedRendererData->RendererManager = createScope<BatchRendererManager>();
 

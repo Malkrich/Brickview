@@ -3,22 +3,25 @@
 
 #include <glad/glad.h>
 
-namespace Utils
-{
-    static std::string readFile(const std::string& fileName)
-    {
-        std::ifstream file;
-        file.open(fileName.c_str());
-
-        if (!file)
-            BV_LOG_ERROR("File named {0} not found !", fileName);
-
-        return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
-    }
-}
-
 namespace Brickview
 {
+    namespace Utils
+    {
+
+        static std::string readFile(const std::filesystem::path& filePath)
+        {
+            std::ifstream file;
+            auto filePathStr = filePath.generic_string();
+            file.open(filePathStr.c_str());
+
+            if (!file)
+                BV_LOG_ERROR("File named {0} not found !", filePath.generic_string());
+
+            return std::string((std::istreambuf_iterator<char>(file)), (std::istreambuf_iterator<char>()));
+        }
+
+    }
+
     #define UNIFORM_PTR(data) (void*)glm::value_ptr(data)
     UniformData::UniformData(const glm::vec3& data)
         : Type(UniformType::Float3)
@@ -28,6 +31,50 @@ namespace Brickview
         : Type(UniformType::Mat4)
         , Data(UNIFORM_PTR(data))
     {}
+
+    static GLenum findGlslType(const std::string& token)
+    {
+        if (token == "vertex")
+            return GL_VERTEX_SHADER;
+        else if (token == "fragment")
+            return GL_FRAGMENT_SHADER;
+
+        BV_ASSERT(false, "Token not known!");
+        return 0;
+    }
+
+    static std::unordered_map<GLenum, std::string> extractShaderSources(const std::filesystem::path& shaderFilePath)
+    {
+        std::string source = Utils::readFile(shaderFilePath);
+
+        std::unordered_map<GLenum, std::string> shaderSources;
+
+        const char* typeToken = "#type";
+        size_t typeTokenLength = strlen(typeToken);
+        size_t pos = source.find(typeToken, 0);
+
+        while (pos != std::string::npos)
+        {
+            // find the substring of the type
+            size_t endLine = source.find_first_of("\r\n", pos);
+            BV_ASSERT(endLine != std::string::npos, "Shader syntaxe error!");
+            size_t count = endLine - (pos + typeTokenLength + 1);
+            std::string type = source.substr(pos + typeTokenLength + 1, count);
+            GLenum openGLType = findGlslType(type); // convert to opengl enum type
+
+            // Extract the source code
+            pos = endLine + 1;
+            size_t endShaderSource = source.find(typeToken, pos);
+            size_t shaderSourceLength = endShaderSource - pos;
+            std::string subSource = source.substr(pos, shaderSourceLength);
+            shaderSources[openGLType] = subSource;
+
+            // Goes to the next token
+            pos = source.find(typeToken, shaderSourceLength + 1);
+        }
+
+        return shaderSources;
+    }
 
     static uint32_t compileShader(const std::string& shaderContent, GLenum shaderType)
     {
@@ -52,12 +99,51 @@ namespace Brickview
         return shaderID;
     }
 
-	Shader::Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath)
-	{
-        std::string vertexShaderContent = Utils::readFile(vertexShaderFilePath);
-        std::string fragmentShaderContent = Utils::readFile(fragmentShaderFilePath);
-        compileAndLink(vertexShaderContent, fragmentShaderContent);
-	}
+    static uint32_t compileAndLink(const std::unordered_map<GLenum, std::string>& shaderSources)
+    {
+        // We have only 2 shader possible (vertex shader ad fragment shader)
+        std::array<uint32_t, 2> shaderIDs;
+
+        uint32_t programID = 0;
+        programID = glCreateProgram();
+
+        uint8_t i = 0;
+        for (const auto& [shaderType, shaderSource] : shaderSources)
+        {
+            uint32_t shaderID = compileShader(shaderSource, shaderType);
+            shaderIDs[i] = shaderID;
+            glAttachShader(programID, shaderID);
+            i++;
+        }
+
+        glLinkProgram(programID);
+
+        // DEBUG
+        {
+            int32_t success;
+            char log[128];
+            glGetProgramiv(programID, GL_LINK_STATUS, &success);
+            if (!success)
+            {
+                glGetProgramInfoLog(programID, 128, nullptr, log);
+                BV_LOG_WARN("Shader program linking failed !");
+            }
+        }
+
+        for (uint8_t i = 0; i < shaderSources.size(); i++)
+        {
+            auto shaderID = shaderIDs[i];
+            glDeleteShader(shaderID);
+        }
+
+        return programID;
+    }
+
+    Shader::Shader(const std::filesystem::path& filePath)
+    {
+        auto shaderSources = extractShaderSources(filePath);
+        m_shaderProgramID = compileAndLink(shaderSources);
+    }
 
     void Shader::bind() const
     {
@@ -98,32 +184,5 @@ namespace Brickview
     {
         int32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
         glUniformMatrix4fv(loc, 1, GL_FALSE, (float*)data);
-    }
-
-    void Shader::compileAndLink(const std::string& vertexShaderContent, const std::string& fragmetShaderContent)
-    {
-        uint32_t vertexShaderID = compileShader(vertexShaderContent, GL_VERTEX_SHADER);
-        uint32_t fragmentShaderID = compileShader(fragmetShaderContent, GL_FRAGMENT_SHADER);
-
-        m_shaderProgramID = glCreateProgram();
-        glAttachShader(m_shaderProgramID, vertexShaderID);
-        glAttachShader(m_shaderProgramID, fragmentShaderID);
-
-        glLinkProgram(m_shaderProgramID);
-
-        // DEBUG
-        {
-            int32_t success;
-            char log[128];
-            glGetProgramiv(m_shaderProgramID, GL_LINK_STATUS, &success);
-            if (!success)
-            {
-                glGetProgramInfoLog(m_shaderProgramID, 128, nullptr, log);
-                BV_LOG_WARN("Shader program linking failed !");
-            }
-        }
-
-        glDeleteShader(vertexShaderID);
-        glDeleteShader(fragmentShaderID);
     }
 }

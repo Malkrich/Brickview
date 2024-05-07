@@ -43,7 +43,7 @@ namespace Brickview
 	{
 		s_solidRendererData = new SolidRendererTypes::RendererData();
 
-		s_solidRendererData->MeshShader = createRef<Shader>("data/shaders/solid.vs", "data/shaders/solid.fs");
+		s_solidRendererData->MeshShader = createRef<Shader>("data/shaders/solid.glsl");
 
 		s_solidRendererData->RendererManager = createScope<BatchRendererManager>();
 

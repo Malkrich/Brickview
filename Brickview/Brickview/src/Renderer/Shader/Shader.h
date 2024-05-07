@@ -2,6 +2,8 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include <filesystem>
+
 namespace Brickview
 {
 	enum class UniformType
@@ -28,7 +30,7 @@ namespace Brickview
 	class Shader
 	{
 	public:
-		Shader(const std::string& vertexShaderFilePath, const std::string& fragmentShaderFilePath);
+		Shader(const std::filesystem::path& filePath);
 
 		void bind() const;
 		void unbind() const;
@@ -39,9 +41,7 @@ namespace Brickview
 		void setFloat3(const std::string& name, const void* data);
 		void setMat4(const std::string& name, const void* data);
 
-		void compileAndLink(const std::string& vertexShaderContent, const std::string& fragmentShaderContent);
-
 	private:
-		uint32_t m_shaderProgramID;
+		uint32_t m_shaderProgramID = 0;
 	};
 }
