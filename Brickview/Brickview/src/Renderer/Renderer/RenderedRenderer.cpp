@@ -1,7 +1,7 @@
 #include "Pch.h"
 #include "RenderedRenderer.h"
 #include "Renderer/Renderer/BatchRendererManager.h"
-#include "Renderer/Shader/Shader.h"
+#include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Buffer/Layout.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -27,14 +27,15 @@ namespace Brickview
 			const uint32_t MaxVertices = 1024;
 			const uint32_t MaxIndices = MaxVertices;
 
+			// Shaders
+			Scope<ShaderLibrary> ShaderLibrary = nullptr;
+
 			// Mesh
-			Ref<Shader> MeshShader = nullptr;
 			UniformMap MeshUniforms = {};
 			std::vector<MeshVertex> MeshVertices;
 			std::vector<TriangleFace> MeshIndices;
 
 			// Light
-			Ref<Shader> LightShader = nullptr;
 			UniformMap LightUniforms = {};
 			std::vector<LightVertex> LightVertices;
 			std::vector<TriangleFace> LightIndices;
@@ -61,10 +62,12 @@ namespace Brickview
 	{
 		s_renderedRendererData = new RenderedRendererTypes::RendererData();
 
-		s_renderedRendererData->MeshShader = createRef<Shader>("data/shaders/legoPiece.glsl");
-		s_renderedRendererData->LightShader = createRef<Shader>("data/shaders/light.glsl");
-
+		s_renderedRendererData->ShaderLibrary   = createScope<ShaderLibrary>();
 		s_renderedRendererData->RendererManager = createScope<BatchRendererManager>();
+
+		// Shaders
+		s_renderedRendererData->ShaderLibrary->load("data/Shaders/LegoPiece.glsl");
+		s_renderedRendererData->ShaderLibrary->load("data/Shaders/Light.glsl");
 
 		// Mesh
 		Layout meshLayout = {
@@ -75,7 +78,7 @@ namespace Brickview
 		s_renderedRendererData->RendererManager->addSubmission("Meshes",
 			s_renderedRendererData->MaxVertices, s_renderedRendererData->MaxIndices,
 			meshLayout,
-			s_renderedRendererData->MeshShader);
+			s_renderedRendererData->ShaderLibrary->get("LegoPiece"));
 
 		// Light
 		Layout lightLayout = {
@@ -84,9 +87,9 @@ namespace Brickview
 		s_renderedRendererData->RendererManager->addSubmission("Lights",
 			s_renderedRendererData->MaxVertices, s_renderedRendererData->MaxIndices,
 			lightLayout,
-			s_renderedRendererData->LightShader);
+			s_renderedRendererData->ShaderLibrary->get("Light"));
 
-		s_renderedRendererData->LightMesh = Mesh::load("data/models/cube.obj");
+		s_renderedRendererData->LightMesh = Mesh::load("data/Models/Cube.obj");
 	}
 
 	void RenderedRenderer::shutdown()

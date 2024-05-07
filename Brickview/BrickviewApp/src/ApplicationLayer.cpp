@@ -30,8 +30,8 @@ namespace Brickview
 		fbSpec.Height = Input::getWindowSize().y;
 		m_frameBuffer = createScope<FrameBuffer>(fbSpec);
 
-		m_legoPieceMesh = Mesh::load("data/models/brick.obj");
-		m_planeMesh = Mesh::load("data/models/plane.obj");
+		m_legoPieceMesh = Mesh::load("data/Models/Brick.obj");
+		m_planeMesh = Mesh::load("data/Models/Plane.obj");
 
 		// Piece 1
 		m_legoPiecePosition1 = { -1.0f, 0.0f, 0.0f };

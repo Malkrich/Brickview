@@ -10,11 +10,11 @@ namespace Brickview
 	class ShaderLibrary
 	{
 	public:
-		//ShaderLibrary();
+		const Ref<Shader>& get(const std::string& name) const;
 
-		//const Ref<Shader>& getShader(const std::string& name) const;
+		void add(const Ref<Shader>& shader);
 
-		//void addShader(const std::filesystem::path& filePath);
+		void load(const std::filesystem::path& filePath);
 
 	private:
 		std::unordered_map<std::string, Ref<Shader>> m_shaderRegistry;

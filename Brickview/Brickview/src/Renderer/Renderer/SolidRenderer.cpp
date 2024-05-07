@@ -1,7 +1,7 @@
 #include "Pch.h"
 #include "SolidRenderer.h"
 #include "Renderer/Renderer/BatchRendererManager.h"
-#include "Renderer/Shader/Shader.h"
+#include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Buffer/Layout.h"
 
 namespace Brickview
@@ -19,8 +19,10 @@ namespace Brickview
 			const uint32_t MaxVertices = 1024;
 			const uint32_t MaxIndices = MaxVertices;
 
+			// Shader Library
+			Scope<ShaderLibrary> ShaderLibrary = nullptr;
+
 			// Mesh
-			Ref<Shader> MeshShader = nullptr;
 			UniformMap MeshUniforms = {};
 			std::vector<MeshVertex> MeshVertices;
 			std::vector<TriangleFace> MeshIndices;
@@ -43,9 +45,11 @@ namespace Brickview
 	{
 		s_solidRendererData = new SolidRendererTypes::RendererData();
 
-		s_solidRendererData->MeshShader = createRef<Shader>("data/shaders/solid.glsl");
-
 		s_solidRendererData->RendererManager = createScope<BatchRendererManager>();
+		s_solidRendererData->ShaderLibrary = createScope<ShaderLibrary>();
+
+		// Shaders
+		s_solidRendererData->ShaderLibrary->load("data/Shaders/Solid.glsl");
 
 		// Mesh
 		Layout meshLayout = {
@@ -55,7 +59,7 @@ namespace Brickview
 		s_solidRendererData->RendererManager->addSubmission("Meshes",
 			s_solidRendererData->MaxVertices, s_solidRendererData->MaxIndices,
 			meshLayout,
-			s_solidRendererData->MeshShader);
+			s_solidRendererData->ShaderLibrary->get("Solid"));
 	}
 
 	void SolidRenderer::shutdown()
