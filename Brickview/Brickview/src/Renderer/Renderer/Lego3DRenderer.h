@@ -1,0 +1,39 @@
+#pragma once
+
+#include "Renderer/Camera.h"
+#include "Renderer/Light.h"
+#include "Models/Mesh.h"
+#include "Renderer/Material.h"
+#include "Renderer/Shader/ShaderLibrary.h"
+
+#include <glm/glm.hpp>
+
+namespace Brickview
+{
+
+	enum class RenderType
+	{
+		Solid,
+		Rendered
+	};
+
+	class Lego3DRenderer
+	{
+	public:
+		static void init();
+		static void shutdown();
+
+		// Ref only
+		static const Ref<ShaderLibrary>& getShaderLibrary();
+
+		static RenderType getRenderType();
+		static void setRenderType(RenderType type);
+		static bool isDrawingLights();
+		static void drawLights(bool drawLights);
+
+		static void begin(const Camera& camera, const Light& light);
+		static void end();
+		static void drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform);
+	};
+
+}

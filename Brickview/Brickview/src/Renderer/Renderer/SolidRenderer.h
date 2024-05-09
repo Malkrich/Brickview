@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer/Shader/Shader.h"
 #include "Renderer/Camera.h"
 #include "Models/Mesh.h"
 #include "Renderer/Light.h"
@@ -12,7 +13,7 @@ namespace Brickview
 	class SolidRenderer
 	{
 	public:
-		static void init();
+		static void init(const Ref<Shader>& meshShader);
 		static void shutdown();
 
 		static void begin(const Camera& camera, const Light& light);

@@ -11,17 +11,12 @@ namespace Brickview
 
 	ApplicationLayer::ApplicationLayer()
 	{
-		//Renderer::init();
-		RenderCommand::init();
-		RenderedRenderer::init();
-		SolidRenderer::init();
+		Lego3DRenderer::init();
 	}
 
 	ApplicationLayer::~ApplicationLayer()
 	{
-		//Renderer::shutdown();
-		RenderedRenderer::shutdown();
-		SolidRenderer::shutdown();
+		Lego3DRenderer::shutdown();
 	}
 
 	void ApplicationLayer::onAttach()
@@ -88,33 +83,14 @@ namespace Brickview
 		m_dt = dt;
 
 		m_viewport->beginFrame();
+		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
-		RenderCommand::clear();
+		auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition1);
+		Lego3DRenderer::drawMesh(m_legoPieceMesh, m_legoPieceMaterial1, transform1);
+		auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition2);
+		Lego3DRenderer::drawMesh(m_legoPieceMesh, m_legoPieceMaterial2, transform2);
 
-		if (m_solidView)
-		{
-			SolidRenderer::begin(m_cameraControl.getCamera(), m_light);
-
-			auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition1);
-			SolidRenderer::submitMesh(m_legoPieceMesh, transform1);
-			auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition2);
-			SolidRenderer::submitMesh(m_legoPieceMesh, transform2);
-
-			SolidRenderer::end();
-		}
-		else
-		{
-			RenderedRenderer::begin(m_cameraControl.getCamera(), m_light);
-
-			auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition1);
-			RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial1, transform1);
-			auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition2);
-			RenderedRenderer::submitMesh(m_legoPieceMesh, m_legoPieceMaterial2, transform2);
-
-			RenderedRenderer::end();
-		}
-		
+		Lego3DRenderer::end();
 		m_viewport->endFrame();
 	}
 
@@ -146,18 +122,26 @@ namespace Brickview
 
 		// Render Type
 		ImGui::SeparatorText("Render Settings:");
-		static bool drawLights = false;
-		if (ImGui::Checkbox("Draw lights", &drawLights))
-			RenderedRenderer::drawLights(drawLights);
-		ImGui::Checkbox("Solid view", &m_solidView);
+
+		int32_t renderTypeIdx = (uint32_t)Lego3DRenderer::getRenderType();
+		std::array<const char*, 2> renderTypeItems = { "Solid", "Rendered" };
+		if (ImGui::Combo("Render type", &renderTypeIdx, renderTypeItems.data(), renderTypeItems.size()))
+		{
+			RenderType newRenderType = (RenderType)renderTypeIdx;
+			Lego3DRenderer::setRenderType(newRenderType);
+		}
+
+		bool drawLight = Lego3DRenderer::isDrawingLights();
+		if (ImGui::Checkbox("Draw lights", &drawLight))
+			Lego3DRenderer::drawLights(drawLight);
 
 		ImGui::SeparatorText("Render statistics:");
 		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);
 		ImGui::Text("Fps: %.3f", m_dt == 0.0f ? 0.0f : 1.0f / m_dt);
 
-		ImGui::Text("Draw calls: %i", RenderedRenderer::getStats().DrawCalls);
-		ImGui::Text("Mesh vertex count: %i", RenderedRenderer::getStats().MeshVertexCount);
-		ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
+		//ImGui::Text("Draw calls: %i", RenderedRenderer::getStats().DrawCalls);
+		//ImGui::Text("Mesh vertex count: %i", RenderedRenderer::getStats().MeshVertexCount);
+		//ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
 
 		ImGui::End();
 

@@ -1,7 +1,6 @@
 #include "Pch.h"
 #include "RenderedRenderer.h"
 #include "Renderer/Renderer/BatchRendererManager.h"
-#include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Buffer/Layout.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -27,9 +26,6 @@ namespace Brickview
 			const uint32_t MaxVertices = 1024;
 			const uint32_t MaxIndices = MaxVertices;
 
-			// Shaders
-			Scope<ShaderLibrary> ShaderLibrary = nullptr;
-
 			// Mesh
 			UniformMap MeshUniforms = {};
 			std::vector<MeshVertex> MeshVertices;
@@ -41,7 +37,6 @@ namespace Brickview
 			std::vector<TriangleFace> LightIndices;
 			Ref<Mesh> LightMesh;
 
-			bool DrawLights = false;
 			Light Light;
 
 			// Camera
@@ -58,16 +53,11 @@ namespace Brickview
 
 	static RenderedRendererTypes::RendererData* s_renderedRendererData = nullptr;
 
-	void RenderedRenderer::init()
+	void RenderedRenderer::init(const Ref<Shader>& meshShader, const Ref<Shader>& lightShader)
 	{
 		s_renderedRendererData = new RenderedRendererTypes::RendererData();
 
-		s_renderedRendererData->ShaderLibrary   = createScope<ShaderLibrary>();
 		s_renderedRendererData->RendererManager = createScope<BatchRendererManager>();
-
-		// Shaders
-		s_renderedRendererData->ShaderLibrary->load("data/Shaders/LegoPiece.glsl");
-		s_renderedRendererData->ShaderLibrary->load("data/Shaders/Light.glsl");
 
 		// Mesh
 		Layout meshLayout = {
@@ -78,7 +68,7 @@ namespace Brickview
 		s_renderedRendererData->RendererManager->addSubmission("Meshes",
 			s_renderedRendererData->MaxVertices, s_renderedRendererData->MaxIndices,
 			meshLayout,
-			s_renderedRendererData->ShaderLibrary->get("LegoPiece"));
+			meshShader);
 
 		// Light
 		Layout lightLayout = {
@@ -87,7 +77,7 @@ namespace Brickview
 		s_renderedRendererData->RendererManager->addSubmission("Lights",
 			s_renderedRendererData->MaxVertices, s_renderedRendererData->MaxIndices,
 			lightLayout,
-			s_renderedRendererData->ShaderLibrary->get("Light"));
+			lightShader);
 
 		s_renderedRendererData->LightMesh = Mesh::load("data/Models/Cube.obj");
 	}
@@ -105,15 +95,6 @@ namespace Brickview
 		s_renderedRendererData->Light = light;
 
 		s_renderedRendererData->Statistics.DrawCalls = 0;
-
-		if(s_renderedRendererData->DrawLights)
-			submitLight();
-	}
-
-	void RenderedRenderer::drawLights(bool drawLights)
-	{
-		s_renderedRendererData->DrawLights = drawLights;
-		s_renderedRendererData->RendererManager->setVisible("Lights", drawLights);
 	}
 
 	void RenderedRenderer::submitMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
@@ -154,7 +135,7 @@ namespace Brickview
 		s_renderedRendererData->MeshUniforms["u_lightColor"] = s_renderedRendererData->Light.Color;
 	}
 
-	void RenderedRenderer::submitLight()
+	void RenderedRenderer::submitLights()
 	{
 		static const float lightScale = 0.1f;
 		glm::mat4 lightTransform = glm::translate(glm::mat4(1.0f), s_renderedRendererData->Light.Position)
@@ -204,6 +185,7 @@ namespace Brickview
 		// Lights
 		if (s_renderedRendererData->LightVertices.size() != 0)
 		{
+			s_renderedRendererData->RendererManager->setVisible("Lights", true);
 			s_renderedRendererData->RendererManager->setData("Lights",
 				s_renderedRendererData->LightVertices.size() * sizeof(RenderedRendererTypes::LightVertex),
 				(void*)s_renderedRendererData->LightVertices.data(),
@@ -215,6 +197,8 @@ namespace Brickview
 			s_renderedRendererData->LightIndices.clear();
 			s_renderedRendererData->Statistics.DrawCalls++;
 		}
+		else
+			s_renderedRendererData->RendererManager->setVisible("Lights", false);
 
 		s_renderedRendererData->RendererManager->flush();
 	}

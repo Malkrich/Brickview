@@ -19,9 +19,6 @@ namespace Brickview
 			const uint32_t MaxVertices = 1024;
 			const uint32_t MaxIndices = MaxVertices;
 
-			// Shader Library
-			Scope<ShaderLibrary> ShaderLibrary = nullptr;
-
 			// Mesh
 			UniformMap MeshUniforms = {};
 			std::vector<MeshVertex> MeshVertices;
@@ -41,25 +38,22 @@ namespace Brickview
 
 	static SolidRendererTypes::RendererData* s_solidRendererData;
 
-	void SolidRenderer::init()
+	void SolidRenderer::init(const Ref<Shader>& meshShader)
 	{
 		s_solidRendererData = new SolidRendererTypes::RendererData();
 
 		s_solidRendererData->RendererManager = createScope<BatchRendererManager>();
-		s_solidRendererData->ShaderLibrary = createScope<ShaderLibrary>();
-
-		// Shaders
-		s_solidRendererData->ShaderLibrary->load("data/Shaders/Solid.glsl");
 
 		// Mesh
 		Layout meshLayout = {
 			{ "a_position", BufferElementType::Float3 },
 			{ "a_normal", BufferElementType::Float3 }
 		};
+
 		s_solidRendererData->RendererManager->addSubmission("Meshes",
 			s_solidRendererData->MaxVertices, s_solidRendererData->MaxIndices,
 			meshLayout,
-			s_solidRendererData->ShaderLibrary->get("Solid"));
+			meshShader);
 	}
 
 	void SolidRenderer::shutdown()

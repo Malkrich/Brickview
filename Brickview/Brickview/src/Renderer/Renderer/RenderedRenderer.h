@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer/Shader/Shader.h"
 #include "Renderer/Camera.h"
 #include "Models/Mesh.h"
 #include "Renderer/Light.h"
@@ -19,21 +20,18 @@ namespace Brickview
 	class RenderedRenderer
 	{
 	public:
-		static void init();
+		static void init(const Ref<Shader>& meshShader, const Ref<Shader>& lightShader);
 		static void shutdown();
 
 		static void begin(const Camera& camera, const Light& light);
 
-		static void drawLights(bool drawLights);
 		static void submitMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform);
+		static void submitLights();
 
 		static void end();
 		static void flush();
 
 		static const RenderSatistics& getStats();
-
-	private:
-		static void submitLight();
 	};
 
 }
