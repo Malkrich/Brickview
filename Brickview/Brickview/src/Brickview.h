@@ -24,3 +24,6 @@
 
 // 3D
 #include "Models/Mesh.h"
+
+// Utils
+#include "Utils/StringUtils.h"

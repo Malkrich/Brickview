@@ -98,6 +98,28 @@ namespace Brickview
 	{
 		beginDockspace();
 
+		// Viewport
+		m_viewport->onGuiRender();
+		if (m_viewport->hasSizeChanged())
+			m_cameraControl.resize(m_viewport->getWidth(), m_viewport->getHeight());
+		m_cameraControl.setViewportHovered(m_viewport->isHovered());
+
+		// Shader lib
+		ImGui::Begin("Shaders");
+
+		const Ref<ShaderLibrary> shaderLibrary = Lego3DRenderer::getShaderLibrary();
+		for (const auto& [name, shader] : *shaderLibrary)
+		{
+			ImGui::Text("%s", name.c_str());
+			std::string buttonName = StringUtils::format("Reload##%s", name.c_str());
+			ImGui::SameLine();
+			if (ImGui::Button(buttonName.c_str()))
+				Lego3DRenderer::reloadShader(name);
+		}
+
+		ImGui::End();
+
+		// Scene hierarchy
 		ImGui::Begin("Scene:");
 		ImGui::SeparatorText("Scene hierarchy:");
 
@@ -144,12 +166,6 @@ namespace Brickview
 		//ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
 
 		ImGui::End();
-
-		// Viewport
-		m_viewport->onGuiRender();
-		if (m_viewport->hasSizeChanged())
-			m_cameraControl.resize(m_viewport->getWidth(), m_viewport->getHeight());
-		m_cameraControl.setViewportHovered(m_viewport->isHovered());
 
 		endDockspace();
 	}
