@@ -5,9 +5,9 @@
 namespace Brickview
 {
 
-	class StringUtils
+	namespace StringUtils
 	{
-	public:
+
 		template<typename... Args>
 		static std::string format(const char* format, Args... args)
 		{
@@ -15,6 +15,7 @@ namespace Brickview
 			sprintf(returnString.data(), format, std::forward<Args>(args)...);
 			return returnString;
 		}
-	};
+
+	}
 
 }
