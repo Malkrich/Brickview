@@ -1,6 +1,7 @@
 #include "ApplicationLayer.h"
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -25,10 +26,9 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
-		FrameBufferSpecifications fbSpec;
-		fbSpec.Width = Input::getWindowSize().x;
-		fbSpec.Height = Input::getWindowSize().y;
-		m_frameBuffer = createScope<FrameBuffer>(fbSpec);
+		uint32_t width = Input::getWindowSize().x;
+		uint32_t height = Input::getWindowSize().y;
+		m_viewport = createScope<Viewport>(width, height);
 
 		m_legoPieceMesh = Mesh::load("data/Models/Brick.obj");
 		m_planeMesh = Mesh::load("data/Models/Plane.obj");
@@ -87,7 +87,7 @@ namespace Brickview
 	{
 		m_dt = dt;
 
-		m_frameBuffer->bind();
+		m_viewport->beginFrame();
 
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
@@ -115,7 +115,7 @@ namespace Brickview
 			RenderedRenderer::end();
 		}
 		
-		m_frameBuffer->unbind();
+		m_viewport->endFrame();
 	}
 
 	void ApplicationLayer::onGuiRender()
@@ -161,26 +161,11 @@ namespace Brickview
 
 		ImGui::End();
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2( 0, 0 ));
-		ImGui::Begin("Viewport");
-
-		bool hovered = ImGui::IsWindowHovered();
-		m_cameraControl.setViewportHovered(hovered);
-
-		// Resize
-		ImVec2 newViewportDim = ImGui::GetContentRegionAvail();
-		if (m_viewportDim.x != newViewportDim.x || m_viewportDim.y != newViewportDim.y)
-		{
-			m_viewportDim.x = (uint32_t)newViewportDim.x;
-			m_viewportDim.y = (uint32_t)newViewportDim.y;
-			m_frameBuffer->resize(m_viewportDim.x, m_viewportDim.y);
-			m_cameraControl.resize(m_viewportDim.x, m_viewportDim.y);
-		}
-		ImVec2 imSize = { (float)m_viewportDim.x, (float)m_viewportDim.y };
-		uint32_t textureID = m_frameBuffer->getColorAttachment();
-		ImGui::Image((void*)textureID, imSize, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-		ImGui::End();
-		ImGui::PopStyleVar();
+		// Viewport
+		m_viewport->onGuiRender();
+		if (m_viewport->hasSizeChanged())
+			m_cameraControl.resize(m_viewport->getWidth(), m_viewport->getHeight());
+		m_cameraControl.setViewportHovered(m_viewport->isHovered());
 
 		endDockspace();
 	}
@@ -219,7 +204,7 @@ namespace Brickview
 		// We cannot preserve the docking relationship between an active window and an inactive docking, otherwise 
 		// any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+		ImGui::Begin("Brickview dockspace", &dockspaceOpen, window_flags);
 		ImGui::PopStyleVar();
 
 		if (opt_fullscreen)
@@ -232,7 +217,7 @@ namespace Brickview
 		style.WindowMinSize.x = 300.0f;
 		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 		{
-			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+			ImGuiID dockspace_id = ImGui::GetID("BrickviewDockspace");
 			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 		}
 

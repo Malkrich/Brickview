@@ -29,8 +29,7 @@ namespace Brickview
 		void endDockspace();
 
 	private:
-		Scope<FrameBuffer> m_frameBuffer = nullptr;
-		glm::ivec2 m_viewportDim;
+		Scope<Viewport> m_viewport = nullptr;
 
 		Ref<Mesh> m_legoPieceMesh;
 		Ref<Mesh> m_planeMesh;
