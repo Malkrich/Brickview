@@ -38,6 +38,7 @@ namespace Brickview
 			uint32_t indexBufferSize, void* indexBufferData);
 		void setUniforms(const std::string& name, const UniformMap& uniforms);
 		void setVisible(const std::string& name, bool visible);
+		void setShader(const std::string& name, const Ref<Shader>& shader);
 
 		void flush();
 

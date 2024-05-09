@@ -23,8 +23,9 @@ namespace Brickview
 		static void init();
 		static void shutdown();
 
-		// Ref only
+		// Read only
 		static const Ref<ShaderLibrary>& getShaderLibrary();
+		static void reloadShader(const std::string& shaderName);
 
 		static RenderType getRenderType();
 		static void setRenderType(RenderType type);

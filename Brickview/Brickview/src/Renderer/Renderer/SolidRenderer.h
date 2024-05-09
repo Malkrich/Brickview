@@ -21,6 +21,8 @@ namespace Brickview
 		static void flush();
 
 		static void submitMesh(const Ref<Mesh>& mesh, const glm::mat4& transform);
+
+		static void setMeshShader(const Ref<Shader>& shader);
 	};
 
 }

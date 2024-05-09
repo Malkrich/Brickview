@@ -57,6 +57,14 @@ namespace Brickview
 		submission.Visible = visible;
 	}
 
+	void BatchRendererManager::setShader(const std::string& name, const Ref<Shader>& shader)
+	{
+		BV_ASSERT(m_renderSubmissions.find(name) != m_renderSubmissions.end(), "Submission name doesn't exist !");
+
+		auto& submission = m_renderSubmissions.at(name);
+		submission.Shader = shader;
+	}
+
 	void BatchRendererManager::flush()
 	{
 		for (const auto& [name, submission] : m_renderSubmissions)

@@ -31,6 +31,7 @@ namespace Brickview
 	{
 	public:
 		Shader(const std::filesystem::path& filePath);
+		~Shader();
 
 		const std::string& getName() const { return m_name; }
 

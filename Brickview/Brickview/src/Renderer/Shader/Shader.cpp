@@ -153,6 +153,11 @@ namespace Brickview
         m_name           = path.substr(lastSlash, count);
     }
 
+    Shader::~Shader()
+    {
+        glDeleteProgram(m_shaderProgramID);
+    }
+
     void Shader::bind() const
     {
         glUseProgram(m_shaderProgramID);

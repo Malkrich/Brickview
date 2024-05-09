@@ -29,7 +29,7 @@ uniform vec3 u_cameraPosition;
 
 void main()
 {
-    float ambient = 0.2;
+    float ambient = 0.15;
     vec3 renderedColor = vec3(0.6);
     
     vec3 viewDirection = normalize(u_cameraPosition - f_currentPosition);

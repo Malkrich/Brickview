@@ -124,4 +124,9 @@ namespace Brickview
 	{
 		flush();
 	}
+
+	void SolidRenderer::setMeshShader(const Ref<Shader>& shader)
+	{
+		s_solidRendererData->RendererManager->setShader("Meshes", shader);
+	}
 }

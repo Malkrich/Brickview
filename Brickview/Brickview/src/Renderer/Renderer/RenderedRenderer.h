@@ -32,6 +32,9 @@ namespace Brickview
 		static void flush();
 
 		static const RenderSatistics& getStats();
+
+		static void setMeshShader(const Ref<Shader>& shader);
+		static void setLightShader(const Ref<Shader>& shader);
 	};
 
 }

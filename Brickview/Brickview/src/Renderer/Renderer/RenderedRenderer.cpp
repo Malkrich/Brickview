@@ -212,4 +212,14 @@ namespace Brickview
 	{
 		return s_renderedRendererData->Statistics;
 	}
+
+	void RenderedRenderer::setMeshShader(const Ref<Shader>& shader)
+	{
+		s_renderedRendererData->RendererManager->setShader("Meshes", shader);
+	}
+
+	void RenderedRenderer::setLightShader(const Ref<Shader>& shader)
+	{
+		s_renderedRendererData->RendererManager->setShader("Lights", shader);
+	}
 }
