@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <filesystem>
@@ -17,12 +18,21 @@ namespace Brickview
 
 	struct UniformData
 	{
-		UniformData() = default;
-		UniformData::UniformData(const glm::vec3& data);
-		UniformData::UniformData(const glm::mat4& data);
+		UniformData()
+			: Type(UniformType::None)
+			, Data(nullptr)
+		{}
+		UniformData(const glm::vec3& data)
+			: Type(UniformType::Float3)
+			, Data((void*)glm::value_ptr(data))
+		{}
+		UniformData(const glm::mat4& data)
+			: Type(UniformType::Mat4)
+			, Data((void*)glm::value_ptr(data))
+		{}
 
-		UniformType Type = UniformType::None;
-		void* Data = nullptr;
+		UniformType Type;
+		void* Data;
 	};
 
 	using UniformMap = std::unordered_map<std::string, UniformData>;

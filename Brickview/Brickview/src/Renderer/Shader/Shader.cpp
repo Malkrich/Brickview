@@ -22,16 +22,6 @@ namespace Brickview
 
     }
 
-    #define UNIFORM_PTR(data) (void*)glm::value_ptr(data)
-    UniformData::UniformData(const glm::vec3& data)
-        : Type(UniformType::Float3)
-        , Data(UNIFORM_PTR(data))
-    {}
-    UniformData::UniformData(const glm::mat4& data)
-        : Type(UniformType::Mat4)
-        , Data(UNIFORM_PTR(data))
-    {}
-
     static GLenum findGlslType(const std::string& token)
     {
         if (token == "vertex")
