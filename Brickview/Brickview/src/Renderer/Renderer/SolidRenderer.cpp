@@ -1,48 +1,14 @@
 #include "Pch.h"
 #include "SolidRenderer.h"
-#include "Renderer/Renderer/BatchRendererManager.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Buffer/Layout.h"
 
 namespace Brickview
 {
-	namespace SolidRendererTypes
+
+	SolidRenderer::SolidRenderer(const Ref<ShaderLibrary>& shaderLib)
 	{
-		struct MeshVertex
-		{
-			glm::vec3 Position;
-			glm::vec3 Normal;
-		};
-
-		struct RendererData
-		{
-			const uint32_t MaxVertices = 1024;
-			const uint32_t MaxIndices = MaxVertices;
-
-			// Mesh
-			UniformMap MeshUniforms = {};
-			std::vector<MeshVertex> MeshVertices;
-			std::vector<TriangleFace> MeshIndices;
-
-			// Light
-			Light Light;
-
-			// Camera data
-			glm::mat4 ViewProjectionMatrix;
-			glm::vec3 CameraPosition;
-
-			// Render submissions
-			Scope<BatchRendererManager> RendererManager;
-		};
-	}
-
-	static SolidRendererTypes::RendererData* s_solidRendererData;
-
-	void SolidRenderer::init(const Ref<Shader>& meshShader)
-	{
-		s_solidRendererData = new SolidRendererTypes::RendererData();
-
-		s_solidRendererData->RendererManager = createScope<BatchRendererManager>();
+		m_rendererManager = createScope<BatchRendererManager>();
 
 		// Mesh
 		Layout meshLayout = {
@@ -50,43 +16,41 @@ namespace Brickview
 			{ "a_normal", BufferElementType::Float3 }
 		};
 
-		s_solidRendererData->RendererManager->addSubmission("Meshes",
-			s_solidRendererData->MaxVertices, s_solidRendererData->MaxIndices,
+		m_rendererManager->addSubmission("Meshes",
+			m_maxVertices, m_maxIndices,
 			meshLayout,
-			meshShader);
+			shaderLib->get("Solid"));
 	}
 
-	void SolidRenderer::shutdown()
+	SolidRenderer::~SolidRenderer()
 	{
-		delete s_solidRendererData;
-		s_solidRendererData = nullptr;
 	}
 
 	void SolidRenderer::begin(const Camera& camera, const Light& light)
 	{
-		s_solidRendererData->ViewProjectionMatrix = camera.getViewProjectionMatrix();
-		s_solidRendererData->CameraPosition = camera.getPosition();
-		s_solidRendererData->Light = light;
+		m_viewProjectionMatrix = camera.getViewProjectionMatrix();
+		m_cameraPosition       = camera.getPosition();
+		m_light                = light;
 	}
 
-	void SolidRenderer::submitMesh(const Ref<Mesh>& mesh, const glm::mat4& transform)
+	void SolidRenderer::drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
 	{
 		const auto& vertices = mesh->getVertices();
 		const auto& indices = mesh->getIndices();
 
-		if (vertices.size() + s_solidRendererData->MeshVertices.size() > s_solidRendererData->MaxVertices
-			|| indices.size() + s_solidRendererData->MeshIndices.size() > s_solidRendererData->MaxIndices)
+		if (vertices.size() + m_meshVertices.size() > m_maxVertices
+			|| indices.size() + m_meshIndices.size() > m_maxIndices)
 		{
 			flush();
 		}
 
-		unsigned int offset = s_solidRendererData->MeshVertices.size();
-		s_solidRendererData->MeshVertices.reserve(s_solidRendererData->MeshVertices.size() + vertices.size());
-		s_solidRendererData->MeshIndices.reserve(s_solidRendererData->MeshIndices.size() + indices.size());
+		unsigned int offset = m_meshVertices.size();
+		m_meshVertices.reserve(m_meshVertices.size() + vertices.size());
+		m_meshIndices.reserve(m_meshIndices.size() + indices.size());
 		for (const auto& v : vertices)
 		{
 			glm::vec3 p = transform * glm::vec4(v.Position, 1.0);
-			s_solidRendererData->MeshVertices.push_back({ p, v.Normal });
+			m_meshVertices.push_back({ p, v.Normal });
 		}
 		for (const auto& f : indices)
 		{
@@ -94,30 +58,34 @@ namespace Brickview
 			face[0] = f[0] + offset;
 			face[1] = f[1] + offset;
 			face[2] = f[2] + offset;
-			s_solidRendererData->MeshIndices.push_back(face);
+			m_meshIndices.push_back(face);
 		}
 
-		s_solidRendererData->MeshUniforms["u_viewProjection"] = s_solidRendererData->ViewProjectionMatrix;
-		s_solidRendererData->MeshUniforms["u_cameraPosition"] = s_solidRendererData->CameraPosition;
+		m_meshUniforms["u_viewProjection"] = m_viewProjectionMatrix;
+		m_meshUniforms["u_cameraPosition"] = m_cameraPosition;
+	}
+
+	void SolidRenderer::drawLights(const Light& light)
+	{
 	}
 
 	void SolidRenderer::flush()
 	{
 		// Meshes
-		if (s_solidRendererData->MeshVertices.size() != 0)
+		if (m_meshVertices.size() != 0)
 		{
-			s_solidRendererData->RendererManager->setData("Meshes",
-				s_solidRendererData->MeshVertices.size() * sizeof(SolidRendererTypes::MeshVertex),
-				(void*)s_solidRendererData->MeshVertices.data(),
-				s_solidRendererData->MeshIndices.size() * sizeof(TriangleFace),
-				(void*)s_solidRendererData->MeshIndices.data());
-			s_solidRendererData->RendererManager->setUniforms("Meshes", s_solidRendererData->MeshUniforms);
+			m_rendererManager->setData("Meshes",
+				m_meshVertices.size() * sizeof(SolidRendererTypes::MeshVertex),
+				(void*)m_meshVertices.data(),
+				m_meshIndices.size() * sizeof(TriangleFace),
+				(void*)m_meshIndices.data());
+			m_rendererManager->setUniforms("Meshes", m_meshUniforms);
 
-			s_solidRendererData->MeshVertices.clear();
-			s_solidRendererData->MeshIndices.clear();
+			m_meshVertices.clear();
+			m_meshIndices.clear();
 		}
 
-		s_solidRendererData->RendererManager->flush();
+		m_rendererManager->flush();
 	}
 
 	void SolidRenderer::end()
@@ -125,8 +93,9 @@ namespace Brickview
 		flush();
 	}
 
-	void SolidRenderer::setMeshShader(const Ref<Shader>& shader)
+	void SolidRenderer::updateShaders(const Ref<ShaderLibrary>& shaderLib)
 	{
-		s_solidRendererData->RendererManager->setShader("Meshes", shader);
+		m_rendererManager->setShader("Meshes", shaderLib->get("Solid"));
 	}
+
 }

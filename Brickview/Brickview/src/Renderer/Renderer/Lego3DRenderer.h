@@ -1,5 +1,6 @@
 #pragma once
 
+#include "RendererBase.h"
 #include "Renderer/Camera.h"
 #include "Renderer/Light.h"
 #include "Models/Mesh.h"
@@ -35,6 +36,9 @@ namespace Brickview
 		static void begin(const Camera& camera, const Light& light);
 		static void end();
 		static void drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform);
+
+	private:
+		static Scope<RendererBase> rendererFromType(RenderType type);
 	};
 
 }
