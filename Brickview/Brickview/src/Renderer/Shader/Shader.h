@@ -18,6 +18,9 @@ namespace Brickview
 
 	struct UniformData
 	{
+		UniformType Type;
+		void* Data;
+
 		UniformData()
 			: Type(UniformType::None)
 			, Data(nullptr)
@@ -30,9 +33,6 @@ namespace Brickview
 			: Type(UniformType::Mat4)
 			, Data((void*)glm::value_ptr(data))
 		{}
-
-		UniformType Type;
-		void* Data;
 	};
 
 	using UniformMap = std::unordered_map<std::string, UniformData>;
