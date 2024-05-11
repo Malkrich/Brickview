@@ -23,6 +23,8 @@ namespace Brickview
 		void load(const std::filesystem::path& filePath);
 		void reload(const std::string& shaderName);
 
+		std::unordered_map<std::string, ShaderData>::const_iterator begin() const { return m_shaderRegistry.begin(); }
+		std::unordered_map<std::string, ShaderData>::const_iterator end() const { return m_shaderRegistry.end(); }
 		std::unordered_map<std::string, ShaderData>::iterator begin() { return m_shaderRegistry.begin(); }
 		std::unordered_map<std::string, ShaderData>::iterator end() { return m_shaderRegistry.end(); }
 
