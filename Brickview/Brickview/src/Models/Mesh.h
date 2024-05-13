@@ -7,6 +7,13 @@
 namespace Brickview
 {
 
+	enum class ModelFileFormat
+	{
+		None = 0,
+		Obj,
+		LDrawDat
+	};
+
 	struct Vertex
 	{
 		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
@@ -15,30 +22,50 @@ namespace Brickview
 
 	struct TriangleFace
 	{
-		uint32_t getIndex1() const { return indices[0]; }
-		uint32_t getIndex2() const { return indices[1]; }
-		uint32_t getIndex3() const { return indices[2]; }
+		TriangleFace()
+			: m_indices{ 0, 0, 0 }
+		{}
+		TriangleFace(const std::array<uint32_t, 3>& data)
+			: m_indices(data)
+		{}
+		TriangleFace(const std::initializer_list<uint32_t>& data)
+			: m_indices
+			{
+				*(data.begin() + 0), 
+				*(data.begin() + 1), 
+				*(data.begin() + 2)
+			}
+		{}
+
+		uint32_t getIndex1() const { return m_indices[0]; }
+		uint32_t getIndex2() const { return m_indices[1]; }
+		uint32_t getIndex3() const { return m_indices[2]; }
+
+		void addOffset(uint32_t offset)
+		{
+			for (uint32_t& i : m_indices)
+				i += offset;
+		}
 
 		uint32_t& operator[](uint32_t i)
 		{ 
-			BV_ASSERT(i < 3, "Index of a triangle has to be less than 3.");
-			return indices[i]; 
+			BV_ASSERT(i < m_indices.size(), "Index of a triangle has to be less than 3.");
+			return m_indices[i];
 		}
 		uint32_t operator[](uint32_t i) const
 		{
-			BV_ASSERT(i < 3, "Index of a triangle has to be less than 3.");
-			return indices[i];
+			BV_ASSERT(i < m_indices.size(), "Index of a triangle has to be less than 3.");
+			return m_indices[i];
 		}
 
 	private:
-		uint32_t indices[3];
+		std::array<uint32_t, 3> m_indices;
 	};
 
 	class Mesh
 	{
 	public:
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<TriangleFace>& indices);
-
 		static Ref<Mesh> load(const std::filesystem::path& filePath);
 
 		const std::vector<Vertex>& getVertices() const { return m_vertices; }

@@ -25,6 +25,9 @@ namespace Brickview
 		uint32_t height = Input::getWindowSize().y;
 		m_viewport = createScope<Viewport>(width, height);
 
+		// New lego piece system
+		m_ldrawBrick = Mesh::load("data/LDraw/p/2-4cyls.dat");
+		// Basic obj files
 		m_legoPieceMesh = Mesh::load("data/Models/Brick.obj");
 		m_planeMesh = Mesh::load("data/Models/Plane.obj");
 
@@ -85,10 +88,7 @@ namespace Brickview
 		m_viewport->beginFrame();
 		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-		auto transform1 = glm::translate(glm::mat4(1.0), m_legoPiecePosition1);
-		Lego3DRenderer::drawMesh(m_legoPieceMesh, m_legoPieceMaterial1, transform1);
-		auto transform2 = glm::translate(glm::mat4(1.0), m_legoPiecePosition2);
-		Lego3DRenderer::drawMesh(m_legoPieceMesh, m_legoPieceMaterial2, transform2);
+		Lego3DRenderer::drawMesh(m_ldrawBrick, m_legoPieceMaterial1, glm::mat4(1.0f));
 
 		Lego3DRenderer::end();
 		m_viewport->endFrame();

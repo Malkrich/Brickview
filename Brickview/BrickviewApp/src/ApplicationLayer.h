@@ -33,6 +33,7 @@ namespace Brickview
 
 		Ref<Mesh> m_legoPieceMesh;
 		Ref<Mesh> m_planeMesh;
+		Ref<Mesh> m_ldrawBrick;
 
 		glm::vec3 m_legoPiecePosition1;
 		Material m_legoPieceMaterial1;

@@ -3,6 +3,7 @@
 // basics
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <memory>
 #include <functional>
 #include <cmath>
