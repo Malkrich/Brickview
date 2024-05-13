@@ -26,7 +26,7 @@ namespace Brickview
 		m_viewport = createScope<Viewport>(width, height);
 
 		// New lego piece system
-		m_ldrawBrick = Mesh::load("data/LDraw/p/2-4cyls.dat");
+		m_ldrawBrick = Mesh::load("data/LDraw/p/4-4cyls.dat");
 		// Basic obj files
 		m_legoPieceMesh = Mesh::load("data/Models/Brick.obj");
 		m_planeMesh = Mesh::load("data/Models/Plane.obj");

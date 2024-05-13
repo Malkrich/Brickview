@@ -21,16 +21,18 @@ namespace Brickview
 		OptionalFile  = 5
 	};
 
-	struct TriangleData
+	struct Triangle
 	{
 		static constexpr inline size_t getElementCount() { return 3; }
+		static constexpr inline size_t getTriangleCount() { return 1; }
 
 		std::array<glm::vec3, 3> Positions;
 	};
 
-	struct QuadData
+	struct Quad
 	{
 		static constexpr inline size_t getElementCount() { return 4; }
+		static constexpr inline size_t getTriangleCount() { return 2; }
 
 		std::array<glm::vec3, 4> Positions;
 	};
@@ -40,20 +42,6 @@ namespace Brickview
 		static inline glm::vec3 LDUToMM(const glm::vec3& v)
 		{
 			return v * 0.4f;
-		}
-
-		static glm::vec3 computeNormal(const QuadData& quad)
-		{
-			glm::vec3 u = glm::normalize(quad.Positions[1] - quad.Positions[0]);
-			glm::vec3 v = glm::normalize(quad.Positions[2] - quad.Positions[0]);
-			return glm::cross(u, v);
-		}
-
-		static glm::vec3 computeNormal(const TriangleData& triangle)
-		{
-			glm::vec3 u = glm::normalize(triangle.Positions[1] - triangle.Positions[0]);
-			glm::vec3 v = glm::normalize(triangle.Positions[2] - triangle.Positions[0]);
-			return glm::cross(u, v);
 		}
 
 		static LineType getPrefix(const std::string& line)
@@ -82,6 +70,14 @@ namespace Brickview
 		}
 
 		template<typename FaceType>
+		static glm::vec3 computeNormal(const FaceType& triangle)
+		{
+			glm::vec3 u = glm::normalize(triangle.Positions[1] - triangle.Positions[0]);
+			glm::vec3 v = glm::normalize(triangle.Positions[2] - triangle.Positions[0]);
+			return glm::cross(u, v);
+		}
+
+		template<typename FaceType>
 		static FaceType getFaceData(const std::string& line)
 		{
 			FaceType face;
@@ -98,6 +94,32 @@ namespace Brickview
 			}
 
 			return face;
+		}
+
+		template<typename FaceType>
+		static void addFace(std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices, const std::string& line, uint32_t indexOffset)
+		{
+			FaceType faceData = Utils::getFaceData<FaceType>(line);
+			glm::vec3 normal = Utils::computeNormal<FaceType>(faceData);
+
+			// add new data
+			vertices.reserve(vertices.size() + FaceType::getElementCount());
+			for (const auto& position : faceData.Positions)
+				vertices.push_back({ position, normal });
+
+			indices.reserve(indices.size() + FaceType::getTriangleCount());
+			uint32_t offset = 0;
+			for (uint32_t i = 0; i < FaceType::getTriangleCount(); i++)
+			{
+				TriangleFace t = {
+					(offset + 0) % FaceType::getElementCount(),
+					(offset + 1) % FaceType::getElementCount(),
+					(offset + 2) % FaceType::getElementCount()
+				};
+				t.addOffset(indexOffset);
+				offset += 2;
+				indices.push_back(t);
+			}
 		}
 
 		// Utils function
@@ -137,45 +159,16 @@ namespace Brickview
 
 			switch (lineType)
 			{
-				case LineType::Quadrilateral:
-				{
-					QuadData quadData = Utils::getFaceData<QuadData>(line);
-					glm::vec3 normal  = Utils::computeNormal(quadData);
-
-					// add new data
-					vertices.reserve(vertices.size() + 4);
-					for (const auto& position : quadData.Positions)
-						vertices.push_back({ position, normal });
-
-					TriangleFace t1 = { 0, 1, 2 };
-					TriangleFace t2 = { 2, 3, 0 };
-					t1.addOffset(indexOffset);
-					t2.addOffset(indexOffset);
-					indices.reserve(indices.size() + 2);
-					indices.push_back(t1);
-					indices.push_back(t2);
-
-					indexOffset += 4;
-					
-					break;
-				}
 				case LineType::Triangle:
 				{
-					TriangleData triangleData = Utils::getFaceData<TriangleData>(line);
-					glm::vec3 normal = Utils::computeNormal(triangleData);
-
-					// add new data
-					vertices.reserve(vertices.size() + 3);
-					for (const auto& position : triangleData.Positions)
-						vertices.push_back({ position, normal });
-
-					TriangleFace f = { 0, 1, 2 };
-					f.addOffset(indexOffset);
-					indices.reserve(indices.size() + 1);
-					indices.push_back(f);
-
+					Utils::addFace<Triangle>(vertices, indices, line, indexOffset);
 					indexOffset += 3;
-
+					break;
+				}
+				case LineType::Quadrilateral:
+				{
+					Utils::addFace<Quad>(vertices, indices, line, indexOffset);
+					indexOffset += 4;
 					break;
 				}
 			}
