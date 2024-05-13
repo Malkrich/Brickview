@@ -74,10 +74,8 @@ namespace Brickview
 		}
 		for (const auto& f : indices)
 		{
-			TriangleFace face;
-			face[0] = f[0] + offset;
-			face[1] = f[1] + offset;
-			face[2] = f[2] + offset;
+			TriangleFace face = { f[0], f[1], f[2] };
+			face.addOffset(offset);
 			m_meshIndices.push_back(face);
 		}
 		
