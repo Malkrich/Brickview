@@ -21,20 +21,22 @@ namespace Brickview
 		OptionalFile  = 5
 	};
 
-	struct Triangle
+	template<uint32_t ElementCount>
+	struct BasicFace
+	{
+		std::array<glm::vec3, ElementCount> Positions;
+	};
+
+	struct Triangle : public BasicFace<3>
 	{
 		static constexpr inline size_t getElementCount() { return 3; }
 		static constexpr inline size_t getTriangleCount() { return 1; }
-
-		std::array<glm::vec3, 3> Positions;
 	};
 
-	struct Quad
+	struct Quad : public BasicFace<4>
 	{
 		static constexpr inline size_t getElementCount() { return 4; }
 		static constexpr inline size_t getTriangleCount() { return 2; }
-
-		std::array<glm::vec3, 4> Positions;
 	};
 
 	namespace Utils
@@ -121,7 +123,7 @@ namespace Brickview
 				indices.push_back(t);
 			}
 		}
-
+		
 		// Utils function
 		static std::string getComment(const std::string& line)
 		{

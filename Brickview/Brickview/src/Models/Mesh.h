@@ -22,19 +22,11 @@ namespace Brickview
 
 	struct TriangleFace
 	{
+		TriangleFace(uint32_t i1, uint32_t i2, uint32_t i3)
+			: m_indices{ i1, i2, i3 }
+		{}
 		TriangleFace()
 			: m_indices{ 0, 0, 0 }
-		{}
-		TriangleFace(const std::array<uint32_t, 3>& data)
-			: m_indices(data)
-		{}
-		TriangleFace(const std::initializer_list<uint32_t>& data)
-			: m_indices
-			{
-				*(data.begin() + 0), 
-				*(data.begin() + 1), 
-				*(data.begin() + 2)
-			}
 		{}
 
 		uint32_t getIndex1() const { return m_indices[0]; }
