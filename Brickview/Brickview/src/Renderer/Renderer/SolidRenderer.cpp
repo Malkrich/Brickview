@@ -72,15 +72,15 @@ namespace Brickview
 	void SolidRenderer::flush()
 	{
 		// Meshes
+		m_rendererManager->setData("Meshes",
+			m_meshVertices.size() * sizeof(SolidRendererTypes::MeshVertex),
+			(void*)m_meshVertices.data(),
+			m_meshIndices.size() * sizeof(TriangleFace),
+			(void*)m_meshIndices.data());
+		m_rendererManager->setUniforms("Meshes", m_meshUniforms);
+
 		if (m_meshVertices.size() != 0)
 		{
-			m_rendererManager->setData("Meshes",
-				m_meshVertices.size() * sizeof(SolidRendererTypes::MeshVertex),
-				(void*)m_meshVertices.data(),
-				m_meshIndices.size() * sizeof(TriangleFace),
-				(void*)m_meshIndices.data());
-			m_rendererManager->setUniforms("Meshes", m_meshUniforms);
-
 			m_meshVertices.clear();
 			m_meshIndices.clear();
 		}

@@ -122,31 +122,31 @@ namespace Brickview
 	void RenderedRenderer::flush()
 	{
 		// Meshes
+		m_rendererManager->setData("Meshes",
+			m_meshVertices.size() * sizeof(RenderedRendererTypes::MeshVertex),
+			(void*)m_meshVertices.data(),
+			m_meshIndices.size() * sizeof(TriangleFace),
+			(void*)m_meshIndices.data());
+		m_rendererManager->setUniforms("Meshes", m_meshUniforms);
+
 		if (m_meshVertices.size() != 0)
 		{
-			m_rendererManager->setData("Meshes",
-				m_meshVertices.size() * sizeof(RenderedRendererTypes::MeshVertex),
-				(void*)m_meshVertices.data(),
-				m_meshIndices.size() * sizeof(TriangleFace),
-				(void*)m_meshIndices.data());
-			m_rendererManager->setUniforms("Meshes", m_meshUniforms);
-
 			m_meshVertices.clear();
 			m_meshIndices.clear();
 			m_statistics.DrawCalls++;
 		}
 
 		// Lights
+		m_rendererManager->setVisible("Lights", true);
+		m_rendererManager->setData("Lights",
+			m_lightVertices.size() * sizeof(RenderedRendererTypes::LightVertex),
+			(void*)m_lightVertices.data(),
+			m_lightIndices.size() * sizeof(TriangleFace),
+			(void*)m_lightIndices.data());
+		m_rendererManager->setUniforms("Lights", m_lightUniforms);
+
 		if (m_lightVertices.size() != 0)
 		{
-			m_rendererManager->setVisible("Lights", true);
-			m_rendererManager->setData("Lights",
-				m_lightVertices.size() * sizeof(RenderedRendererTypes::LightVertex),
-				(void*)m_lightVertices.data(),
-				m_lightIndices.size() * sizeof(TriangleFace),
-				(void*)m_lightIndices.data());
-			m_rendererManager->setUniforms("Lights", m_lightUniforms);
-
 			m_lightVertices.clear();
 			m_lightIndices.clear();
 			m_statistics.DrawCalls++;
