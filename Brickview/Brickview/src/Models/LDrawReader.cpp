@@ -173,6 +173,11 @@ namespace Brickview
 					indexOffset += 4;
 					break;
 				}
+				case LineType::SubFileRef:
+				{
+					BV_LOG_WARN("The file {} contains sub-mesh references", filePath.generic_string());
+					break;
+				}
 			}
 		}
 
