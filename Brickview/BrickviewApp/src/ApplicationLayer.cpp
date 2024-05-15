@@ -6,6 +6,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <filesystem>
+
 namespace Brickview
 {
 
@@ -26,18 +28,8 @@ namespace Brickview
 		m_viewport = createScope<Viewport>(width, height);
 
 		// New lego piece system
-		m_ldrawBrick = Mesh::load("data/LDraw/p/4-4cyls.dat");
-		// Basic obj files
-		m_legoPieceMesh = Mesh::load("data/Models/Brick.obj");
-		m_planeMesh = Mesh::load("data/Models/Plane.obj");
-
-		// Piece 1
-		m_legoPiecePosition1 = { -1.0f, 0.0f, 0.0f };
-		m_legoPieceMaterial1.Color = { 0.8f, 0.2f, 0.1f };
-
-		// Piece 2
-		m_legoPiecePosition2 = { 1.0f, 0.0f, 0.0f };
-		m_legoPieceMaterial2.Color = { 0.2f, 0.2f, 0.8f };
+		m_ldrawBrick = Mesh::load(m_ldrawDir / "4-4cyls.dat");
+		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_cameraControl = CameraController();
 
@@ -76,7 +68,7 @@ namespace Brickview
 	{
 		if (e.getKeyCode() == BV_KEY_KP_0)
 		{
-			m_cameraControl.setTargetPoint(m_legoPiecePosition1);
+			m_cameraControl.setTargetPoint({ 0.0f, 0.0f, 0.0f });
 		}
 		return true;
 	}
@@ -88,7 +80,7 @@ namespace Brickview
 		m_viewport->beginFrame();
 		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-		Lego3DRenderer::drawMesh(m_ldrawBrick, m_legoPieceMaterial1, glm::mat4(1.0f));
+		Lego3DRenderer::drawMesh(m_ldrawBrick, m_ldrawBrickMaterial, glm::mat4(1.0f));
 
 		Lego3DRenderer::end();
 		m_viewport->endFrame();
@@ -120,7 +112,7 @@ namespace Brickview
 		ImGui::End();
 
 		// Scene hierarchy
-		ImGui::Begin("Scene:");
+		ImGui::Begin("Scene:", nullptr, ImGuiWindowFlags_NoNav);
 		ImGui::SeparatorText("Scene hierarchy:");
 
 		// Light
@@ -128,15 +120,38 @@ namespace Brickview
 		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
 		ImGui::Separator();
 
-		// Lego Piece 1
-		ImGui::SliderFloat3("Lego Piece Position 1", (float*)glm::value_ptr(m_legoPiecePosition1), -5.0f, 5.0f);
-		ImGui::ColorEdit3("Lego Piece Color 1", (float*)glm::value_ptr(m_legoPieceMaterial1.Color));
-		ImGui::Separator();
+		if (ImGui::Button("<"))
+		{
+			if (m_fileIndexOffset > 0)
+				m_fileIndexOffset -= m_maxDisplayableFiles;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button(">"))
+			m_fileIndexOffset += m_maxDisplayableFiles;
 
-		// Lego Piece 1
-		ImGui::SliderFloat3("Lego Piece Position 2", (float*)glm::value_ptr(m_legoPiecePosition2), -5.0f, 5.0f);
-		ImGui::ColorEdit3("Lego Piece Color 2", (float*)glm::value_ptr(m_legoPieceMaterial2.Color));
-		ImGui::Separator();
+		uint32_t fileIndex = 0;
+		bool selected = false;
+		for (const auto& file : std::filesystem::directory_iterator(m_ldrawDir))
+		{
+			fileIndex++;
+			if (fileIndex > m_fileIndexOffset + m_maxDisplayableFiles)
+				break;
+			if (fileIndex <= m_fileIndexOffset && fileIndex != 0)
+				continue;
+
+			const std::filesystem::path& filePath = file.path();
+			std::string fileName = filePath.filename().string();
+
+			std::string itemName = StringUtils::format("%i : %s", fileIndex, fileName.c_str());
+			selected = fileIndex == m_selectedMesh;
+			if (ImGui::Selectable(itemName.c_str(), selected))
+			{
+				m_selectedMesh = fileIndex;
+				m_ldrawBrick = Mesh::load(filePath);
+			}
+
+			//ImGui::Text("%i : %s", fileIndex, fileName.c_str());
+		}
 
 		ImGui::End();
 

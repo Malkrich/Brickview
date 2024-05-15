@@ -31,14 +31,14 @@ namespace Brickview
 	private:
 		Scope<Viewport> m_viewport = nullptr;
 
-		Ref<Mesh> m_legoPieceMesh;
-		Ref<Mesh> m_planeMesh;
 		Ref<Mesh> m_ldrawBrick;
 
-		glm::vec3 m_legoPiecePosition1;
-		Material m_legoPieceMaterial1;
-		glm::vec3 m_legoPiecePosition2;
-		Material m_legoPieceMaterial2;
+		std::filesystem::path m_ldrawDir = "data/LDraw/p/";
+		const uint32_t m_maxDisplayableFiles = 10;
+		uint32_t m_fileIndexOffset = 0;
+		uint32_t m_selectedMesh = 1;
+
+		Material m_ldrawBrickMaterial;
 
 		Light m_light;
 		CameraController m_cameraControl;
