@@ -42,7 +42,7 @@ namespace Brickview
 
 		Light m_light;
 		CameraController m_cameraControl;
-		bool m_solidView = false;
+		RenderType m_renderType = RenderType::Rendered;
 
 		float m_dt = 0.0f;
 	};

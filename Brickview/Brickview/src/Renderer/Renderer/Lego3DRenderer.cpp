@@ -78,12 +78,6 @@ namespace Brickview
 		s_lego3DRendererData->drawLights = drawLights;
 	}
 
-	RenderType Lego3DRenderer::getRenderType()
-	{
-		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");
-		return s_lego3DRendererData->RenderType;
-	}
-
 	void Lego3DRenderer::setRenderType(RenderType type)
 	{
 		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");

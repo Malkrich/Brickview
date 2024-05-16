@@ -160,12 +160,12 @@ namespace Brickview
 		// Render Type
 		ImGui::SeparatorText("Render Settings:");
 
-		int32_t renderTypeIdx = (uint32_t)Lego3DRenderer::getRenderType();
 		std::array<const char*, 2> renderTypeItems = { "Solid", "Rendered" };
-		if (ImGui::Combo("Render type", &renderTypeIdx, renderTypeItems.data(), renderTypeItems.size()))
+		int renderTypeIndex = (int)m_renderType;
+		if (ImGui::Combo("Render type", &renderTypeIndex, renderTypeItems.data(), renderTypeItems.size()))
 		{
-			RenderType newRenderType = (RenderType)renderTypeIdx;
-			Lego3DRenderer::setRenderType(newRenderType);
+			m_renderType = (RenderType)renderTypeIndex;
+			Lego3DRenderer::setRenderType(m_renderType);
 		}
 
 		bool drawLight = Lego3DRenderer::isDrawingLights();
