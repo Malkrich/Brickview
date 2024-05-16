@@ -39,11 +39,24 @@ namespace Brickview
 		static constexpr inline size_t getTriangleCount() { return 2; }
 	};
 
+	struct SubMeshData
+	{
+		std::filesystem::path FilePath;
+		glm::mat4 Transform;
+	};
+
 	namespace Utils
 	{
-		static inline glm::vec3 LDUToMM(const glm::vec3& v)
+		template<typename T>
+		static inline glm::vec3 LDUToMM(const T& v)
 		{
 			return v * 0.4f;
+		}
+
+		template<typename T>
+		static inline glm::vec3 LDUToM(const T& v)
+		{
+			return LDUToMM<T>(v) / 100.0f;
 		}
 
 		static LineType getPrefix(const std::string& line)
@@ -72,56 +85,81 @@ namespace Brickview
 		}
 
 		template<typename FaceType>
-		static glm::vec3 computeNormal(const FaceType& triangle)
+		static void addFace(const glm::mat4& transform, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices, const std::string& line, uint32_t indexOffset)
 		{
-			glm::vec3 u = glm::normalize(triangle.Positions[1] - triangle.Positions[0]);
-			glm::vec3 v = glm::normalize(triangle.Positions[2] - triangle.Positions[0]);
-			return glm::cross(u, v);
-		}
-
-		template<typename FaceType>
-		static FaceType getFaceData(const std::string& line)
-		{
-			FaceType face;
-
 			size_t startPos = StringUtils::findNthCharacter(line, ' ', 2);
 			std::string lineData = line.substr(startPos + 1, line.size() - startPos + 1);
 			std::stringstream ss(lineData);
 
+			FaceType face;
 			for (size_t i = 0; i < FaceType::getElementCount(); i++)
 			{
 				glm::vec3 pos;
 				ss >> pos.x >> pos.y >> pos.z;
-				face.Positions[i] = LDUToMM(pos);
+				face.Positions[i] = transform * glm::vec4(pos, 1.0f);
 			}
 
-			return face;
-		}
+			glm::vec3 u = face.Positions[1] - face.Positions[0];
+			glm::vec3 v = face.Positions[2] - face.Positions[0];
+			glm::vec3 normal = glm::normalize(glm::cross(u, v));
 
-		template<typename FaceType>
-		static void addFace(std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices, const std::string& line, uint32_t indexOffset)
-		{
-			FaceType faceData = Utils::getFaceData<FaceType>(line);
-			glm::vec3 normal = Utils::computeNormal<FaceType>(faceData);
-
-			// add new data
+			// Vertices
 			vertices.reserve(vertices.size() + FaceType::getElementCount());
-			for (const auto& position : faceData.Positions)
+			for (const auto& position : face.Positions)
 				vertices.push_back({ position, normal });
 
+			// Indices
 			indices.reserve(indices.size() + FaceType::getTriangleCount());
-			uint32_t offset = 0;
-			for (uint32_t i = 0; i < FaceType::getTriangleCount(); i++)
+			switch (FaceType::getTriangleCount())
 			{
-				TriangleFace t = {
-					(offset + 0) % FaceType::getElementCount(),
-					(offset + 1) % FaceType::getElementCount(),
-					(offset + 2) % FaceType::getElementCount()
-				};
-				t.addOffset(indexOffset);
-				offset += 2;
-				indices.push_back(t);
+				case 1:
+				{
+					TriangleFace t = { 0, 1, 2 };
+					t.addOffset(indexOffset);
+					indices.push_back(t);
+					return;
+				}
+				case 2:
+				{
+					TriangleFace t1 = { 0, 1, 2 };
+					TriangleFace t2 = { 2, 3, 0 };
+					t1.addOffset(indexOffset);
+					t2.addOffset(indexOffset);
+					indices.push_back(t1);
+					indices.push_back(t2);
+					return;
+				}
 			}
+		}
+
+		static SubMeshData readSubMesh(const std::string& line)
+		{
+			// find file name
+			size_t lastSpace      = line.rfind(' ');
+			size_t fileNameLength = line.size() - lastSpace;
+			std::string fileName  = line.substr(lastSpace + 1, fileNameLength);
+
+			// find transform
+			size_t secondSpace = StringUtils::findNthCharacter(line, ' ', 2);
+			size_t transformDataLength = lastSpace - secondSpace;
+			std::string transformData = line.substr(secondSpace + 1, transformDataLength);
+			std::stringstream ss(transformData);
+
+			float a, b, c, d, e, f, g, h, i, x, y, z;
+			ss >> x >> y >> z 
+				>> a >> b >> c 
+				>> d >> e >> f 
+				>> g >> h >> i;
+
+			SubMeshData subMesh;
+			subMesh.FilePath = fileName;
+			subMesh.Transform = glm::mat4(
+				a, d, g, 0.0f,
+				b, e, h, 0.0f,
+				c, f, i, 0.0f,
+				x, y, z, 1.0f);
+
+			return subMesh;
 		}
 		
 		// Utils function
@@ -143,10 +181,41 @@ namespace Brickview
 			return false;
 		}
 
+		std::queue<SubMeshData> subMeshes;
+		SubMeshData initialMesh = { filePath, glm::mat4(1.0f) };
+		subMeshes.push(initialMesh);
+
+		uint32_t meshCount = 0;
+		do
+		{
+			const auto& mesh = subMeshes.front();
+			readFile(mesh.FilePath, mesh.Transform, vertices, indices, subMeshes);
+			meshCount++;
+			subMeshes.pop();
+		} while (!subMeshes.empty());
+		BV_LOG_INFO("Loaded {} meshes.", meshCount);
+
+		for (auto& vertex : vertices)
+			vertex.Position = Utils::LDUToM(vertex.Position);
+
+		return true;
+	}
+
+	bool LDrawReader::readFile(const std::filesystem::path& filePath, const glm::mat4& transform,
+		std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices,
+		std::queue<SubMeshData>& subMeshes)
+	{
+		if (!std::filesystem::exists(filePath))
+		{
+			BV_LOG_ERROR("Couldn't load file: {}", filePath.generic_string());
+			return false;
+		}
+
+		std::filesystem::path currentDirectory = filePath.parent_path();
 		std::ifstream file(filePath);
 		std::string line;
 		std::stringstream stringStr;
-		uint32_t indexOffset = 0;
+		uint32_t indexOffset = vertices.size();
 
 		while (std::getline(file, line))
 		{
@@ -163,19 +232,27 @@ namespace Brickview
 			{
 				case LineType::Triangle:
 				{
-					Utils::addFace<Triangle>(vertices, indices, line, indexOffset);
+					Utils::addFace<Triangle>(transform, vertices, indices, line, indexOffset);
 					indexOffset += 3;
 					break;
 				}
 				case LineType::Quadrilateral:
 				{
-					Utils::addFace<Quad>(vertices, indices, line, indexOffset);
+					Utils::addFace<Quad>(transform, vertices, indices, line, indexOffset);
 					indexOffset += 4;
 					break;
 				}
 				case LineType::SubFileRef:
 				{
-					BV_LOG_WARN("The file {} contains sub-mesh references", filePath.generic_string());
+					SubMeshData subMesh = Utils::readSubMesh(line);
+
+					auto realFilePath = currentDirectory / subMesh.FilePath;
+					auto realTransform = transform * subMesh.Transform;
+					subMesh.FilePath = realFilePath;
+					subMesh.Transform = realTransform;
+					subMeshes.push(subMesh);
+
+					BV_LOG_INFO("Added {} to the mesh queue", subMesh.FilePath.generic_string());
 					break;
 				}
 			}

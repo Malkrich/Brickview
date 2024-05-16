@@ -34,7 +34,7 @@ namespace Brickview
 		m_cameraControl = CameraController(ccSpec);
 
 		// New lego piece system
-		m_ldrawBrick = Mesh::load(m_ldrawDir / "4-4cyls.dat");
+		m_ldrawBrick = Mesh::load(m_ldrawDir / "003238c.dat");
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };

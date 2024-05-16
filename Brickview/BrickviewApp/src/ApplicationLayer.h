@@ -33,7 +33,7 @@ namespace Brickview
 
 		Ref<Mesh> m_ldrawBrick;
 
-		std::filesystem::path m_ldrawDir = "data/LDraw/p/";
+		std::filesystem::path m_ldrawDir = "data/LDraw/parts/";
 		const uint32_t m_maxDisplayableFiles = 10;
 		uint32_t m_fileIndexOffset = 0;
 		uint32_t m_selectedMesh = 1;
