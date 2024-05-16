@@ -93,9 +93,4 @@ namespace Brickview
 		flush();
 	}
 
-	void SolidRenderer::updateShaders(const Ref<ShaderLibrary>& shaderLib)
-	{
-		m_rendererManager->setShader("Meshes", shaderLib->get("Solid"));
-	}
-
 }

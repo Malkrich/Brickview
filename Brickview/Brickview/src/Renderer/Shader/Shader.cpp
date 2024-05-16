@@ -131,16 +131,7 @@ namespace Brickview
 
     Shader::Shader(const std::filesystem::path& filePath)
     {
-        auto shaderSources = extractShaderSources(filePath);
-        m_shaderProgramID = compileAndLink(shaderSources);
-
-        std::string path = filePath.generic_string();
-        size_t lastSlash = path.find_last_of("/\\");
-        lastSlash        = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-        size_t lastPoint = path.rfind('.');
-        lastPoint        = lastPoint == std::string::npos ? path.size() : lastPoint;
-        size_t count     = lastPoint - lastSlash;
-        m_name           = path.substr(lastSlash, count);
+        invalidate(filePath);
     }
 
     Shader::~Shader()
@@ -174,6 +165,25 @@ namespace Brickview
 
             BV_ASSERT(false, "Uniform type not implemented");
         }
+    }
+
+    void Shader::invalidate(const std::filesystem::path& filePath)
+    {
+        if (m_shaderProgramID)
+        {
+            glDeleteProgram(m_shaderProgramID);
+        }
+
+        auto shaderSources = extractShaderSources(filePath);
+        m_shaderProgramID = compileAndLink(shaderSources);
+
+        std::string path = filePath.generic_string();
+        size_t lastSlash = path.find_last_of("/\\");
+        lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+        size_t lastPoint = path.rfind('.');
+        lastPoint = lastPoint == std::string::npos ? path.size() : lastPoint;
+        size_t count = lastPoint - lastSlash;
+        m_name = path.substr(lastSlash, count);
     }
 
     void Shader::setFloat3(const std::string& name, const void* data)

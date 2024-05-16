@@ -58,14 +58,6 @@ namespace Brickview
 		return s_lego3DRendererData->ShaderLibrary;
 	}
 
-	void Lego3DRenderer::reloadShader(const std::string& shaderName)
-	{
-		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");
-		s_lego3DRendererData->ShaderLibrary->reload(shaderName);
-		
-		s_lego3DRendererData->Renderer->updateShaders(s_lego3DRendererData->ShaderLibrary);
-	}
-
 	bool Lego3DRenderer::isDrawingLights()
 	{
 		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");

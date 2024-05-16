@@ -38,12 +38,6 @@ namespace Brickview
 	{
 	}
 
-	void RenderedRenderer::updateShaders(const Ref<ShaderLibrary>& shaderLib)
-	{
-		m_rendererManager->setShader("Meshes", shaderLib->get("LegoPiece"));
-		m_rendererManager->setShader("Lights", shaderLib->get("Light"));
-	}
-
 	void RenderedRenderer::begin(const Camera& camera, const Light& light)
 	{
 		m_viewProjectionMatrix = camera.getViewProjectionMatrix();

@@ -48,9 +48,13 @@ namespace Brickview
 		void bind() const;
 		void unbind() const;
 
+		void reload(const std::filesystem::path& filePath) { invalidate(filePath); }
+
 		void setUniforms(const UniformMap& uniforms);
 
 	private:
+		void invalidate(const std::filesystem::path& filePath);
+
 		void setFloat3(const std::string& name, const void* data);
 		void setMat4(const std::string& name, const void* data);
 

@@ -119,13 +119,16 @@ namespace Brickview
 		ImGui::Begin("Shaders");
 
 		const Ref<ShaderLibrary> shaderLibrary = Lego3DRenderer::getShaderLibrary();
-		for (const auto& [name, shader] : *shaderLibrary)
+		for (const auto& [name, shaderData] : *shaderLibrary)
 		{
 			ImGui::Text("%s", name.c_str());
 			ImGui::SameLine();
 			std::string buttonName = std::format("Reload##{}", name);
 			if (ImGui::Button(buttonName.c_str()))
-				Lego3DRenderer::reloadShader(name);
+			{
+				std::filesystem::path shaderFilePath = shaderData.FilePath;
+				shaderData.Shader->reload(shaderFilePath);
+			}
 		}
 
 		ImGui::End();

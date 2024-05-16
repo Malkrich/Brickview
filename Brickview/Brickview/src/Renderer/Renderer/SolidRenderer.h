@@ -34,8 +34,6 @@ namespace Brickview
 		virtual void drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform) override;
 		virtual void drawLights(const Light& light) override;
 
-		virtual void updateShaders(const Ref<ShaderLibrary>& shaderLib);
-
 	private:
 		void flush();
 
