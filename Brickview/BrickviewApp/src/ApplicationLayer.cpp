@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <filesystem>
+#include <format>
 
 namespace Brickview
 {
@@ -121,8 +122,8 @@ namespace Brickview
 		for (const auto& [name, shader] : *shaderLibrary)
 		{
 			ImGui::Text("%s", name.c_str());
-			std::string buttonName = StringUtils::format("Reload##%s", name.c_str());
 			ImGui::SameLine();
+			std::string buttonName = std::format("Reload##{}", name);
 			if (ImGui::Button(buttonName.c_str()))
 				Lego3DRenderer::reloadShader(name);
 		}
@@ -151,24 +152,26 @@ namespace Brickview
 		bool selected = false;
 		for (const auto& file : std::filesystem::directory_iterator(m_ldrawDir))
 		{
-			fileIndex++;
-			if (fileIndex > m_fileIndexOffset + m_maxDisplayableFiles)
-				break;
-			if (fileIndex <= m_fileIndexOffset && fileIndex != 0)
+			if (fileIndex < m_fileIndexOffset)
+			{
+				fileIndex++;
 				continue;
+			}
+			if (fileIndex > m_fileIndexOffset + m_maxDisplayableFiles - 1)
+				break;
 
 			const std::filesystem::path& filePath = file.path();
 			std::string fileName = filePath.filename().string();
 
-			std::string itemName = StringUtils::format("%i : %s", fileIndex, fileName.c_str());
 			selected = fileIndex == m_selectedMesh;
+			std::string itemName = std::format("{} : {}", fileIndex, fileName);
 			if (ImGui::Selectable(itemName.c_str(), selected))
 			{
 				m_selectedMesh = fileIndex;
 				m_ldrawBrick = Mesh::load(filePath);
 			}
 
-			//ImGui::Text("%i : %s", fileIndex, fileName.c_str());
+			fileIndex++;
 		}
 
 		ImGui::End();
