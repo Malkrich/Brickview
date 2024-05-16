@@ -27,11 +27,14 @@ namespace Brickview
 		uint32_t height = Input::getWindowSize().y;
 		m_viewport = createScope<Viewport>(width, height);
 
+		// Camera
+		CameraControllerSpecifications ccSpec;
+		ccSpec.LaptopMode = m_laptopMode;
+		m_cameraControl = CameraController(ccSpec);
+
 		// New lego piece system
 		m_ldrawBrick = Mesh::load(m_ldrawDir / "4-4cyls.dat");
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
-
-		m_cameraControl = CameraController();
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
 		m_light.Color = { 1.0f, 1.0f, 1.0f };
@@ -89,6 +92,21 @@ namespace Brickview
 	void ApplicationLayer::onGuiRender()
 	{
 		beginDockspace();
+
+		// Menu
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("Mode"))
+			{
+				if (ImGui::MenuItem("Laptop mode", nullptr, m_laptopMode))
+				{
+					m_laptopMode = !m_laptopMode;
+					m_cameraControl.setLaptopMode(m_laptopMode);
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::EndMenuBar();
+		}
 
 		// Viewport
 		m_viewport->onGuiRender();
@@ -196,7 +214,7 @@ namespace Brickview
 
 		// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
 		// because it would be confusing to have two docking targets within each others.
-		ImGuiWindowFlags window_flags = /*ImGuiWindowFlags_MenuBar |*/ ImGuiWindowFlags_NoDocking;
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
 		if (opt_fullscreen)
 		{
 			ImGuiViewport* viewport = ImGui::GetMainViewport();

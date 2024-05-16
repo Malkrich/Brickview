@@ -39,10 +39,11 @@ namespace Brickview
 		uint32_t m_selectedMesh = 1;
 
 		Material m_ldrawBrickMaterial;
-
 		Light m_light;
-		CameraController m_cameraControl;
 		RenderType m_renderType = RenderType::Rendered;
+
+		CameraController m_cameraControl;
+		bool m_laptopMode = true;
 
 		float m_dt = 0.0f;
 	};
