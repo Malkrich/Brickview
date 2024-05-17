@@ -14,11 +14,13 @@ namespace Brickview
 
 	ApplicationLayer::ApplicationLayer()
 	{
+		LDrawReader::init();
 		Lego3DRenderer::init();
 	}
 
 	ApplicationLayer::~ApplicationLayer()
 	{
+		LDrawReader::shutdown();
 		Lego3DRenderer::shutdown();
 	}
 
@@ -33,8 +35,12 @@ namespace Brickview
 		ccSpec.LaptopMode = m_laptopMode;
 		m_cameraControl = CameraController(ccSpec);
 
-		// New lego piece system
-		m_ldrawBrick = Mesh::load(m_ldrawDir / "003238c.dat");
+		// New lego piece system:
+		m_ldrawDir = "data/LDraw/parts/";
+//		m_ldrawBrickTransform = glm::rotate(glm::mat4(1.0f), 45.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+//		m_ldrawBrick = Mesh::load(m_ldrawDir / "test.dat");
+		m_ldrawBrickTransform = glm::mat4(1.0f);
+		m_ldrawBrick = Mesh::load(m_ldrawDir / "1.dat");
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
@@ -84,7 +90,7 @@ namespace Brickview
 		m_viewport->beginFrame();
 		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-		Lego3DRenderer::drawMesh(m_ldrawBrick, m_ldrawBrickMaterial, glm::mat4(1.0f));
+		Lego3DRenderer::drawMesh(m_ldrawBrick, m_ldrawBrickMaterial, m_ldrawBrickTransform);
 
 		Lego3DRenderer::end();
 		m_viewport->endFrame();

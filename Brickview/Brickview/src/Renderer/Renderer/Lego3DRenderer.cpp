@@ -95,6 +95,9 @@ namespace Brickview
 
 	void Lego3DRenderer::drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
 	{
+		if (mesh->isEmpty())
+			return;
+
 		s_lego3DRendererData->Renderer->drawMesh(mesh, material, transform);
 	}
 

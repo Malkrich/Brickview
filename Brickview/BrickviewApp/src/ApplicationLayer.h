@@ -32,8 +32,9 @@ namespace Brickview
 		Scope<Viewport> m_viewport = nullptr;
 
 		Ref<Mesh> m_ldrawBrick;
+		glm::mat4 m_ldrawBrickTransform;
 
-		std::filesystem::path m_ldrawDir = "data/LDraw/parts/";
+		std::filesystem::path m_ldrawDir;
 		const uint32_t m_maxDisplayableFiles = 10;
 		uint32_t m_fileIndexOffset = 0;
 		uint32_t m_selectedMesh = 1;

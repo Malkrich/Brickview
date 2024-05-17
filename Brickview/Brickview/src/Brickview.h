@@ -23,6 +23,7 @@
 #include "Renderer/Material.h"
 
 // 3D
+#include "Models/LDrawReader.h"
 #include "Models/Mesh.h"
 
 // Utils

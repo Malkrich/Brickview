@@ -4,11 +4,19 @@
 
 #include <glm/glm.hpp>
 
-#include <filesystem>
 #include <charconv>
 
 namespace Brickview
 {
+
+	struct LDrawReaderData
+	{
+		std::filesystem::path BaseDirectory;
+		std::filesystem::path SubPartsDirectory;
+		std::filesystem::path PartsDirectory;
+	};
+
+	static LDrawReaderData* s_ldrawData = nullptr;
 
 	enum class LineType
 	{
@@ -56,7 +64,7 @@ namespace Brickview
 		template<typename T>
 		static inline glm::vec3 LDUToM(const T& v)
 		{
-			return LDUToMM<T>(v) / 100.0f;
+			return LDUToMM<T>(v) / 1000.0f;
 		}
 
 		static LineType getPrefix(const std::string& line)
@@ -101,7 +109,7 @@ namespace Brickview
 
 			glm::vec3 u = face.Positions[1] - face.Positions[0];
 			glm::vec3 v = face.Positions[2] - face.Positions[0];
-			glm::vec3 normal = glm::normalize(glm::cross(u, v));
+			glm::vec3 normal = glm::normalize(glm::cross(v, u));
 
 			// Vertices
 			vertices.reserve(vertices.size() + FaceType::getElementCount());
@@ -146,9 +154,9 @@ namespace Brickview
 			std::stringstream ss(transformData);
 
 			float a, b, c, d, e, f, g, h, i, x, y, z;
-			ss >> x >> y >> z 
-				>> a >> b >> c 
-				>> d >> e >> f 
+			ss  >> x >> y >> z
+				>> a >> b >> c
+				>> d >> e >> f
 				>> g >> h >> i;
 
 			SubMeshData subMesh;
@@ -171,6 +179,32 @@ namespace Brickview
 			commentLength           = firstSpace == std::string::npos ? 0 : commentLength;
 			return line.substr(firstSpace, commentLength);
 		}
+
+		bool isInPartsDirectory(const std::filesystem::path& filePath)
+		{
+			return std::filesystem::exists(s_ldrawData->PartsDirectory / filePath);
+		}
+
+		bool isInSubPartsDirectory(const std::filesystem::path& filePath)
+		{
+			return std::filesystem::exists(s_ldrawData->SubPartsDirectory / filePath);
+		}
+	}
+
+	void LDrawReader::init()
+	{
+		BV_ASSERT(!s_ldrawData, "LDrawReader engine already initialized!");
+
+		s_ldrawData                    = new LDrawReaderData();
+		s_ldrawData->BaseDirectory     = "./data/LDraw";
+		s_ldrawData->SubPartsDirectory = s_ldrawData->BaseDirectory / "p";
+		s_ldrawData->PartsDirectory    = s_ldrawData->BaseDirectory / "parts";
+	}
+
+	void LDrawReader::shutdown()
+	{
+		delete s_ldrawData;
+		s_ldrawData = nullptr;
 	}
 
 	bool LDrawReader::load(const std::filesystem::path& filePath, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices)
@@ -196,7 +230,7 @@ namespace Brickview
 		BV_LOG_INFO("Loaded {} meshes.", meshCount);
 
 		for (auto& vertex : vertices)
-			vertex.Position = Utils::LDUToM(vertex.Position);
+			vertex.Position = Utils::LDUToMM(vertex.Position);
 
 		return true;
 	}
@@ -220,13 +254,12 @@ namespace Brickview
 		while (std::getline(file, line))
 		{
 			LineType lineType = Utils::getPrefix(line);
-			uint32_t color;
+//			uint32_t color;
 
-			if (lineType == LineType::Empty)
+			if (lineType == LineType::Empty || lineType == LineType::Comment)
 				continue;
 
-			if (lineType != LineType::Comment)
-				color = Utils::getColorID(line);
+//			color = Utils::getColorID(line);
 
 			switch (lineType)
 			{
@@ -245,11 +278,22 @@ namespace Brickview
 				case LineType::SubFileRef:
 				{
 					SubMeshData subMesh = Utils::readSubMesh(line);
+					
+					if (Utils::isInPartsDirectory(subMesh.FilePath))
+					{
+						BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->PartsDirectory.generic_string());
+						subMesh.FilePath = s_ldrawData->PartsDirectory / subMesh.FilePath;
+					}
+					else if (Utils::isInSubPartsDirectory(subMesh.FilePath))
+					{
+						BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->SubPartsDirectory.generic_string());
+						subMesh.FilePath = s_ldrawData->SubPartsDirectory / subMesh.FilePath;
+					}
+					else
+						BV_LOG_ERROR("Sub nesh {} doen't exist!", subMesh.FilePath.generic_string());
 
-					auto realFilePath = currentDirectory / subMesh.FilePath;
-					auto realTransform = transform * subMesh.Transform;
-					subMesh.FilePath = realFilePath;
-					subMesh.Transform = realTransform;
+					subMesh.Transform *= transform;
+
 					subMeshes.push(subMesh);
 
 					BV_LOG_INFO("Added {} to the mesh queue", subMesh.FilePath.generic_string());

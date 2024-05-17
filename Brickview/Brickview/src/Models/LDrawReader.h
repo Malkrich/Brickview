@@ -3,6 +3,7 @@
 #include "Mesh.h"
 
 #include <filesystem>
+#include <queue>
 
 namespace Brickview
 {
@@ -12,6 +13,9 @@ namespace Brickview
 	class LDrawReader
 	{
 	public:
+		static void init();
+		static void shutdown();
+
 		static bool load(const std::filesystem::path& filePath, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices);
 
 	private:
