@@ -49,7 +49,6 @@ namespace Brickview
 			m_colorAttachment = 0;
 			m_depthAttachment = 0;
 		}
-
 		glCreateFramebuffers(1, &m_bufferID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_bufferID);
 

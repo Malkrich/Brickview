@@ -1,6 +1,8 @@
 #include "Pch.h"
 #include "Buffer.h"
 
+#include "Renderer/OpenGLError.h"
+
 #include <glad/glad.h>
 
 namespace Utils
@@ -64,6 +66,8 @@ namespace Brickview
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+
+		CHECK_GL_ERROR();
 	}
 
 	VertexBuffer::VertexBuffer(uint32_t size)
@@ -71,6 +75,8 @@ namespace Brickview
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
 		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+
+		CHECK_GL_ERROR();
 	}
 
 	VertexBuffer::~VertexBuffer()
@@ -82,11 +88,7 @@ namespace Brickview
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, m_bufferID);
 		// We first need to invalidate the buffer data and the copy the new buffer data
-		glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
-
-		void* vbo = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-		memcpy(vbo, data, size);
-		glUnmapBuffer(GL_ARRAY_BUFFER);
+		glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 	}
 
 	void VertexBuffer::bind() const
@@ -109,6 +111,8 @@ namespace Brickview
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+
+		CHECK_GL_ERROR();
 	}
 
 	IndexBuffer::IndexBuffer(uint32_t size)
@@ -117,6 +121,8 @@ namespace Brickview
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+
+		CHECK_GL_ERROR();
 	}
 
 	IndexBuffer::~IndexBuffer()
@@ -128,11 +134,7 @@ namespace Brickview
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferID);
 		// We first need to invalidate the buffer data and the copy the new buffer data
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
-		
-		void* ebo = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-		memcpy(ebo, data, size);
-		glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 		m_count = size / sizeof(unsigned int);
 	}
 
