@@ -6,16 +6,19 @@ namespace Brickview::StringUtils
 
 	size_t findNthCharacter(const std::string& data, char token, size_t nth)
 	{
-		size_t tokenCounter = 0;
-		size_t startPos = 0;
-		for (const char& c : data)
+		size_t charPos = 0;
+		size_t offset = 0;
+
+		for (uint32_t i = 0; i < nth; i++)
 		{
-			if (c == token)
-				tokenCounter++;
-			if (tokenCounter == nth)
-				return startPos;
-			startPos++;
+			charPos = data.find_first_of(token, offset);
+
+			if (charPos == std::string::npos)
+				break;
+
+			offset = charPos + 1;
 		}
+		return charPos;
 	}
 
 }
