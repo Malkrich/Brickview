@@ -23,6 +23,10 @@ namespace Brickview
 			std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices,
 			std::queue<SubMeshData>& subMeshes);
 
+		static bool isInPartsDirectory(const std::filesystem::path& filePath);
+		static bool isInSubPartsDirectory(const std::filesystem::path& filePath);
+
+		static bool isPrefixACommand(const std::string& prefix);
 	};
 
 }

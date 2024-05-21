@@ -14,6 +14,8 @@ namespace Brickview
 		std::filesystem::path BaseDirectory;
 		std::filesystem::path SubPartsDirectory;
 		std::filesystem::path PartsDirectory;
+
+		std::unordered_map<std::string, std::function<void(const std::string&)>> CommandFunctions;
 	};
 
 	static LDrawReaderData* s_ldrawData = nullptr;
@@ -67,7 +69,7 @@ namespace Brickview
 			return LDUToMM<T>(v) / 1000.0f;
 		}
 
-		static LineType getPrefix(const std::string& line)
+		static LineType getLineType(const std::string& line)
 		{
 			if (line.empty())
 				return LineType::Empty;
@@ -180,15 +182,23 @@ namespace Brickview
 			return line.substr(firstSpace, commentLength);
 		}
 
-		bool isInPartsDirectory(const std::filesystem::path& filePath)
+		static void readBFCCommand(const std::string& line)
 		{
-			return std::filesystem::exists(s_ldrawData->PartsDirectory / filePath);
+			size_t thirdSpace = StringUtils::findNthCharacter(line, ' ', 3);
 		}
 
-		bool isInSubPartsDirectory(const std::filesystem::path& filePath)
+		static std::string getCommandPrefix(const std::string& line)
 		{
-			return std::filesystem::exists(s_ldrawData->SubPartsDirectory / filePath);
+			// 0 BFC CCW
+
+			size_t firstSpace = line.find_first_of(' ') + 1;
+			size_t secondSpace = StringUtils::findNthCharacter(line, ' ', 2);
+			size_t commandPrefixLength = secondSpace - firstSpace;
+			auto commandPrefix = line.substr(firstSpace, commandPrefixLength);
+
+			return commandPrefix;
 		}
+
 	}
 
 	void LDrawReader::init()
@@ -199,6 +209,8 @@ namespace Brickview
 		s_ldrawData->BaseDirectory     = "./data/LDraw";
 		s_ldrawData->SubPartsDirectory = s_ldrawData->BaseDirectory / "p";
 		s_ldrawData->PartsDirectory    = s_ldrawData->BaseDirectory / "parts";
+
+		s_ldrawData->CommandFunctions["BFC"] = &Utils::readBFCCommand;
 	}
 
 	void LDrawReader::shutdown()
@@ -253,16 +265,27 @@ namespace Brickview
 
 		while (std::getline(file, line))
 		{
-			LineType lineType = Utils::getPrefix(line);
+			LineType lineType = Utils::getLineType(line);
 //			uint32_t color;
 
-			if (lineType == LineType::Empty || lineType == LineType::Comment)
+			if (lineType == LineType::Empty)
 				continue;
 
 //			color = Utils::getColorID(line);
 
 			switch (lineType)
 			{
+				case LineType::Comment:
+				{
+					std::string prefix = Utils::getCommandPrefix(line);
+
+					if (!isPrefixACommand(prefix))
+						break;
+
+					// Call command
+					s_ldrawData->CommandFunctions.at(prefix)(line);
+					break;
+				}
 				case LineType::Triangle:
 				{
 					Utils::addFace<Triangle>(transform, vertices, indices, line, indexOffset);
@@ -279,12 +302,12 @@ namespace Brickview
 				{
 					SubMeshData subMesh = Utils::readSubMesh(line);
 					
-					if (Utils::isInPartsDirectory(subMesh.FilePath))
+					if (isInPartsDirectory(subMesh.FilePath))
 					{
 						BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->PartsDirectory.generic_string());
 						subMesh.FilePath = s_ldrawData->PartsDirectory / subMesh.FilePath;
 					}
-					else if (Utils::isInSubPartsDirectory(subMesh.FilePath))
+					else if (isInSubPartsDirectory(subMesh.FilePath))
 					{
 						BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->SubPartsDirectory.generic_string());
 						subMesh.FilePath = s_ldrawData->SubPartsDirectory / subMesh.FilePath;
@@ -303,6 +326,21 @@ namespace Brickview
 		}
 
 		return true;
+	}
+
+	bool LDrawReader::isInPartsDirectory(const std::filesystem::path& filePath)
+	{
+		return std::filesystem::exists(s_ldrawData->PartsDirectory / filePath);
+	}
+
+	bool LDrawReader::isInSubPartsDirectory(const std::filesystem::path& filePath)
+	{
+		return std::filesystem::exists(s_ldrawData->SubPartsDirectory / filePath);
+	}
+
+	bool LDrawReader::isPrefixACommand(const std::string& prefix)
+	{
+		return s_ldrawData->CommandFunctions.find(prefix) != s_ldrawData->CommandFunctions.end();
 	}
 
 }
