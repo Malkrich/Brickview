@@ -44,6 +44,9 @@ namespace Brickview
 
 		m_camera.setPosition(newPosition);
 		m_camera.setRotation(newPitch, newYaw);
+
+		// reseting mouse offset to prevent the update of the orientation
+		m_mouseOffset = { 0, 0 };
 	}
 
 	void CameraController::onEvent(Event& e)
@@ -78,9 +81,6 @@ namespace Brickview
 			translation += up * (float)m_mouseOffset.y;
 			translation *= m_translationSensitivity;
 			m_targetPoint += translation;
-
-			// reseting mouse offset to prevent the update of the orientation
-			m_mouseOffset = { 0, 0 };
 		}
 
 		updatePosition();
