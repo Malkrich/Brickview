@@ -1,5 +1,5 @@
 #include "Pch.h"
-#include "LDrawReader.h"
+#include "LegoMeshLoader.h"
 #include "Utils/StringUtils.h"
 
 #include <glm/glm.hpp>
@@ -9,13 +9,19 @@
 namespace Brickview
 {
 
+	struct FileSpecifications
+	{
+		bool ClockwiseWinding = true;
+	};
+
 	struct LDrawReaderData
 	{
 		std::filesystem::path BaseDirectory;
 		std::filesystem::path SubPartsDirectory;
 		std::filesystem::path PartsDirectory;
 
-		std::unordered_map<std::string, std::function<void(const std::string&)>> CommandFunctions;
+		using CommandFunction = std::function<void(const std::string&, FileSpecifications&)>;
+		std::unordered_map<std::string, CommandFunction> CommandFunctions;
 	};
 
 	static LDrawReaderData* s_ldrawData = nullptr;
@@ -69,49 +75,55 @@ namespace Brickview
 			return LDUToMM<T>(v) / 1000.0f;
 		}
 
-		static LineType getLineType(const std::string& line)
+		static std::tuple<LineType, std::string> getLineType(const std::string& line)
 		{
 			if (line.empty())
-				return LineType::Empty;
+				return { LineType::Empty, line };
 
 			size_t firstSpace     = line.find_first_of(' ');
+			size_t lineLength     = line.size();
 			std::string strPrefix = line.substr(0, firstSpace);
+			std::string tail      = line.substr(firstSpace + 1, lineLength - firstSpace);
 			uint32_t lineType;
 			std::from_chars(strPrefix.data(), strPrefix.data() + strPrefix.size(), lineType);
 
-			return (LineType)lineType;
+			return { (LineType)lineType, tail };
 		}
 
-		static uint32_t getColorID(const std::string& line)
+		static std::tuple<uint32_t, std::string> getColorID(const std::string& line)
 		{
-			// ID colorID ...
+			// colorID ...
 
-			size_t firstSpace  = line.find_first_of(' ') + 1;
-			size_t secondSpace = line.find_first_of(' ', firstSpace);
-			std::string strColor = line.substr(firstSpace, secondSpace - firstSpace);
+			size_t strColorLength = line.find_first_of(' ');
+			size_t lineLength     = line.size();
+			std::string strColor  = line.substr(0, strColorLength);
 			uint32_t colorID;
 			std::from_chars(strColor.data(), strColor.data() + strColor.size(), colorID);
-			return colorID;
+
+			std::string coordData = line.substr(strColorLength + 1, lineLength - strColorLength);
+
+			return { colorID, coordData };
 		}
 
 		template<typename FaceType>
-		static void addFace(const glm::mat4& transform, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices, const std::string& line, uint32_t indexOffset)
+		static void addFace(const glm::mat4& transform, const FileSpecifications& spec, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices, const std::string& coordData, uint32_t indexOffset)
 		{
-			size_t startPos = StringUtils::findNthCharacter(line, ' ', 2);
-			std::string lineData = line.substr(startPos + 1, line.size() - startPos + 1);
-			std::stringstream ss(lineData);
+			std::stringstream ss(coordData);
 
 			FaceType face;
 			for (size_t i = 0; i < FaceType::getElementCount(); i++)
 			{
 				glm::vec3 pos;
 				ss >> pos.x >> pos.y >> pos.z;
+				pos.y *= -1.0f;
 				face.Positions[i] = transform * glm::vec4(pos, 1.0f);
 			}
 
 			glm::vec3 u = face.Positions[1] - face.Positions[0];
 			glm::vec3 v = face.Positions[2] - face.Positions[0];
 			glm::vec3 normal = glm::normalize(glm::cross(v, u));
+			if (!spec.ClockwiseWinding)
+				normal *= -1.0f; // Inverse normal
 
 			// Vertices
 			vertices.reserve(vertices.size() + FaceType::getElementCount());
@@ -120,26 +132,17 @@ namespace Brickview
 
 			// Indices
 			indices.reserve(indices.size() + FaceType::getTriangleCount());
-			switch (FaceType::getTriangleCount())
-			{
-				case 1:
-				{
-					TriangleFace t = { 0, 1, 2 };
-					t.addOffset(indexOffset);
-					indices.push_back(t);
-					return;
-				}
-				case 2:
-				{
-					TriangleFace t1 = { 0, 1, 2 };
-					TriangleFace t2 = { 2, 3, 0 };
-					t1.addOffset(indexOffset);
-					t2.addOffset(indexOffset);
-					indices.push_back(t1);
-					indices.push_back(t2);
-					return;
-				}
-			}
+
+			TriangleFace t = { 0, 1, 2 };
+			t.addOffset(indexOffset);
+			indices.push_back(t);
+
+			if (FaceType::getTriangleCount() == 1)
+				return;
+
+			t = { 2, 3, 0 };
+			t.addOffset(indexOffset);
+			indices.push_back(t);
 		}
 
 		static SubMeshData readSubMesh(const std::string& line)
@@ -164,10 +167,10 @@ namespace Brickview
 			SubMeshData subMesh;
 			subMesh.FilePath = fileName;
 			subMesh.Transform = glm::mat4(
-				a, d, g, 0.0f,
-				b, e, h, 0.0f,
-				c, f, i, 0.0f,
-				x, y, z, 1.0f);
+				a,  d,  g,  0.0f,
+				b,  e,  h,  0.0f,
+				c,  f,  i,  0.0f,
+				x, -y,  z,  1.0f);
 
 			return subMesh;
 		}
@@ -182,26 +185,42 @@ namespace Brickview
 			return line.substr(firstSpace, commentLength);
 		}
 
-		static void readBFCCommand(const std::string& line)
+		static void readBFCCommand(const std::string& commandContent, FileSpecifications& spec)
 		{
-			size_t thirdSpace = StringUtils::findNthCharacter(line, ' ', 3);
+			std::stringstream ss(commandContent);
+			while (ss.good())
+			{
+				std::string instruction;
+				ss >> instruction;
+
+				if (instruction == "CW")
+					spec.ClockwiseWinding = true;
+				else if (instruction == "CCW")
+					spec.ClockwiseWinding = false;
+				else if (instruction == "INVERTNEXT")
+					spec.ClockwiseWinding = !spec.ClockwiseWinding;
+				else
+					continue;
+			}
 		}
 
-		static std::string getCommandPrefix(const std::string& line)
+		static std::tuple<std::string, std::string> getCommandPrefix(const std::string& line)
 		{
-			// 0 BFC CCW
+			// Word
 
-			size_t firstSpace = line.find_first_of(' ') + 1;
-			size_t secondSpace = StringUtils::findNthCharacter(line, ' ', 2);
-			size_t commandPrefixLength = secondSpace - firstSpace;
-			auto commandPrefix = line.substr(firstSpace, commandPrefixLength);
+			size_t prefixLength = line.find_first_of(' ');
+			prefixLength        = prefixLength == std::string::npos ? line.size() : prefixLength;
+			size_t contentLength = line.size();
 
-			return commandPrefix;
+			std::string commandPrefix  = line.substr(0, prefixLength);
+			std::string commandContent = contentLength == prefixLength ? "" : line.substr(prefixLength + 1, contentLength - prefixLength);
+
+			return { commandPrefix, commandContent };
 		}
 
 	}
 
-	void LDrawReader::init()
+	void LegoMeshLoader::init()
 	{
 		BV_ASSERT(!s_ldrawData, "LDrawReader engine already initialized!");
 
@@ -213,13 +232,13 @@ namespace Brickview
 		s_ldrawData->CommandFunctions["BFC"] = &Utils::readBFCCommand;
 	}
 
-	void LDrawReader::shutdown()
+	void LegoMeshLoader::shutdown()
 	{
 		delete s_ldrawData;
 		s_ldrawData = nullptr;
 	}
 
-	bool LDrawReader::load(const std::filesystem::path& filePath, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices)
+	bool LegoMeshLoader::load(const std::filesystem::path& filePath, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices)
 	{
 		if (!std::filesystem::exists(filePath))
 		{
@@ -231,23 +250,20 @@ namespace Brickview
 		SubMeshData initialMesh = { filePath, glm::mat4(1.0f) };
 		subMeshes.push(initialMesh);
 
-		uint32_t meshCount = 0;
 		do
 		{
 			const auto& mesh = subMeshes.front();
 			readFile(mesh.FilePath, mesh.Transform, vertices, indices, subMeshes);
-			meshCount++;
 			subMeshes.pop();
 		} while (!subMeshes.empty());
-		BV_LOG_INFO("Loaded {} meshes.", meshCount);
 
 		for (auto& vertex : vertices)
-			vertex.Position = Utils::LDUToMM(vertex.Position);
+			vertex.Position = Utils::LDUToM(vertex.Position);
 
 		return true;
 	}
 
-	bool LDrawReader::readFile(const std::filesystem::path& filePath, const glm::mat4& transform,
+	bool LegoMeshLoader::readFile(const std::filesystem::path& filePath, const glm::mat4& transform,
 		std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices,
 		std::queue<SubMeshData>& subMeshes)
 	{
@@ -257,6 +273,8 @@ namespace Brickview
 			return false;
 		}
 
+		FileSpecifications spec;
+
 		std::filesystem::path currentDirectory = filePath.parent_path();
 		std::ifstream file(filePath);
 		std::string line;
@@ -265,42 +283,41 @@ namespace Brickview
 
 		while (std::getline(file, line))
 		{
-			LineType lineType = Utils::getLineType(line);
-//			uint32_t color;
+			auto [lineType, lineContent] = Utils::getLineType(line);
 
-			if (lineType == LineType::Empty)
+			if (lineType == LineType::Empty || lineType == LineType::Line) // TODO: Implement lines
 				continue;
 
-//			color = Utils::getColorID(line);
+			if (lineType == LineType::Comment)
+			{
+				auto [prefix, commandContent] = Utils::getCommandPrefix(lineContent);
 
+				if (!isPrefixACommand(prefix))
+					continue;
+
+				// Call command
+				s_ldrawData->CommandFunctions.at(prefix)(commandContent, spec);
+				continue;
+			}
+
+			auto [colorID, geoData] = Utils::getColorID(lineContent);
 			switch (lineType)
 			{
-				case LineType::Comment:
-				{
-					std::string prefix = Utils::getCommandPrefix(line);
-
-					if (!isPrefixACommand(prefix))
-						break;
-
-					// Call command
-					s_ldrawData->CommandFunctions.at(prefix)(line);
-					break;
-				}
 				case LineType::Triangle:
 				{
-					Utils::addFace<Triangle>(transform, vertices, indices, line, indexOffset);
+					Utils::addFace<Triangle>(transform, spec, vertices, indices, geoData, indexOffset);
 					indexOffset += 3;
 					break;
 				}
 				case LineType::Quadrilateral:
 				{
-					Utils::addFace<Quad>(transform, vertices, indices, line, indexOffset);
+					Utils::addFace<Quad>(transform, spec, vertices, indices, geoData, indexOffset);
 					indexOffset += 4;
 					break;
 				}
 				case LineType::SubFileRef:
 				{
-					SubMeshData subMesh = Utils::readSubMesh(line);
+					SubMeshData subMesh = Utils::readSubMesh(geoData);
 					
 					if (isInPartsDirectory(subMesh.FilePath))
 					{
@@ -315,7 +332,7 @@ namespace Brickview
 					else
 						BV_LOG_ERROR("Sub nesh {} doen't exist!", subMesh.FilePath.generic_string());
 
-					subMesh.Transform *= transform;
+					//subMesh.Transform *= transform;
 
 					subMeshes.push(subMesh);
 
@@ -328,17 +345,17 @@ namespace Brickview
 		return true;
 	}
 
-	bool LDrawReader::isInPartsDirectory(const std::filesystem::path& filePath)
+	bool LegoMeshLoader::isInPartsDirectory(const std::filesystem::path& filePath)
 	{
 		return std::filesystem::exists(s_ldrawData->PartsDirectory / filePath);
 	}
 
-	bool LDrawReader::isInSubPartsDirectory(const std::filesystem::path& filePath)
+	bool LegoMeshLoader::isInSubPartsDirectory(const std::filesystem::path& filePath)
 	{
 		return std::filesystem::exists(s_ldrawData->SubPartsDirectory / filePath);
 	}
 
-	bool LDrawReader::isPrefixACommand(const std::string& prefix)
+	bool LegoMeshLoader::isPrefixACommand(const std::string& prefix)
 	{
 		return s_ldrawData->CommandFunctions.find(prefix) != s_ldrawData->CommandFunctions.end();
 	}

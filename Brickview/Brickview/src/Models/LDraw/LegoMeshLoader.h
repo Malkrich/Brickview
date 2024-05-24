@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Mesh.h"
+#include "Models/Mesh.h"
 
 #include <filesystem>
 #include <queue>
@@ -10,7 +10,7 @@ namespace Brickview
 
 	struct SubMeshData;
 
-	class LDrawReader
+	class LegoMeshLoader
 	{
 	public:
 		static void init();

@@ -31,7 +31,9 @@ namespace Brickview
 	private:
 		Scope<Viewport> m_viewport = nullptr;
 
-		Ref<Mesh> m_ldrawBrick;
+		Ref<Mesh> m_planeMesh = nullptr;
+		Ref<Mesh> m_cubeMesh = nullptr;
+		Ref<Mesh> m_ldrawBrick = nullptr;
 		glm::mat4 m_ldrawBrickTransform;
 
 		std::filesystem::path m_ldrawDir;
@@ -44,7 +46,7 @@ namespace Brickview
 		RenderType m_renderType = RenderType::Rendered;
 
 		CameraController m_cameraControl;
-		bool m_laptopMode = true;
+		bool m_laptopMode = false;
 
 		float m_dt = 0.0f;
 	};

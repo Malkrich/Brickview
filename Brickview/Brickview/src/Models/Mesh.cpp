@@ -1,6 +1,6 @@
 #include "Pch.h"
 #include "Mesh.h"
-#include "Models/LDrawReader.h"
+#include "Models/LDraw/LegoMeshLoader.h"
 
 #define POSITION_IDX 0
 #define TEXTURE_IDX  1
@@ -153,7 +153,7 @@ namespace Brickview
 				loadSuccess = Utils::loadObj(filePath, vertices, indices);
 				break;
 			case ModelFileFormat::LDrawDat:
-				loadSuccess = LDrawReader::load(filePath, vertices, indices);
+				loadSuccess = LegoMeshLoader::load(filePath, vertices, indices);
 				break;
 		}
 		if (!loadSuccess)
