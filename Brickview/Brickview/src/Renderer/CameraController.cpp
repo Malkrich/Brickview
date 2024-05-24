@@ -116,7 +116,7 @@ namespace Brickview
 		if (!m_isViewportHovered)
 			return false;
 
-		static const float scrollSensitivity = 0.3f;
+		static const float scrollSensitivity = 0.05f;
 
 		m_distanceFromObject -= (float)e.getOffsetY() * scrollSensitivity;
 
