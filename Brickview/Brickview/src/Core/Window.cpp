@@ -33,10 +33,8 @@ namespace Brickview
 
 	void Window::initialize(const WindowSettings& windowSettings)
 	{
-		m_settings.name = windowSettings.name;
-		m_settings.width = windowSettings.width;
-		m_settings.height = windowSettings.height;
-
+		m_settings = windowSettings;
+		
 		/* Initialize the library */
 		if (!glfwInit())
 		{
@@ -45,8 +43,8 @@ namespace Brickview
 		}
 
 		/* Create a windowed mode window and its OpenGL context */
-		m_window = glfwCreateWindow(m_settings.width, m_settings.height,
-			m_settings.name.c_str(),
+		m_window = glfwCreateWindow(m_settings.Width, m_settings.Height,
+			m_settings.Name.c_str(),
 			NULL, NULL);
 
 		if (!m_window)
@@ -70,11 +68,14 @@ namespace Brickview
 		// set window settings as user pointer
 		glfwSetWindowUserPointer(m_window, &m_settings);
 
+		// VSync
+		glfwSwapInterval(m_settings.VSync ? 1 : 0);
+
 		glfwSetWindowCloseCallback(m_window, [](GLFWwindow* window)
 		{
 			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
 			WindowCloseEvent e;
-			wSettings.callbackFn(e);
+			wSettings.CallbackFn(e);
 		});
 
 		glfwSetWindowSizeCallback(m_window, [](GLFWwindow* window, int width, int height)
@@ -82,10 +83,10 @@ namespace Brickview
 			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
 
 			WindowResizeEvent e(width, height);
-			wSettings.callbackFn(e);
+			wSettings.CallbackFn(e);
 
-			wSettings.width = width;
-			wSettings.height = height;
+			wSettings.Width = width;
+			wSettings.Height = height;
 		});
 
 		glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -97,13 +98,13 @@ namespace Brickview
 				case GLFW_PRESS:
 				{
 					KeyPressedEvent e(key);
-					wSettings.callbackFn(e);
+					wSettings.CallbackFn(e);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					KeyReleasedEvent e(key);
-					wSettings.callbackFn(e);
+					wSettings.CallbackFn(e);
 					break;
 				}
 			}
@@ -114,7 +115,7 @@ namespace Brickview
 			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
 
 			MouseMovedEvent e((unsigned int)x, (unsigned int)y);
-			wSettings.callbackFn(e);
+			wSettings.CallbackFn(e);
 		});
 
 		glfwSetMouseButtonCallback(m_window, [](GLFWwindow* window, int button, int action, int mods)
@@ -126,13 +127,13 @@ namespace Brickview
 				case GLFW_PRESS:
 				{
 					MousePressedEvent e(button);
-					wSettings.callbackFn(e);
+					wSettings.CallbackFn(e);
 					break;
 				}
 				case GLFW_RELEASE:
 				{
 					MouseReleasedEvent e(button);
-					wSettings.callbackFn(e);
+					wSettings.CallbackFn(e);
 					break;
 				}
 			}
@@ -143,7 +144,13 @@ namespace Brickview
 			WindowSettings wSettings = *(WindowSettings*)glfwGetWindowUserPointer(window);
 
 			MouseScrolledEvent e(offsetX, offsetY);
-			wSettings.callbackFn(e);
+			wSettings.CallbackFn(e);
 		});
+	}
+
+	void Window::setVSync(bool enable)
+	{
+		glfwSwapInterval(enable ? 1 : 0);
+		m_settings.VSync = enable;
 	}
 }

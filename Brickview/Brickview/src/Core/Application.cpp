@@ -32,7 +32,7 @@ namespace Brickview
 	{
 		// Window
 		Window::WindowSettings windowSettings;
-		windowSettings.name = "Brickview";
+		windowSettings.Name = "Brickview";
 		m_window = createRef<Window>(windowSettings);
 		m_window->setEventCallbackFunction(BV_BIND_EVENT_FUNCTION(Application::onEvent));
 
