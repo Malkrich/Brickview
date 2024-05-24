@@ -38,8 +38,10 @@ void main()
 {
     float ambient = 0.2;
     
-    vec3 lightDirection = normalize(u_lightPosition - f_currentPosition);
+    vec3 lightDirection  = normalize(u_lightPosition - f_currentPosition);
+    vec3 cameraDirection = normalize(u_cameraPosition - f_currentPosition);
     
+    float facingFactor = dot(cameraDirection, f_normal) >= 0.0 ? 1.0 : ambient;
     float diffuse = max(dot(f_normal, lightDirection), 0.0);
 
     float specular = 0.0;
@@ -52,6 +54,6 @@ void main()
         specular *= specularLight;
     }
 
-    vec3 finalColor = (diffuse + ambient + specular) * u_lightColor * f_color;
+    vec3 finalColor = facingFactor * (diffuse + ambient + specular) * u_lightColor * f_color;
     color = vec4(finalColor, 1.0);
 }
