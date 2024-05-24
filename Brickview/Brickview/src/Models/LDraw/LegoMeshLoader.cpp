@@ -153,9 +153,7 @@ namespace Brickview
 			std::string fileName  = line.substr(lastSpace + 1, fileNameLength);
 
 			// find transform
-			size_t secondSpace = StringUtils::findNthCharacter(line, ' ', 2);
-			size_t transformDataLength = lastSpace - secondSpace;
-			std::string transformData = line.substr(secondSpace + 1, transformDataLength);
+			std::string transformData = line.substr(0, lastSpace);
 			std::stringstream ss(transformData);
 
 			float a, b, c, d, e, f, g, h, i, x, y, z;
