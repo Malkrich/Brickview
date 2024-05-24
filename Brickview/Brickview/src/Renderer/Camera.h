@@ -31,7 +31,7 @@ namespace Brickview
 		void updateProjectionMatrix();
 
 	private:
-		float m_fov = 45.0f, m_nearClip = 0.1f, m_farClip = 1000.0f;
+		float m_fov = 45.0f, m_nearClip = 0.01f, m_farClip = 100.0f;
 		float m_viewportWidth = 1280.0f, m_viewportHeight = 720.0f;
 		float m_aspectRatio = m_viewportWidth / m_viewportHeight;
 
