@@ -12,6 +12,14 @@ namespace Brickview
 	struct FileSpecifications
 	{
 		bool ClockwiseWinding = true;
+		bool InvertNext = false;
+	};
+
+	struct SubMeshData
+	{
+		std::filesystem::path FilePath;
+		glm::mat4 Transform;
+		bool Inverted;
 	};
 
 	struct LDrawReaderData
@@ -53,12 +61,6 @@ namespace Brickview
 	{
 		static constexpr inline size_t getElementCount() { return 4; }
 		static constexpr inline size_t getTriangleCount() { return 2; }
-	};
-
-	struct SubMeshData
-	{
-		std::filesystem::path FilePath;
-		glm::mat4 Transform;
 	};
 
 	namespace Utils
@@ -106,7 +108,10 @@ namespace Brickview
 		}
 
 		template<typename FaceType>
-		static void addFace(const glm::mat4& transform, const FileSpecifications& spec, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices, const std::string& coordData, uint32_t indexOffset)
+		static void addFace(const glm::mat4& transform, bool inverted, const FileSpecifications& spec,
+			std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices,
+			const std::string& coordData,
+			uint32_t indexOffset)
 		{
 			std::stringstream ss(coordData);
 
@@ -115,14 +120,14 @@ namespace Brickview
 			{
 				glm::vec3 pos;
 				ss >> pos.x >> pos.y >> pos.z;
-				pos.y *= -1.0f;
+				//pos.y *= -1.0f;
 				face.Positions[i] = transform * glm::vec4(pos, 1.0f);
 			}
 
 			glm::vec3 u = face.Positions[1] - face.Positions[0];
 			glm::vec3 v = face.Positions[2] - face.Positions[0];
-			glm::vec3 normal = glm::normalize(glm::cross(v, u));
-			if (!spec.ClockwiseWinding)
+			glm::vec3 normal = glm::normalize(glm::cross(u, v));
+			if ((!spec.ClockwiseWinding && !inverted) || (spec.ClockwiseWinding && inverted))
 				normal *= -1.0f; // Inverse normal
 
 			// Vertices
@@ -168,7 +173,7 @@ namespace Brickview
 				a,  d,  g,  0.0f,
 				b,  e,  h,  0.0f,
 				c,  f,  i,  0.0f,
-				x, -y,  z,  1.0f);
+				x,  y,  z,  1.0f);
 
 			return subMesh;
 		}
@@ -196,7 +201,7 @@ namespace Brickview
 				else if (instruction == "CCW")
 					spec.ClockwiseWinding = false;
 				else if (instruction == "INVERTNEXT")
-					spec.ClockwiseWinding = !spec.ClockwiseWinding;
+					spec.InvertNext = true;
 				else
 					continue;
 			}
@@ -206,8 +211,8 @@ namespace Brickview
 		{
 			// Word
 
-			size_t prefixLength = line.find_first_of(' ');
-			prefixLength        = prefixLength == std::string::npos ? line.size() : prefixLength;
+			size_t prefixLength  = line.find_first_of(' ');
+			prefixLength         = prefixLength == std::string::npos ? line.size() : prefixLength;
 			size_t contentLength = line.size();
 
 			std::string commandPrefix  = line.substr(0, prefixLength);
@@ -250,8 +255,8 @@ namespace Brickview
 
 		do
 		{
-			const auto& mesh = subMeshes.front();
-			readFile(mesh.FilePath, mesh.Transform, vertices, indices, subMeshes);
+			const auto& meshData = subMeshes.front();
+			readFile(meshData, vertices, indices, subMeshes);
 			subMeshes.pop();
 		} while (!subMeshes.empty());
 
@@ -261,10 +266,14 @@ namespace Brickview
 		return true;
 	}
 
-	bool LegoMeshLoader::readFile(const std::filesystem::path& filePath, const glm::mat4& transform,
+	bool LegoMeshLoader::readFile(const SubMeshData& meshData,
 		std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices,
 		std::queue<SubMeshData>& subMeshes)
 	{
+		std::filesystem::path filePath = meshData.FilePath;
+		glm::mat4 transform            = meshData.Transform;
+		bool inverted                  = meshData.Inverted;
+
 		if (!std::filesystem::exists(filePath))
 		{
 			BV_LOG_ERROR("Couldn't load file: {}", filePath.generic_string());
@@ -303,20 +312,20 @@ namespace Brickview
 			{
 				case LineType::Triangle:
 				{
-					Utils::addFace<Triangle>(transform, spec, vertices, indices, geoData, indexOffset);
+					Utils::addFace<Triangle>(transform, inverted, spec, vertices, indices, geoData, indexOffset);
 					indexOffset += 3;
 					break;
 				}
 				case LineType::Quadrilateral:
 				{
-					Utils::addFace<Quad>(transform, spec, vertices, indices, geoData, indexOffset);
+					Utils::addFace<Quad>(transform, inverted, spec, vertices, indices, geoData, indexOffset);
 					indexOffset += 4;
 					break;
 				}
 				case LineType::SubFileRef:
 				{
 					SubMeshData subMesh = Utils::readSubMesh(geoData);
-					
+
 					if (isInPartsDirectory(subMesh.FilePath))
 					{
 						BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->PartsDirectory.generic_string());
@@ -330,7 +339,11 @@ namespace Brickview
 					else
 						BV_LOG_ERROR("Sub nesh {} doen't exist!", subMesh.FilePath.generic_string());
 
-					//subMesh.Transform *= transform;
+					glm::mat4 worldTransform = transform * subMesh.Transform;
+					subMesh.Transform = worldTransform;
+					subMesh.Inverted = spec.InvertNext;
+					if (spec.InvertNext)
+						spec.InvertNext = false;
 
 					subMeshes.push(subMesh);
 

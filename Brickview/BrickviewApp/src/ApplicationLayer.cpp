@@ -41,7 +41,7 @@ namespace Brickview
 		// New lego piece system:
 		m_ldrawDir = "data/LDraw/parts/";
 		m_ldrawBrickTransform = glm::mat4(1.0f);
-		m_ldrawBrick = Mesh::load(m_ldrawDir / "2.dat");
+		m_ldrawBrick = Mesh::load(m_ldrawDir / "1.dat");
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
