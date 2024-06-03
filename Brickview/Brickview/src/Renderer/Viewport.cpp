@@ -36,7 +36,7 @@ namespace Brickview
 		{
 			m_hasSizeChanged = true;
 			if (newViewportDim.x != 0 && newViewportDim.y != 0)
-				m_frameBuffer->resize(newViewportDim.x, newViewportDim.y);
+				m_frameBuffer->resize((uint32_t)newViewportDim.x, (uint32_t)newViewportDim.y);
 		}
 
 		// Viewport render

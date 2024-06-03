@@ -43,36 +43,39 @@ namespace Brickview
 
 	Scope<RendererBase> Lego3DRenderer::rendererFromType(RenderType type)
 	{
-		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");
+		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized!");
 
 		switch (type)
 		{
 			case RenderType::Solid:    return createScope<SolidRenderer>(s_lego3DRendererData->ShaderLibrary);
 			case RenderType::Rendered: return createScope<RenderedRenderer>(s_lego3DRendererData->ShaderLibrary);
 		}
+
+		BV_ASSERT(false, "Render Type not known!");
+		return nullptr;
 	}
 
 	const Ref<ShaderLibrary>& Lego3DRenderer::getShaderLibrary()
 	{
-		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");
+		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized!");
 		return s_lego3DRendererData->ShaderLibrary;
 	}
 
 	bool Lego3DRenderer::isDrawingLights()
 	{
-		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");
+		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized!");
 		return s_lego3DRendererData->drawLights;
 	}
 
 	void Lego3DRenderer::drawLights(bool drawLights)
 	{
-		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");
+		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized!");
 		s_lego3DRendererData->drawLights = drawLights;
 	}
 
 	void Lego3DRenderer::setRenderType(RenderType type)
 	{
-		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized !");
+		BV_ASSERT(s_lego3DRendererData, "Lego3DRenderer has not been initialized!");
 		s_lego3DRendererData->RenderType = type;
 		s_lego3DRendererData->Renderer   = rendererFromType(type);
 	}

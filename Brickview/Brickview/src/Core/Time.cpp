@@ -8,7 +8,7 @@ namespace Brickview
 
 	float Time::getTime()
 	{
-		return glfwGetTime();
+		return (float)glfwGetTime();
 	}
 
 }
