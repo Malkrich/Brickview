@@ -13,6 +13,9 @@ namespace Brickview
 {
 
 	ApplicationLayer::ApplicationLayer()
+		: m_ldrawBrickTransform(1.0f)
+		, m_ldrawBrickMaterial()
+		, m_light()
 	{
 		LegoMeshLoader::init();
 		Lego3DRenderer::init();
@@ -31,9 +34,7 @@ namespace Brickview
 		m_viewport = createScope<Viewport>(width, height);
 
 		// Camera
-		CameraControllerSpecifications ccSpec;
-		ccSpec.LaptopMode = m_laptopMode;
-		m_cameraControl = CameraController(ccSpec);
+		m_cameraControl.setLaptopMode(m_laptopMode);
 
 		// Basic meshes
 		m_planeMesh = Mesh::load("data/Models/Plane.obj");

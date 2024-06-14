@@ -45,7 +45,7 @@ namespace Brickview
 		Light m_light;
 		RenderType m_renderType = RenderType::Rendered;
 
-		CameraController m_cameraControl;
+		CameraController m_cameraControl = CameraController();
 		bool m_laptopMode = false;
 
 		float m_dt = 0.0f;

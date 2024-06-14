@@ -53,6 +53,10 @@ namespace Brickview
 		glm::mat4 m_viewProjectionMatrix;
 		glm::vec3 m_cameraPosition;
 
+		// Settings
+		bool m_showNormals = false;
+		RenderSettings m_settings;
+
 		// Render submissions
 		Scope<BatchRendererManager> m_rendererManager = nullptr;
 	};

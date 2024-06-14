@@ -26,6 +26,7 @@ in vec3 f_normal;
 out vec4 color;
 
 uniform vec3 u_cameraPosition;
+uniform bool u_showNormals;
 
 void main()
 {
@@ -33,9 +34,13 @@ void main()
     vec3 renderedColor = vec3(0.6);
     
     vec3 viewDirection = normalize(u_cameraPosition - f_currentPosition);
-    float diffuse = max(dot(viewDirection, f_normal), 0.0);
+    float facingFactor = dot(viewDirection, f_normal);
+//    vec3 normalColor   = facingFactor >= 0.0 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
+    
+    float diffuse = max(facingFactor, 0.0);
     renderedColor *= diffuse;
     renderedColor += ambient;
 
+//    color = u_showNormals ? normalColor : vec4(renderedColor, 1.0);
     color = vec4(renderedColor, 1.0);
 }

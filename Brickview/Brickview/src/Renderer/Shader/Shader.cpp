@@ -1,4 +1,5 @@
 #include "Pch.h"
+#include "Renderer/OpenGLError.h"
 #include "Shader.h"
 
 #include <glad/glad.h>
@@ -155,10 +156,13 @@ namespace Brickview
         {
             switch (uniform.Type)
             {
-                case UniformType::Float3:
+                case BasicTypes::Bool:
+                    setBool(name, uniform.Data);
+                    continue;
+                case BasicTypes::Float3:
                     setFloat3(name, uniform.Data);
                     continue;
-                case UniformType::Mat4:
+                case BasicTypes::Mat4:
                     setMat4(name, uniform.Data);
                     continue;
             }
@@ -184,6 +188,13 @@ namespace Brickview
         lastPoint = lastPoint == std::string::npos ? path.size() : lastPoint;
         size_t count = lastPoint - lastSlash;
         m_name = path.substr(lastSlash, count);
+    }
+
+    void Shader::setBool(const std::string& name, const void* data)
+    {
+        uint32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
+        CHECK_GL_ERROR();
+        glUniform1i(loc, *((int*)data));
     }
 
     void Shader::setFloat3(const std::string& name, const void* data)

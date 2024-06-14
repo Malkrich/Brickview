@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/BasicTypes.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Camera.h"
 #include "Renderer/Light.h"
@@ -11,6 +12,51 @@
 
 namespace Brickview
 {
+
+	struct RenderParameter
+	{
+		RenderParameter()
+			: Type(BasicTypes::None)
+			, Data(nullptr)
+		{}
+		RenderParameter(bool data)
+			: Type(BasicTypes::Bool)
+			, Data((void*)&data)
+		{}
+
+		BasicTypes Type;
+		void* Data;
+	};
+
+	class RenderSettings
+	{
+	public:
+		template<typename T>
+		const T& get(const std::string& name) const
+		{
+			BV_ASSERT(m_parameters.contains(name), "Parameter doesn't exist!");
+
+			const RenderParameter& param = m_parameters.at(name);
+			return *((T*)param.Data);
+		}
+
+		void add(const std::string& name, const RenderParameter& parameter);
+		template<typename T>
+		void add(const std::string& name, const T& data)
+		{
+			RenderParameter param(data);
+			add(name, param);
+		}
+		template<typename T>
+		void set(const std::string& name, const T& value)
+		{
+			BV_ASSERT(m_parameters.contains(name), "Parameter doesn't exist!");
+			m_parameters[name].Data = value;
+		}
+
+	private:
+		std::unordered_map<std::string, RenderParameter> m_parameters;
+	};
 
 	class RendererBase
 	{

@@ -44,8 +44,8 @@ namespace Brickview
 
 		glm::vec3 m_targetPoint = { 0.0f, 0.0f, 0.0f };
 
-		glm::ivec2 m_currentMousePosition;
-		glm::ivec2 m_mouseOffset = { 0.0f, 0.0f };
+		glm::ivec2 m_currentMousePosition = { 0, 0 };
+		glm::ivec2 m_mouseOffset = { 0, 0 };
 
 		float m_angleSensitivity = 0.15f;
 		float m_translationSensitivity = m_angleSensitivity / 50.0f;
@@ -53,7 +53,7 @@ namespace Brickview
 
 		bool m_isViewportHovered = true;
 		bool m_isCameraControlled = false;
-		bool m_laptopMode;
+		bool m_laptopMode = false;
 	};
 
 }

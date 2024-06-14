@@ -7,7 +7,7 @@ namespace Brickview
 
 	struct Material
 	{
-		glm::vec3 Color;
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 	};
 
 }

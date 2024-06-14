@@ -20,6 +20,9 @@ namespace Brickview
 			m_maxVertices, m_maxIndices,
 			meshLayout,
 			shaderLib->get("Solid"));
+
+		// Settings
+		m_settings.add<bool>("Show normals", m_showNormals);
 	}
 
 	SolidRenderer::~SolidRenderer()
@@ -71,6 +74,8 @@ namespace Brickview
 
 	void SolidRenderer::flush()
 	{
+		//m_meshUniforms["u_showNormals"] = m_settings.get<bool>("Show normals");
+
 		// Meshes
 		m_rendererManager->setData("Meshes",
 			m_meshVertices.size() * sizeof(SolidRendererTypes::MeshVertex),

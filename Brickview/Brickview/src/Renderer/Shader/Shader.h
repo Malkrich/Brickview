@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/BasicTypes.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -7,30 +9,25 @@
 
 namespace Brickview
 {
-	enum class UniformType
-	{
-		None = 0,
-		Bool,
-		Int, Int2, Int3, Int4,
-		Float, Float2, Float3, Float4,
-		Mat2, Mat3, Mat4,
-	};
-
 	struct UniformData
 	{
-		UniformType Type;
+		BasicTypes Type;
 		void* Data;
 
 		UniformData()
-			: Type(UniformType::None)
+			: Type(BasicTypes::None)
 			, Data(nullptr)
 		{}
+		UniformData(bool data)
+			: Type(BasicTypes::Bool)
+			, Data((void*)&data)
+		{}
 		UniformData(const glm::vec3& data)
-			: Type(UniformType::Float3)
+			: Type(BasicTypes::Float3)
 			, Data((void*)glm::value_ptr(data))
 		{}
 		UniformData(const glm::mat4& data)
-			: Type(UniformType::Mat4)
+			: Type(BasicTypes::Mat4)
 			, Data((void*)glm::value_ptr(data))
 		{}
 	};
@@ -55,6 +52,7 @@ namespace Brickview
 	private:
 		void invalidate(const std::filesystem::path& filePath);
 
+		void setBool(const std::string& name, const void* data);
 		void setFloat3(const std::string& name, const void* data);
 		void setMat4(const std::string& name, const void* data);
 
