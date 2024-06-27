@@ -7,6 +7,8 @@ namespace Brickview
 {
 
 	SolidRenderer::SolidRenderer(const Ref<ShaderLibrary>& shaderLib)
+		: m_viewProjectionMatrix(glm::mat4(1.0f))
+		, m_cameraPosition(glm::vec3(0.0f))
 	{
 		m_rendererManager = createScope<BatchRendererManager>();
 
@@ -22,7 +24,8 @@ namespace Brickview
 			shaderLib->get("Solid"));
 
 		// Settings
-		m_settings.add<bool>("Show normals", m_showNormals);
+		m_settings = createRef<RenderSettings>();
+		m_settings->add<bool>("Show normals", m_showNormals);
 	}
 
 	SolidRenderer::~SolidRenderer()
@@ -74,7 +77,7 @@ namespace Brickview
 
 	void SolidRenderer::flush()
 	{
-		//m_meshUniforms["u_showNormals"] = m_settings.get<bool>("Show normals");
+		m_meshUniforms["u_showNormals"] = m_settings->get<bool>("Show normals");
 
 		// Meshes
 		m_rendererManager->setData("Meshes",

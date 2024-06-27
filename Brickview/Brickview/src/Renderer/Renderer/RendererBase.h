@@ -51,8 +51,14 @@ namespace Brickview
 		void set(const std::string& name, const T& value)
 		{
 			BV_ASSERT(m_parameters.contains(name), "Parameter doesn't exist!");
-			m_parameters[name].Data = value;
+			T* ptr = (T*)m_parameters[name].Data;
+			*ptr = value;
 		}
+
+		std::unordered_map<std::string, RenderParameter>::const_iterator begin() const { return m_parameters.begin(); }
+		std::unordered_map<std::string, RenderParameter>::const_iterator end() const { return m_parameters.end(); }
+		std::unordered_map<std::string, RenderParameter>::iterator begin() { return m_parameters.begin(); }
+		std::unordered_map<std::string, RenderParameter>::iterator end() { return m_parameters.end(); }
 
 	private:
 		std::unordered_map<std::string, RenderParameter> m_parameters;
@@ -62,6 +68,8 @@ namespace Brickview
 	{
 	public:
 		virtual ~RendererBase() = default;
+
+		virtual const Ref<RenderSettings>& getRenderSettings() const = 0;
 
 		virtual void begin(const Camera& camera, const Light& light) = 0;
 		virtual void end() = 0;

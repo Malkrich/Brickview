@@ -29,6 +29,9 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
+		// Render type
+		Lego3DRenderer::setRenderType(m_renderType);
+
 		uint32_t width = Input::getWindowSize().x;
 		uint32_t height = Input::getWindowSize().y;
 		m_viewport = createScope<Viewport>(width, height);
@@ -206,6 +209,32 @@ namespace Brickview
 		bool drawLight = Lego3DRenderer::isDrawingLights();
 		if (ImGui::Checkbox("Draw lights", &drawLight))
 			Lego3DRenderer::drawLights(drawLight);
+
+		// Render
+		const Ref<RenderSettings>& renderSettings = Lego3DRenderer::getRenderSettings();
+		if (renderSettings)
+		{
+			ImGui::SeparatorText("Render settings:");
+			for (const auto& [name, param] : *renderSettings)
+			{
+				ImGui::Text("%s", name.c_str());
+				ImGui::SameLine();
+				switch (param.Type)
+				{
+					case BasicTypes::None: BV_ASSERT(false, "Type none is not dispayable!");
+					case BasicTypes::Bool:
+					{
+						std::string paramName = std::format("##{}", name);
+						bool state = *((bool*)param.Data);
+						if (ImGui::Checkbox(paramName.c_str(), &state))
+						{
+							renderSettings->set<bool>(name, state);
+							BV_LOG_INFO("Param {} switched to {}", name, state);
+						}
+					}
+				}
+			}
+		}
 
 		ImGui::SeparatorText("Render statistics:");
 		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);

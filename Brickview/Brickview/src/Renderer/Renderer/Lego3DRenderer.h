@@ -26,6 +26,7 @@ namespace Brickview
 
 		// Read only
 		static const Ref<ShaderLibrary>& getShaderLibrary();
+		static const Ref<RenderSettings>& getRenderSettings();
 
 		static void setRenderType(RenderType type);
 		static bool isDrawingLights();

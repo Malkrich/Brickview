@@ -28,6 +28,8 @@ namespace Brickview
 		SolidRenderer(const Ref<ShaderLibrary>& shaderLib);
 		virtual ~SolidRenderer();
 
+		virtual const Ref<RenderSettings>& getRenderSettings() const { return m_settings; }
+
 		virtual void begin(const Camera& camera, const Light& light) override;
 		virtual void end() override;
 
@@ -55,7 +57,7 @@ namespace Brickview
 
 		// Settings
 		bool m_showNormals = false;
-		RenderSettings m_settings;
+		Ref<RenderSettings> m_settings;
 
 		// Render submissions
 		Scope<BatchRendererManager> m_rendererManager = nullptr;

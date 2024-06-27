@@ -43,6 +43,8 @@ namespace Brickview
 		RenderedRenderer(const Ref<ShaderLibrary>& shaderLib);
 		virtual ~RenderedRenderer();
 
+		virtual const Ref<RenderSettings>& getRenderSettings() const override { return nullptr; }
+
 		virtual void begin(const Camera& camera, const Light& light) override;
 		virtual void end() override;
 
