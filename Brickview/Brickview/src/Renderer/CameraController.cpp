@@ -26,6 +26,11 @@ namespace Brickview
 		}
 	}
 
+	CameraController::CameraController()
+	{
+		updatePosition();
+	}
+
 	CameraController::CameraController(const CameraControllerSpecifications& spec)
 		: m_currentMousePosition(-1)
 		, m_targetPoint(spec.TargetPosition)

@@ -17,7 +17,7 @@ namespace Brickview
 	class CameraController
 	{
 	public:
-		CameraController() = default;
+		CameraController();
 		CameraController(const CameraControllerSpecifications& spec);
 
 		const Camera& getCamera() const { return m_camera; }

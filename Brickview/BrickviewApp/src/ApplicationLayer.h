@@ -44,10 +44,10 @@ namespace Brickview
 
 		Material m_ldrawBrickMaterial;
 		Light m_light;
-		RenderType m_renderType = RenderType::Solid;
+		RenderType m_renderType = RenderType::Rendered;
 
 		CameraController m_cameraControl = CameraController();
-		bool m_laptopMode = true;
+		bool m_laptopMode = false;
 
 		float m_dt = 0.0f;
 	};
