@@ -36,10 +36,11 @@ namespace Brickview
 		Ref<Mesh> m_ldrawBrick = nullptr;
 		glm::mat4 m_ldrawBrickTransform;
 
-		std::filesystem::path m_ldrawDir;
+#if 0
 		const uint32_t m_maxDisplayableFiles = 10;
 		uint32_t m_fileIndexOffset = 0;
 		uint32_t m_selectedMesh = 1;
+#endif
 
 		Material m_ldrawBrickMaterial;
 		Light m_light;

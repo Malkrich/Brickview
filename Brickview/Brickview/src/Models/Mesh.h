@@ -59,6 +59,7 @@ namespace Brickview
 	public:
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<TriangleFace>& indices);
 		static Ref<Mesh> load(const std::filesystem::path& filePath);
+		static Ref<Mesh> loadLDrawExample();
 
 		bool isEmpty() const { return m_vertices.empty(); }
 

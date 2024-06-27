@@ -228,7 +228,7 @@ namespace Brickview
 		BV_ASSERT(!s_ldrawData, "LDrawReader engine already initialized!");
 
 		s_ldrawData                    = new LDrawReaderData();
-		s_ldrawData->BaseDirectory     = "./data/LDraw";
+		s_ldrawData->BaseDirectory     = "./data/Models/LDrawExample";
 		s_ldrawData->SubPartsDirectory = s_ldrawData->BaseDirectory / "p";
 		s_ldrawData->PartsDirectory    = s_ldrawData->BaseDirectory / "parts";
 
@@ -337,7 +337,7 @@ namespace Brickview
 						subMesh.FilePath = s_ldrawData->SubPartsDirectory / subMesh.FilePath;
 					}
 					else
-						BV_LOG_ERROR("Sub nesh {} doen't exist!", subMesh.FilePath.generic_string());
+						BV_LOG_ERROR("Sub mesh {} doesn't exist!", subMesh.FilePath.generic_string());
 
 					glm::mat4 worldTransform = transform * subMesh.Transform;
 					subMesh.Transform = worldTransform;

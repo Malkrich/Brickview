@@ -43,9 +43,8 @@ namespace Brickview
 		m_planeMesh = Mesh::load("data/Models/Plane.obj");
 		m_cubeMesh  = Mesh::load("data/Models/Cube.obj");
 		// New lego piece system:
-		m_ldrawDir = "data/LDraw/parts/";
 		m_ldrawBrickTransform = glm::mat4(1.0f);
-		m_ldrawBrick = Mesh::load(m_ldrawDir / "1.dat");
+		m_ldrawBrick = Mesh::loadLDrawExample();
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
@@ -156,6 +155,7 @@ namespace Brickview
 		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
 		ImGui::Separator();
 
+#if 0
 		if (ImGui::Button("<"))
 		{
 			if (m_fileIndexOffset > 0)
@@ -190,7 +190,7 @@ namespace Brickview
 
 			fileIndex++;
 		}
-
+#endif
 		ImGui::End();
 
 		ImGui::Begin("Renderer");
@@ -211,6 +211,7 @@ namespace Brickview
 			Lego3DRenderer::drawLights(drawLight);
 
 		// Render
+#if 0
 		const Ref<RenderSettings>& renderSettings = Lego3DRenderer::getRenderSettings();
 		if (renderSettings)
 		{
@@ -235,6 +236,7 @@ namespace Brickview
 				}
 			}
 		}
+#endif
 
 		ImGui::SeparatorText("Render statistics:");
 		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);
