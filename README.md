@@ -43,7 +43,6 @@ The architecture of the software as well as well as the code style is highly ins
 
 Here is a list of the things to improve/add in the future:
 
-- Add __render settings__ on the GUI so the user can see the normal orientation etc...
 - Fix the __normal orientation__ of the Lego parts.
 - Make a __better renderer__, with multiple lights/HDRI.
 - Add an __Entity Component System__ (ECS).
