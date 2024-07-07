@@ -19,9 +19,9 @@ namespace Brickview
 			: Type(BasicTypes::None)
 			, Data(nullptr)
 		{}
-		RenderParameter(bool data)
+		RenderParameter(const bool* data)
 			: Type(BasicTypes::Bool)
-			, Data((void*)&data)
+			, Data((void*)data)
 		{}
 
 		BasicTypes Type;
@@ -41,16 +41,19 @@ namespace Brickview
 		}
 
 		void add(const std::string& name, const RenderParameter& parameter);
+
 		template<typename T>
-		void add(const std::string& name, const T& data)
+		void add(const std::string& name, const T* data)
 		{
 			RenderParameter param(data);
 			add(name, param);
 		}
+
 		template<typename T>
 		void set(const std::string& name, const T& value)
 		{
 			BV_ASSERT(m_parameters.contains(name), "Parameter doesn't exist!");
+
 			T* ptr = (T*)m_parameters[name].Data;
 			*ptr = value;
 		}
@@ -69,7 +72,7 @@ namespace Brickview
 	public:
 		virtual ~RendererBase() = default;
 
-		virtual const Ref<RenderSettings>& getRenderSettings() const = 0;
+		virtual const Ref<RenderSettings> getRenderSettings() const = 0;
 
 		virtual void begin(const Camera& camera, const Light& light) = 0;
 		virtual void end() = 0;

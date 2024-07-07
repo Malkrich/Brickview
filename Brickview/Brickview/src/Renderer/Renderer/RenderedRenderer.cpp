@@ -76,11 +76,6 @@ namespace Brickview
 		// Update stats
 		m_statistics.MeshVertexCount       = m_meshVertices.size();
 		m_statistics.MeshIndicesCount      = m_meshIndices.size() * 3;
-
-		m_meshUniforms["u_viewProjection"] = m_viewProjectionMatrix;
-		m_meshUniforms["u_cameraPosition"] = m_cameraPosition;
-		m_meshUniforms["u_lightPosition"]  = m_light.Position;
-		m_meshUniforms["u_lightColor"]     = m_light.Color;
 	}
 
 	void RenderedRenderer::drawLights(const Light& light)
@@ -108,13 +103,20 @@ namespace Brickview
 			face[2] = f[2] + offset;
 			m_lightIndices.push_back(face);
 		}
-
-		m_lightUniforms["u_viewProjection"] = m_viewProjectionMatrix;
-		m_lightUniforms["u_lightColor"]     = m_light.Color;
 	}
 
 	void RenderedRenderer::flush()
 	{
+		//// Uniforms
+		// Lights
+		m_lightUniforms["u_lightColor"]    = m_light.Color;
+		m_lightUniforms["u_viewProjection"] = m_viewProjectionMatrix;
+		// Meshes
+		m_meshUniforms["u_viewProjection"] = m_viewProjectionMatrix;
+		m_meshUniforms["u_cameraPosition"] = m_cameraPosition;
+		m_meshUniforms["u_lightPosition"]  = m_light.Position;
+		m_meshUniforms["u_lightColor"]     = m_light.Color;
+
 		// Meshes
 		m_rendererManager->setData("Meshes",
 			m_meshVertices.size() * sizeof(RenderedRendererTypes::MeshVertex),

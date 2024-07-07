@@ -207,7 +207,8 @@ namespace Brickview
     {
         uint32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
         CHECK_GL_ERROR();
-        glUniform1i(loc, *((int*)data));
+        bool value = *((bool*)data);
+        glUniform1i(loc, value);
     }
 
     void Shader::setFloat3(const std::string& name, const void* data)

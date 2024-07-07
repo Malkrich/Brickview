@@ -211,8 +211,7 @@ namespace Brickview
 			Lego3DRenderer::drawLights(drawLight);
 
 		// Render
-#if 0
-		const Ref<RenderSettings>& renderSettings = Lego3DRenderer::getRenderSettings();
+		const Ref<RenderSettings> renderSettings = Lego3DRenderer::getRenderSettings();
 		if (renderSettings)
 		{
 			ImGui::SeparatorText("Render settings:");
@@ -222,21 +221,25 @@ namespace Brickview
 				ImGui::SameLine();
 				switch (param.Type)
 				{
-					case BasicTypes::None: BV_ASSERT(false, "Type none is not dispayable!");
+					case BasicTypes::None:
+						BV_ASSERT(false, "Type none is not dispayable!");
+						break;
+					default:
+						BV_ASSERT(false, "Render setting type not implemented yet!");
+						break;
 					case BasicTypes::Bool:
 					{
 						std::string paramName = std::format("##{}", name);
-						bool state = *((bool*)param.Data);
+						bool state = renderSettings->get<bool>(name);
 						if (ImGui::Checkbox(paramName.c_str(), &state))
 						{
 							renderSettings->set<bool>(name, state);
-							BV_LOG_INFO("Param {} switched to {}", name, state);
 						}
+						break;
 					}
 				}
 			}
 		}
-#endif
 
 		ImGui::SeparatorText("Render statistics:");
 		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);

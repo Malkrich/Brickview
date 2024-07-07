@@ -28,7 +28,7 @@ namespace Brickview
 		SolidRenderer(const Ref<ShaderLibrary>& shaderLib);
 		virtual ~SolidRenderer();
 
-		virtual const Ref<RenderSettings>& getRenderSettings() const { return m_settings; }
+		virtual const Ref<RenderSettings> getRenderSettings() const { return m_settings; }
 
 		virtual void begin(const Camera& camera, const Light& light) override;
 		virtual void end() override;

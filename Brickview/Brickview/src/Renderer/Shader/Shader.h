@@ -18,9 +18,9 @@ namespace Brickview
 			: Type(BasicTypes::None)
 			, Data(nullptr)
 		{}
-		UniformData(bool data)
+		UniformData(const bool& data)
 			: Type(BasicTypes::Bool)
-			, Data((void*)&data)
+			, Data((void*)(&data))
 		{}
 		UniformData(const glm::vec3& data)
 			: Type(BasicTypes::Float3)

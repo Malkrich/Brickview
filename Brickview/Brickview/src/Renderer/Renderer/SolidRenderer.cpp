@@ -25,7 +25,7 @@ namespace Brickview
 
 		// Settings
 		m_settings = createRef<RenderSettings>();
-		m_settings->add<bool>("Show normals", m_showNormals);
+		m_settings->add<bool>("Show normals", &m_showNormals);
 	}
 
 	SolidRenderer::~SolidRenderer()
@@ -66,9 +66,6 @@ namespace Brickview
 			face[2] = f[2] + offset;
 			m_meshIndices.push_back(face);
 		}
-
-		m_meshUniforms["u_viewProjection"] = m_viewProjectionMatrix;
-		m_meshUniforms["u_cameraPosition"] = m_cameraPosition;
 	}
 
 	void SolidRenderer::drawLights(const Light& light)
@@ -77,7 +74,11 @@ namespace Brickview
 
 	void SolidRenderer::flush()
 	{
-		m_meshUniforms["u_showNormals"] = m_settings->get<bool>("Show normals");
+		void* showNormalsAddr = (void*)&m_showNormals;
+		// Uniforms
+		m_meshUniforms["u_viewProjection"] = m_viewProjectionMatrix;
+		m_meshUniforms["u_cameraPosition"] = m_cameraPosition;
+		m_meshUniforms["u_showNormals"]    = m_showNormals;
 
 		// Meshes
 		m_rendererManager->setData("Meshes",

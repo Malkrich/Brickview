@@ -35,12 +35,11 @@ void main()
     
     vec3 viewDirection = normalize(u_cameraPosition - f_currentPosition);
     float facingFactor = dot(viewDirection, f_normal);
-//    vec3 normalColor   = facingFactor >= 0.0 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
+    vec3 normalColor   = facingFactor >= 0.0 ? vec3(0.0, 0.6, 0.1) : vec3(0.8, 0.1, 0.1);
     
     float diffuse = max(facingFactor, 0.0);
     renderedColor *= diffuse;
     renderedColor += ambient;
 
-//    color = u_showNormals ? normalColor : vec4(renderedColor, 1.0);
-    color = vec4(renderedColor, 1.0);
+    color = vec4(u_showNormals ? normalColor : renderedColor, 1.0);
 }
