@@ -72,7 +72,7 @@ namespace Brickview
 	public:
 		virtual ~RendererBase() = default;
 
-		virtual const Ref<RenderSettings> getRenderSettings() const = 0;
+		virtual const Ref<RenderSettings>& getRenderSettings() const = 0;
 
 		virtual void begin(const Camera& camera, const Light& light) = 0;
 		virtual void end() = 0;

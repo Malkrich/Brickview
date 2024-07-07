@@ -211,7 +211,7 @@ namespace Brickview
 			Lego3DRenderer::drawLights(drawLight);
 
 		// Render
-		const Ref<RenderSettings> renderSettings = Lego3DRenderer::getRenderSettings();
+		const Ref<RenderSettings>& renderSettings = Lego3DRenderer::getRenderSettings();
 		if (renderSettings)
 		{
 			ImGui::SeparatorText("Render settings:");
