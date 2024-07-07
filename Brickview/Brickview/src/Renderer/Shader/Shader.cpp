@@ -84,7 +84,20 @@ namespace Brickview
         if (!success)
         {
             glGetShaderInfoLog(shaderID, 128, nullptr, log);
-            BV_LOG_WARN("Shader compilation failed !");
+            std::string shaderTypeStr;
+            switch (shaderType)
+            {
+                case GL_VERTEX_SHADER:   
+                    shaderTypeStr = "Vertex";
+                    break;
+                case GL_FRAGMENT_SHADER: 
+                    shaderTypeStr = "Fragment"; 
+                    break;
+                default:
+                    shaderTypeStr = "[Unknown]";
+                    break;
+            }
+            BV_LOG_WARN("{} shader compilation failed !", shaderTypeStr);
         }
 
         return shaderID;
