@@ -28,7 +28,7 @@ namespace Brickview
 		return std::make_pair(a.PositionIndex, a.NormalIndex) < std::make_pair(b.PositionIndex, b.NormalIndex);
 	}
 
-	bool ObjLoader::load(const std::filesystem::path& filePath, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices)
+	bool ObjLoader::load(const std::filesystem::path& filePath, Ref<Mesh> mesh)
 	{
 		if (!std::filesystem::exists(filePath))
 			return false;
@@ -96,6 +96,8 @@ namespace Brickview
 		std::map<ObjFace::ObjVertexIndex, uint32_t> indexOfVertex;
 		uint32_t currentIndex = 0;
 
+		std::vector<Vertex> vertices;
+		std::vector<TriangleFace> indices;
 		for (const auto& face : faces)
 		{
 			TriangleFace f;
@@ -120,6 +122,8 @@ namespace Brickview
 			}
 			indices.push_back(f);
 		}
+
+		mesh->setData(vertices, indices);
 		return true;
 	}
 

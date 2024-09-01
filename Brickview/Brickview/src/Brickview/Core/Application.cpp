@@ -1,12 +1,12 @@
 #include "Pch.h"
 #include "Application.h"
 // Core
-#include "Time.h"
-#include "Input.h"
-#include "KeyCodes.h"
-#include "BrickviewCore.h"
+#include "Core/Time.h"
+#include "Core/Input.h"
+#include "Core/KeyCodes.h"
+#include "Core/BrickviewCore.h"
 // Layers
-#include "Layer/Layer.h"
+#include "Core/Layer/Layer.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>

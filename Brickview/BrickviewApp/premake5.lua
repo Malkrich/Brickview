@@ -6,7 +6,7 @@ project "BrickviewApp"
 
     targetdir("bin/" .. outputDir .. "/%{prj.name}")
     objdir("bin-int/" .. outputDir .. "/%{prj.name}")
-    
+
     includedirs
     {
         "src/",

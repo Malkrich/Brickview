@@ -16,5 +16,5 @@
 #include <queue>
 
 // Brickview core
-#include "Core/Core.h"
-#include "Core/Log.h"
+#include "Brickview/Core/Core.h"
+#include "Brickview/Core/Log.h"

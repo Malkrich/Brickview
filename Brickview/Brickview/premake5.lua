@@ -9,6 +9,7 @@ project "Brickview"
 
     includedirs
     {
+        "src/",
         "src/Brickview/",
         "src/Vendors/",
         "../vendors/glm/",

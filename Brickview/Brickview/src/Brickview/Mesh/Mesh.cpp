@@ -1,8 +1,8 @@
 #include "Pch.h"
 #include "Mesh.h"
 
-#include "Mesh/LegoMeshLoader.h"
-#include "Mesh/ObjLoader.h"
+#include "Vendors/Mesh/LegoMeshLoader.h"
+#include "Vendors/Mesh/ObjLoader.h"
 
 namespace Brickview
 {
@@ -21,6 +21,8 @@ namespace Brickview
 
 	Ref<Mesh> Mesh::load(const std::filesystem::path& filePath)
 	{
+		Ref<Mesh> mesh = createRef<Mesh>();
+
 		std::vector<Vertex> vertices;
 		std::vector<TriangleFace> indices;
 
@@ -31,7 +33,7 @@ namespace Brickview
 		switch (modelFileFormat)
 		{
 			case ModelFileFormat::Obj:
-				loadSuccess = ObjLoader::load(filePath, vertices, indices);
+				loadSuccess = ObjLoader::load(filePath, mesh);
 				break;
 			case ModelFileFormat::LDrawDat:
 				loadSuccess = LegoMeshLoader::load(filePath, vertices, indices);
@@ -43,7 +45,6 @@ namespace Brickview
 			return nullptr;
 		}
 
-		Ref<Mesh> mesh = createRef<Mesh>(vertices, indices);
 		return mesh;
 	}
 
@@ -52,10 +53,5 @@ namespace Brickview
 		Ref<Mesh> ldrawExampleMesh = Mesh::load("data/Models/LDrawExample/parts/1.dat");
 		return ldrawExampleMesh;
 	}
-
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<TriangleFace>& indices)
-		: m_vertices(vertices)
-		, m_indices(indices)
-	{}
 
 }

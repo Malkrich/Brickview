@@ -57,14 +57,21 @@ namespace Brickview
 	class Mesh
 	{
 	public:
-		Mesh(const std::vector<Vertex>& vertices, const std::vector<TriangleFace>& indices);
 		static Ref<Mesh> load(const std::filesystem::path& filePath);
 		static Ref<Mesh> loadLDrawExample();
+
+		Mesh() = default;
 
 		bool isEmpty() const { return m_vertices.empty(); }
 
 		const std::vector<Vertex>& getVertices() const { return m_vertices; }
 		const std::vector<TriangleFace>& getIndices() const { return m_indices; }
+
+		void setData(const std::vector<Vertex>& vertices, const std::vector<TriangleFace> indices)
+		{
+			m_vertices = vertices;
+			m_indices = indices;
+		}
 
 	private:
 		std::vector<Vertex> m_vertices;
