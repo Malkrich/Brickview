@@ -3,7 +3,7 @@
 #include "RendererBase.h"
 #include "Renderer/Camera.h"
 #include "Renderer/Light.h"
-#include "Models/Mesh.h"
+#include "Mesh/Mesh.h"
 #include "Renderer/Material.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 

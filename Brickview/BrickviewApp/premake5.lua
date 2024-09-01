@@ -9,8 +9,8 @@ project "BrickviewApp"
     
     includedirs
     {
-        "src",
-        "../Brickview/src",
+        "src/",
+        "../Brickview/src/Brickview/",
         "../vendors/glm/",
         "../vendors/imgui/",
         "../vendors/spdlog/include"

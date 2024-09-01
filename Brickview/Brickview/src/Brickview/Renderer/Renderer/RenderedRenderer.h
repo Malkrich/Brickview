@@ -4,7 +4,7 @@
 #include "Renderer/Renderer/BatchRendererManager.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Camera.h"
-#include "Models/Mesh.h"
+#include "Mesh/Mesh.h"
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
 

@@ -6,7 +6,7 @@
 #include "Renderer/Light.h"
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
-#include "Models/Mesh.h"
+#include "Mesh/Mesh.h"
 
 #include <glm/glm.hpp>
 

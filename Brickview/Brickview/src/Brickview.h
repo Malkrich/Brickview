@@ -22,9 +22,8 @@
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
 
-// 3D
-#include "Models/LDraw/LegoMeshLoader.h"
-#include "Models/Mesh.h"
+// Meshes
+#include "Mesh/Mesh.h"
 
 // Utils
 #include "Utils/StringUtils.h"

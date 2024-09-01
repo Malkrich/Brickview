@@ -3,7 +3,7 @@
 #include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Buffer/Layout.h"
-#include "Models/Mesh.h"
+#include "Mesh/Mesh.h"
 #include "Renderer/Light.h"
 
 namespace Brickview

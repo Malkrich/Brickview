@@ -1,11 +1,12 @@
 #include "Pch.h"
 #include "Application.h"
 // Core
-#include "Core/Time.h"
-#include "Core/Input.h"
-#include "Core/KeyCodes.h"
+#include "Time.h"
+#include "Input.h"
+#include "KeyCodes.h"
+#include "BrickviewCore.h"
 // Layers
-#include "Core/Layer/Layer.h"
+#include "Layer/Layer.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -26,6 +27,8 @@ namespace Brickview
 
 	Application::~Application()
 	{
+		// Brickview API
+		BrickviewCore::shutdown();
 	}
 
 	void Application::initialize()
@@ -41,6 +44,9 @@ namespace Brickview
 
 		// Layers
 		m_layerStack = createScope<LayerStack>();
+
+		// Brickview API
+		BrickviewCore::init();
 	}
 
 	void Application::run()

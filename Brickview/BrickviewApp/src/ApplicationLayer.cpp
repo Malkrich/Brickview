@@ -16,16 +16,10 @@ namespace Brickview
 		: m_ldrawBrickTransform(1.0f)
 		, m_ldrawBrickMaterial()
 		, m_light()
-	{
-		LegoMeshLoader::init();
-		Lego3DRenderer::init();
-	}
+	{}
 
 	ApplicationLayer::~ApplicationLayer()
-	{
-		LegoMeshLoader::shutdown();
-		Lego3DRenderer::shutdown();
-	}
+	{}
 
 	void ApplicationLayer::onAttach()
 	{
@@ -43,7 +37,7 @@ namespace Brickview
 		m_planeMesh = Mesh::load("data/Models/Plane.obj");
 		m_cubeMesh  = Mesh::load("data/Models/Cube.obj");
 		// New lego piece system:
-		m_ldrawBrickTransform = glm::mat4(1.0f);
+		m_ldrawBrickTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
 		m_ldrawBrick = Mesh::loadLDrawExample();
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
@@ -95,7 +89,7 @@ namespace Brickview
 		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
 
 #if 1
-		Lego3DRenderer::drawMesh(m_ldrawBrick, m_ldrawBrickMaterial, m_ldrawBrickTransform);
+		Lego3DRenderer::drawMesh(m_cubeMesh, m_ldrawBrickMaterial, m_ldrawBrickTransform);
 #else
 		Lego3DRenderer::drawMesh(m_planeMesh, m_ldrawBrickMaterial, m_ldrawBrickTransform);
 #endif
