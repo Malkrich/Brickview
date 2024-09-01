@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Mesh/Mesh.h"
+#include "Brickview/Mesh/Mesh.h"
 
 #include <filesystem>
 #include <queue>
@@ -16,7 +16,7 @@ namespace Brickview
 		static void init();
 		static void shutdown();
 
-		static bool load(const std::filesystem::path& filePath, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices);
+		static bool load(const std::filesystem::path& filePath, Ref<Mesh> mesh);
 
 	private:
 		static bool readFile(const SubMeshData& meshData,

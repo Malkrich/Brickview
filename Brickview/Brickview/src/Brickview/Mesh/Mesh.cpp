@@ -23,9 +23,6 @@ namespace Brickview
 	{
 		Ref<Mesh> mesh = createRef<Mesh>();
 
-		std::vector<Vertex> vertices;
-		std::vector<TriangleFace> indices;
-
 		auto extension = filePath.extension();
 		auto modelFileFormat = modelFileFormatFromExtension(extension.string());
 
@@ -36,7 +33,7 @@ namespace Brickview
 				loadSuccess = ObjLoader::load(filePath, mesh);
 				break;
 			case ModelFileFormat::LDrawDat:
-				loadSuccess = LegoMeshLoader::load(filePath, vertices, indices);
+				loadSuccess = LegoMeshLoader::load(filePath, mesh);
 				break;
 		}
 		if (!loadSuccess)

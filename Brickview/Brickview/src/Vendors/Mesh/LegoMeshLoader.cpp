@@ -241,8 +241,11 @@ namespace Brickview
 		s_ldrawData = nullptr;
 	}
 
-	bool LegoMeshLoader::load(const std::filesystem::path& filePath, std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices)
+	bool LegoMeshLoader::load(const std::filesystem::path& filePath, Ref<Mesh> mesh)
 	{
+		std::vector<Vertex> vertices;
+		std::vector<TriangleFace> indices;
+
 		if (!std::filesystem::exists(filePath))
 		{
 			BV_LOG_ERROR("Couldn't load file: {}", filePath.generic_string());

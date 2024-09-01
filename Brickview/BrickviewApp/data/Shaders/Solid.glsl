@@ -41,5 +41,5 @@ void main()
     renderedColor *= diffuse;
     renderedColor += ambient;
 
-    color = vec4(u_showNormals ? normalColor : renderedColor, 1.0);
+    color = vec4(u_showNormals ? normalColor * renderedColor: renderedColor, 1.0);
 }
