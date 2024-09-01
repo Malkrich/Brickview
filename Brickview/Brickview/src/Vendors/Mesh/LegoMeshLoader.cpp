@@ -1,10 +1,10 @@
 #include "Pch.h"
 #include "LegoMeshLoader.h"
+
 #include "Utils/StringUtils.h"
+#include "LDrawReader.h"
 
 #include <glm/glm.hpp>
-
-#include <charconv>
 
 namespace Brickview
 {
@@ -33,17 +33,6 @@ namespace Brickview
 	};
 
 	static LDrawReaderData* s_ldrawData = nullptr;
-
-	enum class LineType
-	{
-		Empty         = -1,
-		Comment       = 0,
-		SubFileRef    = 1,
-		Line          = 2,
-		Triangle      = 3,
-		Quadrilateral = 4,
-		OptionalFile  = 5
-	};
 
 	template<uint32_t ElementCount>
 	struct BasicFace
@@ -75,21 +64,6 @@ namespace Brickview
 		static inline glm::vec3 LDUToM(const T& v)
 		{
 			return LDUToMM<T>(v) / 1000.0f;
-		}
-
-		static std::tuple<LineType, std::string> getLineType(const std::string& line)
-		{
-			if (line.empty())
-				return { LineType::Empty, line };
-
-			size_t firstSpace     = line.find_first_of(' ');
-			size_t lineLength     = line.size();
-			std::string strPrefix = line.substr(0, firstSpace);
-			std::string tail      = line.substr(firstSpace + 1, lineLength - firstSpace);
-			uint32_t lineType;
-			std::from_chars(strPrefix.data(), strPrefix.data() + strPrefix.size(), lineType);
-
-			return { (LineType)lineType, tail };
 		}
 
 		static std::tuple<uint32_t, std::string> getColorID(const std::string& line)
@@ -259,7 +233,7 @@ namespace Brickview
 		do
 		{
 			const auto& meshData = subMeshes.front();
-			readFile(meshData, vertices, indices, subMeshes);
+			readFile(meshData, mesh, subMeshes);
 			subMeshes.pop();
 		} while (!subMeshes.empty());
 
@@ -269,13 +243,34 @@ namespace Brickview
 		return true;
 	}
 
-	bool LegoMeshLoader::readFile(const SubMeshData& meshData,
-		std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices,
-		std::queue<SubMeshData>& subMeshes)
+	bool LegoMeshLoader::readFile(const SubMeshData& meshData, Ref<Mesh> mesh, std::queue<SubMeshData>& subMeshes)
 	{
 		std::filesystem::path filePath = meshData.FilePath;
-		glm::mat4 transform            = meshData.Transform;
-		bool inverted                  = meshData.Inverted;
+
+		LDrawReader reader(filePath);
+
+		if (!reader.isValid())
+		{
+			BV_LOG_ERROR("Couldn't load file: {}", filePath.generic_string());
+			return false;
+		}
+
+		while (reader.readLine())
+		{
+			LineType lineType = reader.getLineType();
+
+			switch (lineType)
+			{
+				case LineType::Empty:
+					continue;
+			}
+		}
+
+		return true;
+#if 0
+		std::filesystem::path filePath = meshData.FilePath;
+		glm::mat4 transform = meshData.Transform;
+		bool inverted = meshData.Inverted;
 
 		if (!std::filesystem::exists(filePath))
 		{
@@ -313,50 +308,51 @@ namespace Brickview
 			auto [colorID, geoData] = Utils::getColorID(lineContent);
 			switch (lineType)
 			{
-				case LineType::Triangle:
+			case LineType::Triangle:
+			{
+				Utils::addFace<Triangle>(transform, inverted, spec, vertices, indices, geoData, indexOffset);
+				indexOffset += 3;
+				break;
+			}
+			case LineType::Quadrilateral:
+			{
+				Utils::addFace<Quad>(transform, inverted, spec, vertices, indices, geoData, indexOffset);
+				indexOffset += 4;
+				break;
+			}
+			case LineType::SubFileRef:
+			{
+				SubMeshData subMesh = Utils::readSubMesh(geoData);
+
+				if (isInPartsDirectory(subMesh.FilePath))
 				{
-					Utils::addFace<Triangle>(transform, inverted, spec, vertices, indices, geoData, indexOffset);
-					indexOffset += 3;
-					break;
+					BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->PartsDirectory.generic_string());
+					subMesh.FilePath = s_ldrawData->PartsDirectory / subMesh.FilePath;
 				}
-				case LineType::Quadrilateral:
+				else if (isInSubPartsDirectory(subMesh.FilePath))
 				{
-					Utils::addFace<Quad>(transform, inverted, spec, vertices, indices, geoData, indexOffset);
-					indexOffset += 4;
-					break;
+					BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->SubPartsDirectory.generic_string());
+					subMesh.FilePath = s_ldrawData->SubPartsDirectory / subMesh.FilePath;
 				}
-				case LineType::SubFileRef:
-				{
-					SubMeshData subMesh = Utils::readSubMesh(geoData);
+				else
+					BV_LOG_ERROR("Sub mesh {} doesn't exist!", subMesh.FilePath.generic_string());
 
-					if (isInPartsDirectory(subMesh.FilePath))
-					{
-						BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->PartsDirectory.generic_string());
-						subMesh.FilePath = s_ldrawData->PartsDirectory / subMesh.FilePath;
-					}
-					else if (isInSubPartsDirectory(subMesh.FilePath))
-					{
-						BV_LOG_INFO("Found file {} in {}", subMesh.FilePath.generic_string(), s_ldrawData->SubPartsDirectory.generic_string());
-						subMesh.FilePath = s_ldrawData->SubPartsDirectory / subMesh.FilePath;
-					}
-					else
-						BV_LOG_ERROR("Sub mesh {} doesn't exist!", subMesh.FilePath.generic_string());
+				glm::mat4 worldTransform = transform * subMesh.Transform;
+				subMesh.Transform = worldTransform;
+				subMesh.Inverted = spec.InvertNext;
+				if (spec.InvertNext)
+					spec.InvertNext = false;
 
-					glm::mat4 worldTransform = transform * subMesh.Transform;
-					subMesh.Transform = worldTransform;
-					subMesh.Inverted = spec.InvertNext;
-					if (spec.InvertNext)
-						spec.InvertNext = false;
+				subMeshes.push(subMesh);
 
-					subMeshes.push(subMesh);
-
-					BV_LOG_INFO("Added {} to the mesh queue", subMesh.FilePath.generic_string());
-					break;
-				}
+				BV_LOG_INFO("Added {} to the mesh queue", subMesh.FilePath.generic_string());
+				break;
+			}
 			}
 		}
 
 		return true;
+#endif
 	}
 
 	bool LegoMeshLoader::isInPartsDirectory(const std::filesystem::path& filePath)
