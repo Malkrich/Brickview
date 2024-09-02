@@ -22,16 +22,12 @@ namespace Brickview
 
 	struct TriangleFace
 	{
-		TriangleFace(uint32_t i1, uint32_t i2, uint32_t i3)
-			: m_indices{ i1, i2, i3 }
+		TriangleFace(uint32_t i0, uint32_t i1, uint32_t i2)
+			: m_indices{ i0, i1, i2 }
 		{}
 		TriangleFace()
 			: m_indices{ 0, 0, 0 }
 		{}
-
-		uint32_t getIndex1() const { return m_indices[0]; }
-		uint32_t getIndex2() const { return m_indices[1]; }
-		uint32_t getIndex3() const { return m_indices[2]; }
 
 		void addOffset(uint32_t offset)
 		{
@@ -67,15 +63,18 @@ namespace Brickview
 		const std::vector<Vertex>& getVertices() const { return m_vertices; }
 		const std::vector<TriangleFace>& getIndices() const { return m_indices; }
 
-		void setData(const std::vector<Vertex>& vertices, const std::vector<TriangleFace> indices)
-		{
-			m_vertices = vertices;
-			m_indices = indices;
-		}
+		void setData(const std::vector<Vertex>& vertices, const std::vector<TriangleFace> indices);
+		void addTriangle(
+			const glm::vec3& p0, const glm::vec3& n0,
+			const glm::vec3& p1, const glm::vec3& n1,
+			const glm::vec3& p2, const glm::vec3& n2);
+		void addTriangle(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2);
+		void addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
 
 	private:
 		std::vector<Vertex> m_vertices;
 		std::vector<TriangleFace> m_indices;
+		uint32_t m_lastIndex = 0;
 	};
 
 }

@@ -25,6 +25,26 @@ namespace Brickview
 
 	}
 
+	LDrawTriangleData LDrawTriangleData::deserialize(const std::string& line)
+	{
+		BV_LOG_INFO("Deserializing triangle data: {}", line);
+		LDrawTriangleData t;
+		return t;
+	}
+
+	LDrawQuadData LDrawQuadData::deserialize(const std::string& line)
+	{
+		BV_LOG_INFO("Deserializing quad data: {}", line);
+		LDrawQuadData q;
+		return q;
+	}
+
+	LDrawSubFileRefData LDrawSubFileRefData::deserialize(const std::string& line)
+	{
+		BV_LOG_INFO("Deserializing sub-file reference data: {}", line);
+		LDrawSubFileRefData sf;
+		return sf;
+	}
 
 	LDrawReader::LDrawReader(const std::filesystem::path& filePath)
 	{
@@ -32,6 +52,22 @@ namespace Brickview
 			m_valid = false;
 
 		m_fileStream = std::ifstream(filePath);
+	}
+
+	std::string LDrawReader::lineTypeToString(LineType type)
+	{
+		switch (type)
+		{
+			case LineType::Empty:         return "Empty";
+			case LineType::Comment:       return "Comment";
+			case LineType::SubFileRef:    return "Sub-file reference";
+			case LineType::Line:          return "Line";
+			case LineType::Triangle:      return "Triangle";
+			case LineType::Quadrilateral: return "Quadrilateral";
+			case LineType::OptionalFile:  return "Optional file";
+		}
+
+		return "Unkown";
 	}
 
 	bool LDrawReader::readLine()

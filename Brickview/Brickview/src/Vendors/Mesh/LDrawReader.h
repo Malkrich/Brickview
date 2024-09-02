@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/glm.hpp>
+
 #include <filesystem>
 
 namespace Brickview
@@ -16,13 +18,44 @@ namespace Brickview
 		OptionalFile = 5
 	};
 
+	struct LDrawTriangleData
+	{
+		static LDrawTriangleData deserialize(const std::string& line);
+
+		glm::vec3 p0, p1, p2;
+	};
+
+	struct LDrawQuadData
+	{
+		static LDrawQuadData deserialize(const std::string& line);
+
+		glm::vec3 p0, p1, p2, p3;
+	};
+
+	struct LDrawSubFileRefData
+	{
+		static LDrawSubFileRefData deserialize(const std::string& line);
+
+		std::filesystem::path FilePath;
+		glm::mat4 Transform;
+	};
+
 	class LDrawReader
 	{
 	public:
 		LDrawReader(const std::filesystem::path& filePath);
 
+		// For debug purposes
+		static std::string lineTypeToString(LineType type);
+
 		bool isValid() const { return m_valid; }
 		LineType getLineType() const { return m_currentLineType; }
+		template<typename T>
+		T getLineData()
+		{
+			T data = T::deserialize(m_currentLine);
+			return data;
+		}
 
 		bool readLine();
 
@@ -33,7 +66,7 @@ namespace Brickview
 
 		// Current states
 		std::string m_currentLine;
-		LineType m_currentLineType;
+		LineType m_currentLineType = LineType::Empty;
 
 	};
 

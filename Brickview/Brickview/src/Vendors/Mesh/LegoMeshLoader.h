@@ -8,7 +8,7 @@
 namespace Brickview
 {
 
-	struct SubMeshData;
+	struct LDrawSubFileRefData;
 
 	class LegoMeshLoader
 	{
@@ -19,7 +19,7 @@ namespace Brickview
 		static bool load(const std::filesystem::path& filePath, Ref<Mesh> mesh);
 
 	private:
-		static bool readFile(const SubMeshData& meshData, Ref<Mesh> mesh, std::queue<SubMeshData>& subMeshes);
+		static bool readFile(const LDrawSubFileRefData& file, Ref<Mesh> mesh, std::queue<LDrawSubFileRefData>& loadingQueue);
 
 		static bool isInPartsDirectory(const std::filesystem::path& filePath);
 		static bool isInSubPartsDirectory(const std::filesystem::path& filePath);

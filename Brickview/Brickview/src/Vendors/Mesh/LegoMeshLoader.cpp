@@ -9,49 +9,17 @@
 namespace Brickview
 {
 
-	struct FileSpecifications
-	{
-		bool ClockwiseWinding = true;
-		bool InvertNext = false;
-	};
-
-	struct SubMeshData
-	{
-		std::filesystem::path FilePath;
-		glm::mat4 Transform;
-		bool Inverted;
-	};
-
-	struct LDrawReaderData
+	struct LegoMeshLoaderData
 	{
 		std::filesystem::path BaseDirectory;
 		std::filesystem::path SubPartsDirectory;
 		std::filesystem::path PartsDirectory;
-
-		using CommandFunction = std::function<void(const std::string&, FileSpecifications&)>;
-		std::unordered_map<std::string, CommandFunction> CommandFunctions;
 	};
 
-	static LDrawReaderData* s_ldrawData = nullptr;
+	static LegoMeshLoaderData* s_legoMeshLoaderData = nullptr;
 
-	template<uint32_t ElementCount>
-	struct BasicFace
-	{
-		std::array<glm::vec3, ElementCount> Positions;
-	};
-
-	struct Triangle : public BasicFace<3>
-	{
-		static constexpr inline size_t getElementCount() { return 3; }
-		static constexpr inline size_t getTriangleCount() { return 1; }
-	};
-
-	struct Quad : public BasicFace<4>
-	{
-		static constexpr inline size_t getElementCount() { return 4; }
-		static constexpr inline size_t getTriangleCount() { return 2; }
-	};
-
+// Old implementation
+#if 0
 	namespace Utils
 	{
 		template<typename T>
@@ -196,62 +164,58 @@ namespace Brickview
 		}
 
 	}
+#endif
 
 	void LegoMeshLoader::init()
 	{
-		BV_ASSERT(!s_ldrawData, "LDrawReader engine already initialized!");
+		BV_ASSERT(!s_legoMeshLoaderData, "LDrawReader engine already initialized!");
 
-		s_ldrawData                    = new LDrawReaderData();
-		s_ldrawData->BaseDirectory     = "./data/Models/LDrawExample";
-		s_ldrawData->SubPartsDirectory = s_ldrawData->BaseDirectory / "p";
-		s_ldrawData->PartsDirectory    = s_ldrawData->BaseDirectory / "parts";
-
-		s_ldrawData->CommandFunctions["BFC"] = &Utils::readBFCCommand;
+		s_legoMeshLoaderData                    = new LegoMeshLoaderData();
+		s_legoMeshLoaderData->BaseDirectory     = "./data/Models/LDrawExample";
+		s_legoMeshLoaderData->SubPartsDirectory = s_legoMeshLoaderData->BaseDirectory / "p";
+		s_legoMeshLoaderData->PartsDirectory    = s_legoMeshLoaderData->BaseDirectory / "parts";
 	}
 
 	void LegoMeshLoader::shutdown()
 	{
-		delete s_ldrawData;
-		s_ldrawData = nullptr;
+		delete s_legoMeshLoaderData;
+		s_legoMeshLoaderData = nullptr;
 	}
 
 	bool LegoMeshLoader::load(const std::filesystem::path& filePath, Ref<Mesh> mesh)
 	{
-		std::vector<Vertex> vertices;
-		std::vector<TriangleFace> indices;
-
 		if (!std::filesystem::exists(filePath))
 		{
 			BV_LOG_ERROR("Couldn't load file: {}", filePath.generic_string());
 			return false;
 		}
 
-		std::queue<SubMeshData> subMeshes;
-		SubMeshData initialMesh = { filePath, glm::mat4(1.0f) };
-		subMeshes.push(initialMesh);
+		std::queue<LDrawSubFileRefData> loadingQueue;
+		LDrawSubFileRefData initialFile = { filePath, glm::mat4(1.0f) };
+		loadingQueue.push(initialFile);
 
-		do
+		while (!loadingQueue.empty())
 		{
-			const auto& meshData = subMeshes.front();
-			readFile(meshData, mesh, subMeshes);
-			subMeshes.pop();
-		} while (!subMeshes.empty());
+			const LDrawSubFileRefData& file = loadingQueue.front();
+			readFile(file, mesh, loadingQueue);
+			loadingQueue.pop();
+		}
 
-		for (auto& vertex : vertices)
-			vertex.Position = Utils::LDUToM(vertex.Position);
+		//TODO: convertLDUToM(mesh);
+		// Previously:
+		//for (auto& vertex : vertices)
+		//	vertex.Position = Utils::LDUToM(vertex.Position);
 
 		return true;
 	}
 
-	bool LegoMeshLoader::readFile(const SubMeshData& meshData, Ref<Mesh> mesh, std::queue<SubMeshData>& subMeshes)
+	bool LegoMeshLoader::readFile(const LDrawSubFileRefData& file, Ref<Mesh> mesh, std::queue<LDrawSubFileRefData>& loadingQueue)
 	{
-		std::filesystem::path filePath = meshData.FilePath;
-
-		LDrawReader reader(filePath);
+		LDrawReader reader(file.FilePath);
 
 		if (!reader.isValid())
 		{
-			BV_LOG_ERROR("Couldn't load file: {}", filePath.generic_string());
+			BV_LOG_ERROR("Couldn't load file: {}", file.FilePath.generic_string());
 			return false;
 		}
 
@@ -261,8 +225,30 @@ namespace Brickview
 
 			switch (lineType)
 			{
+				case LineType::Triangle:
+				{
+					LDrawTriangleData t = reader.getLineData<LDrawTriangleData>();
+					mesh->addTriangle(t.p0, t.p1, t.p2);
+					break;
+				}
+				case LineType::Quadrilateral:
+				{
+					LDrawQuadData q = reader.getLineData<LDrawQuadData>();
+					mesh->addQuad(q.p0, q.p1, q.p2, q.p3);
+					break;
+				}
+				case LineType::SubFileRef:
+				{
+					LDrawSubFileRefData sf = reader.getLineData<LDrawSubFileRefData>();
+					loadingQueue.push(sf);
+					break;
+				}
+
 				case LineType::Empty:
-					continue;
+				case LineType::Comment:
+				case LineType::Line:
+					BV_LOG_INFO("Ignoring line with line type {}", LDrawReader::lineTypeToString(lineType));
+					break;
 			}
 		}
 
@@ -357,17 +343,12 @@ namespace Brickview
 
 	bool LegoMeshLoader::isInPartsDirectory(const std::filesystem::path& filePath)
 	{
-		return std::filesystem::exists(s_ldrawData->PartsDirectory / filePath);
+		return std::filesystem::exists(s_legoMeshLoaderData->PartsDirectory / filePath);
 	}
 
 	bool LegoMeshLoader::isInSubPartsDirectory(const std::filesystem::path& filePath)
 	{
-		return std::filesystem::exists(s_ldrawData->SubPartsDirectory / filePath);
-	}
-
-	bool LegoMeshLoader::isPrefixACommand(const std::string& prefix)
-	{
-		return s_ldrawData->CommandFunctions.find(prefix) != s_ldrawData->CommandFunctions.end();
+		return std::filesystem::exists(s_legoMeshLoaderData->SubPartsDirectory / filePath);
 	}
 
 }
