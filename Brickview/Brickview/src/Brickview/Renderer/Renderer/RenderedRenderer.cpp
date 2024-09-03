@@ -50,7 +50,7 @@ namespace Brickview
 	void RenderedRenderer::drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
 	{
 		const auto& vertices = mesh->getVertices();
-		const auto& indices  = mesh->getIndices();
+		const auto& indices  = mesh->getConnectivities();
 
 		if (vertices.size() + m_meshVertices.size() > m_maxVertices
 			|| indices.size() + m_meshIndices.size() > m_maxIndices)
@@ -85,7 +85,7 @@ namespace Brickview
 			* glm::scale(glm::mat4(1.0f), lightScale * glm::vec3(1.0f));
 
 		const auto& vertices = m_lightMesh->getVertices();
-		const auto& indices  = m_lightMesh->getIndices();
+		const auto& indices  = m_lightMesh->getConnectivities();
 
 		uint32_t offset = m_lightVertices.size();
 		m_lightVertices.reserve(m_lightVertices.size() + vertices.size());

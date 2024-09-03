@@ -61,19 +61,46 @@ namespace Brickview
 		bool isEmpty() const { return m_vertices.empty(); }
 
 		const std::vector<Vertex>& getVertices() const { return m_vertices; }
-		const std::vector<TriangleFace>& getIndices() const { return m_indices; }
+		const std::vector<TriangleFace>& getConnectivities() const { return m_connectivities; }
 
 		void setData(const std::vector<Vertex>& vertices, const std::vector<TriangleFace> indices);
-		void addTriangle(
-			const glm::vec3& p0, const glm::vec3& n0,
-			const glm::vec3& p1, const glm::vec3& n1,
-			const glm::vec3& p2, const glm::vec3& n2);
 		void addTriangle(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2);
 		void addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
 
 	private:
+		template<uint32_t VertexCount, uint32_t TriangleCount>
+		void addGeometry(const std::array<glm::vec3, VertexCount>& positions)
+		{
+			BV_ASSERT(TriangleCount <= 2, "Geometry which is not triangle nor quad is not supported!");
+			// Normal calculation
+			glm::vec3 normal = glm::normalize(glm::cross(positions[2] - positions[0], positions[1] - positions[0]));
+
+			// Geometry
+			m_vertices.reserve(VertexCount);
+			for (uint32_t i = 0; i < VertexCount; i++)
+			{
+				Vertex v = { positions[i], normal };
+				m_vertices.push_back(v);
+			}
+
+			// Connectivity
+			m_connectivities.reserve(TriangleCount);
+			TriangleFace t1 = { 0, 1, 2 };
+			t1.addOffset(m_lastIndex);
+			m_connectivities.push_back(t1);
+			if constexpr(TriangleCount > 1)
+			{
+				TriangleFace t2 = { 2, 3, 0 };
+				t2.addOffset(m_lastIndex);
+				m_connectivities.push_back(t2);
+			}
+
+			m_lastIndex += VertexCount;
+		}
+
+	private:
 		std::vector<Vertex> m_vertices;
-		std::vector<TriangleFace> m_indices;
+		std::vector<TriangleFace> m_connectivities;
 		uint32_t m_lastIndex = 0;
 	};
 

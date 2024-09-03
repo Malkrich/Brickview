@@ -42,7 +42,7 @@ namespace Brickview
 	void SolidRenderer::drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
 	{
 		const auto& vertices = mesh->getVertices();
-		const auto& indices = mesh->getIndices();
+		const auto& indices = mesh->getConnectivities();
 
 		if (vertices.size() + m_meshVertices.size() > m_maxVertices
 			|| indices.size() + m_meshIndices.size() > m_maxIndices)
