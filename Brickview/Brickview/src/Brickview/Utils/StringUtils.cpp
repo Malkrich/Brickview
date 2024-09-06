@@ -21,4 +21,22 @@ namespace Brickview::StringUtils
 		return charPos;
 	}
 
+	std::string getSubStringAt(const std::string& data, const char* separator, uint32_t index)
+	{
+		size_t subStrBegin = 0;
+
+		for (uint32_t i = 0; i < index; i++)
+		{
+			size_t firstSep = data.find_first_of(separator, subStrBegin);
+
+			if (firstSep == std::string::npos)
+				return "";
+
+			subStrBegin = firstSep + 1;
+		}
+
+		size_t subStrSize = data.find_first_of(separator, subStrBegin) - subStrBegin;
+		return data.substr(subStrBegin, subStrSize);
+	}
+
 }

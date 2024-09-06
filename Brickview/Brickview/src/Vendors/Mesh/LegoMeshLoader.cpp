@@ -252,6 +252,8 @@ namespace Brickview
 			}
 		}
 
+		convertToCm(mesh);
+
 		return true;
 #if 0
 		std::filesystem::path filePath = meshData.FilePath;
@@ -339,6 +341,16 @@ namespace Brickview
 
 		return true;
 #endif
+	}
+
+	void LegoMeshLoader::convertToCm(Ref<Mesh> mesh)
+	{
+		// Convert LDU to mm
+		// 1 LDU = 0.4 mm
+		mesh->scale(0.4);
+		// Convert mm to cm
+		// 1 mm = 0.01 cm;
+		mesh->scale(0.01);
 	}
 
 	bool LegoMeshLoader::isInPartsDirectory(const std::filesystem::path& filePath)

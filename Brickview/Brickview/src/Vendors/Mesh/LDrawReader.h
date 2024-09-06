@@ -48,16 +48,20 @@ namespace Brickview
 		// For debug purposes
 		static std::string lineTypeToString(LineType type);
 
+		bool readLine();
+
 		bool isValid() const { return m_valid; }
+
 		LineType getLineType() const { return m_currentLineType; }
 		template<typename T>
-		T getLineData()
+		T getLineData() const
 		{
 			T data = T::deserialize(m_currentLine);
 			return data;
 		}
 
-		bool readLine();
+	private:
+		LineType deserializeLineType(const std::string& line);
 
 	private:
 		// Global file states
@@ -67,7 +71,6 @@ namespace Brickview
 		// Current states
 		std::string m_currentLine;
 		LineType m_currentLineType = LineType::Empty;
-
 	};
 
 }

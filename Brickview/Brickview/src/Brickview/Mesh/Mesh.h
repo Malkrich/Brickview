@@ -59,13 +59,17 @@ namespace Brickview
 		Mesh() = default;
 
 		bool isEmpty() const { return m_vertices.empty(); }
-
 		const std::vector<Vertex>& getVertices() const { return m_vertices; }
 		const std::vector<TriangleFace>& getConnectivities() const { return m_connectivities; }
 
+		// Data modifications
 		void setData(const std::vector<Vertex>& vertices, const std::vector<TriangleFace> indices);
 		void addTriangle(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2);
 		void addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
+
+		// Geometry modifications
+		void scale(float scaleFactor);
+		void scale(const glm::vec3& scaleVector);
 
 	private:
 		template<uint32_t VertexCount, uint32_t TriangleCount>
