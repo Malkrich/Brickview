@@ -34,8 +34,8 @@ namespace Brickview
 		m_cameraControl.setLaptopMode(m_laptopMode);
 
 		// Basic meshes
-		m_planeMesh = Mesh::load("data/Models/Plane.obj");
-		m_cubeMesh  = Mesh::load("data/Models/Cube.obj");
+		m_planeMesh = Mesh::load("data/Meshes/Plane.obj");
+		m_cubeMesh  = Mesh::load("data/Meshes/Cube.obj");
 		// New lego piece system:
 		m_ldrawBrickTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
 		m_ldrawBrick = Mesh::loadLDrawExample();

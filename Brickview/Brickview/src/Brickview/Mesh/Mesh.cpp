@@ -49,7 +49,7 @@ namespace Brickview
 
 	Ref<Mesh> Mesh::loadLDrawExample()
 	{
-		Ref<Mesh> ldrawExampleMesh = Mesh::load("data/Models/LDrawExample/parts/1.dat");
+		Ref<Mesh> ldrawExampleMesh = Mesh::load("data/LDraw/parts/u9495.dat");
 		return ldrawExampleMesh;
 	}
 

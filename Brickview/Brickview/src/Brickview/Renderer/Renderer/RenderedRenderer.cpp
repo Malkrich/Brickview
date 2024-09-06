@@ -31,7 +31,7 @@ namespace Brickview
 			lightLayout,
 			shaderLib->get("Light"));
 
-		m_lightMesh = Mesh::load("data/Models/Cube.obj");
+		m_lightMesh = Mesh::load("data/Meshes/Cube.obj");
 	}
 
 	RenderedRenderer::~RenderedRenderer()
