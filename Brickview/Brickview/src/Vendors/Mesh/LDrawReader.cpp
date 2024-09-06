@@ -3,6 +3,8 @@
 
 #include "Utils/StringUtils.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <charconv>
 
 namespace Brickview
@@ -33,6 +35,34 @@ namespace Brickview
 			return v;
 		}
 
+		static glm::mat4 deserializeTransform(const std::string& line, uint32_t index)
+		{
+			// from: https://www.ldraw.org/article/218.html
+			float a, b, c, d, e, f, g, h, i, x, y, z;
+			x = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 0);
+			y = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 1);
+			z = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 2);
+
+			a = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 3);
+			b = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 4);
+			c = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 5);
+			d = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 6);
+			e = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 7);
+			f = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 8);
+			g = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 9);
+			h = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 10);
+			i = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 11);
+
+			float values[] =
+			{
+				a,    b,    c,    x,
+				d,    e,    f,    y,
+				g,    h,    i,    z,
+				0.0f, 0.0f, 0.0f, 1.0f
+			};
+			glm::mat4 transform = glm::make_mat4(values);
+			return transform;
+		}
 	}
 
 	LDrawTriangleData LDrawTriangleData::deserialize(const std::string& line)
@@ -56,8 +86,9 @@ namespace Brickview
 
 	LDrawSubFileRefData LDrawSubFileRefData::deserialize(const std::string& line)
 	{
-		BV_LOG_INFO("Deserializing sub-file reference data: {}", line);
 		LDrawSubFileRefData sf;
+		sf.Transform = Utils::deserializeTransform(line, 2);
+		sf.FilePath  = Utils::deserializeElementAt(line, 14);
 		return sf;
 	}
 

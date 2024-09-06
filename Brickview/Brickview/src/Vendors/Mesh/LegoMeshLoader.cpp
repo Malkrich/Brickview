@@ -201,10 +201,7 @@ namespace Brickview
 			loadingQueue.pop();
 		}
 
-		//TODO: convertLDUToM(mesh);
-		// Previously:
-		//for (auto& vertex : vertices)
-		//	vertex.Position = Utils::LDUToM(vertex.Position);
+		convertToDm(mesh);
 
 		return true;
 	}
@@ -251,8 +248,6 @@ namespace Brickview
 					break;
 			}
 		}
-
-		convertToDm(mesh);
 
 		return true;
 #if 0
