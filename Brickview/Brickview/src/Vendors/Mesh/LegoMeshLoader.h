@@ -20,7 +20,7 @@ namespace Brickview
 
 	private:
 		static bool readFile(const LDrawSubFileRefData& file, Ref<Mesh> mesh, std::queue<LDrawSubFileRefData>& loadingQueue);
-		static void convertToCm(Ref<Mesh> mesh);
+		static void convertToDm(Ref<Mesh> mesh);
 
 		static bool isInPartsDirectory(const std::filesystem::path& filePath);
 		static bool isInSubPartsDirectory(const std::filesystem::path& filePath);

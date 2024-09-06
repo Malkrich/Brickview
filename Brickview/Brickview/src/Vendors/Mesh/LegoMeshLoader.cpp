@@ -252,7 +252,7 @@ namespace Brickview
 			}
 		}
 
-		convertToCm(mesh);
+		convertToDm(mesh);
 
 		return true;
 #if 0
@@ -343,13 +343,13 @@ namespace Brickview
 #endif
 	}
 
-	void LegoMeshLoader::convertToCm(Ref<Mesh> mesh)
+	void LegoMeshLoader::convertToDm(Ref<Mesh> mesh)
 	{
 		// Convert LDU to mm
 		// 1 LDU = 0.4 mm
 		mesh->scale(0.4);
-		// Convert mm to cm
-		// 1 mm = 0.01 cm;
+		// Convert mm to dm
+		// 1 mm = 0.01 dm;
 		mesh->scale(0.01);
 	}
 

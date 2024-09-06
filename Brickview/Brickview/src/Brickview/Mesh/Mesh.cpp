@@ -80,9 +80,9 @@ namespace Brickview
 		glm::mat4 scaleTransform = glm::scale(glm::mat4(1.0), scaleVector);
 		for (Vertex& v : m_vertices)
 		{
-			glm::vec4 tempV = glm::vec4(v.Position, 1.0f);
-			tempV = scaleTransform * tempV;
-			v.Position = glm::vec3(tempV.x, tempV.y, tempV.z);
+			glm::vec4 pos = glm::vec4(v.Position, 1.0f);
+			pos = scaleTransform * pos;
+			v.Position = glm::vec3(pos.x, pos.y, pos.z);
 		}
 	}
 
