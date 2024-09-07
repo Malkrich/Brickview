@@ -12,157 +12,80 @@ namespace Brickview
 	struct LegoMeshLoaderData
 	{
 		std::filesystem::path BaseDirectory;
-		std::filesystem::path SubPartsDirectory;
 		std::filesystem::path PartsDirectory;
+		std::filesystem::path SubPartsDirectory;
+		std::filesystem::path PrimitivesDirectory;
 	};
 
 	static LegoMeshLoaderData* s_legoMeshLoaderData = nullptr;
 
-// Old implementation
-#if 0
+	LegoMeshFileData::LegoMeshFileData(const std::filesystem::path& filePath, LegoMeshFileType type, const glm::mat4& transform)
+		: FilePath(filePath)
+		, Type(type)
+		, Transform(transform)
+	{}
+
 	namespace Utils
 	{
-		template<typename T>
-		static inline glm::vec3 LDUToMM(const T& v)
+
+		static std::string fileTypeToString(LegoMeshFileType type)
 		{
-			return v * 0.4f;
-		}
-
-		template<typename T>
-		static inline glm::vec3 LDUToM(const T& v)
-		{
-			return LDUToMM<T>(v) / 1000.0f;
-		}
-
-		static std::tuple<uint32_t, std::string> getColorID(const std::string& line)
-		{
-			// colorID ...
-
-			size_t strColorLength = line.find_first_of(' ');
-			size_t lineLength     = line.size();
-			std::string strColor  = line.substr(0, strColorLength);
-			uint32_t colorID;
-			std::from_chars(strColor.data(), strColor.data() + strColor.size(), colorID);
-
-			std::string coordData = line.substr(strColorLength + 1, lineLength - strColorLength);
-
-			return { colorID, coordData };
-		}
-
-		template<typename FaceType>
-		static void addFace(const glm::mat4& transform, bool inverted, const FileSpecifications& spec,
-			std::vector<Vertex>& vertices, std::vector<TriangleFace>& indices,
-			const std::string& coordData,
-			uint32_t indexOffset)
-		{
-			std::stringstream ss(coordData);
-
-			FaceType face;
-			for (size_t i = 0; i < FaceType::getElementCount(); i++)
+			switch (type)
 			{
-				glm::vec3 pos;
-				ss >> pos.x >> pos.y >> pos.z;
-				//pos.y *= -1.0f;
-				face.Positions[i] = transform * glm::vec4(pos, 1.0f);
+				case LegoMeshFileType::None:      return "None";
+				case LegoMeshFileType::Part:      return "Parts";
+				case LegoMeshFileType::SubPart:   return "Sub-parts";
+				case LegoMeshFileType::Primitive: return "Primitive";
 			}
 
-			glm::vec3 u = face.Positions[1] - face.Positions[0];
-			glm::vec3 v = face.Positions[2] - face.Positions[0];
-			glm::vec3 normal = glm::normalize(glm::cross(u, v));
-			if ((!spec.ClockwiseWinding && !inverted) || (spec.ClockwiseWinding && inverted))
-				normal *= -1.0f; // Inverse normal
-
-			// Vertices
-			vertices.reserve(vertices.size() + FaceType::getElementCount());
-			for (const auto& position : face.Positions)
-				vertices.push_back({ position, normal });
-
-			// Indices
-			indices.reserve(indices.size() + FaceType::getTriangleCount());
-
-			TriangleFace t = { 0, 1, 2 };
-			t.addOffset(indexOffset);
-			indices.push_back(t);
-
-			if (FaceType::getTriangleCount() == 1)
-				return;
-
-			t = { 2, 3, 0 };
-			t.addOffset(indexOffset);
-			indices.push_back(t);
+			return "Unknown";
 		}
 
-		static SubMeshData readSubMesh(const std::string& line)
+	}
+
+// Old implementation
+#if 0
+	// Utils function
+	static std::string getComment(const std::string& line)
+	{
+		size_t firstSpace       = line.find_first_of(' ') + 1;
+		firstSpace              = firstSpace == std::string::npos ? 0 : firstSpace;
+		size_t commentLength    = line.size() - firstSpace;
+		commentLength           = firstSpace == std::string::npos ? 0 : commentLength;
+		return line.substr(firstSpace, commentLength);
+	}
+
+	static void readBFCCommand(const std::string& commandContent, FileSpecifications& spec)
+	{
+		std::stringstream ss(commandContent);
+		while (ss.good())
 		{
-			// find file name
-			size_t lastSpace      = line.rfind(' ');
-			size_t fileNameLength = line.size() - lastSpace;
-			std::string fileName  = line.substr(lastSpace + 1, fileNameLength);
+			std::string instruction;
+			ss >> instruction;
 
-			// find transform
-			std::string transformData = line.substr(0, lastSpace);
-			std::stringstream ss(transformData);
-
-			float a, b, c, d, e, f, g, h, i, x, y, z;
-			ss  >> x >> y >> z
-				>> a >> b >> c
-				>> d >> e >> f
-				>> g >> h >> i;
-
-			SubMeshData subMesh;
-			subMesh.FilePath = fileName;
-			subMesh.Transform = glm::mat4(
-				a,  d,  g,  0.0f,
-				b,  e,  h,  0.0f,
-				c,  f,  i,  0.0f,
-				x,  y,  z,  1.0f);
-
-			return subMesh;
+			if (instruction == "CW")
+				spec.ClockwiseWinding = true;
+			else if (instruction == "CCW")
+				spec.ClockwiseWinding = false;
+			else if (instruction == "INVERTNEXT")
+				spec.InvertNext = true;
+			else
+				continue;
 		}
-		
-		// Utils function
-		static std::string getComment(const std::string& line)
-		{
-			size_t firstSpace       = line.find_first_of(' ') + 1;
-			firstSpace              = firstSpace == std::string::npos ? 0 : firstSpace;
-			size_t commentLength    = line.size() - firstSpace;
-			commentLength           = firstSpace == std::string::npos ? 0 : commentLength;
-			return line.substr(firstSpace, commentLength);
-		}
+	}
 
-		static void readBFCCommand(const std::string& commandContent, FileSpecifications& spec)
-		{
-			std::stringstream ss(commandContent);
-			while (ss.good())
-			{
-				std::string instruction;
-				ss >> instruction;
+	static std::tuple<std::string, std::string> getCommandPrefix(const std::string& line)
+	{
+		// Word
 
-				if (instruction == "CW")
-					spec.ClockwiseWinding = true;
-				else if (instruction == "CCW")
-					spec.ClockwiseWinding = false;
-				else if (instruction == "INVERTNEXT")
-					spec.InvertNext = true;
-				else
-					continue;
-			}
-		}
+		size_t prefixLength  = line.find_first_of(' ');
+		prefixLength         = prefixLength == std::string::npos ? line.size() : prefixLength;
+		size_t contentLength = line.size();
 
-		static std::tuple<std::string, std::string> getCommandPrefix(const std::string& line)
-		{
-			// Word
+		std::string commandPrefix  = line.substr(0, prefixLength);
+		std::string commandContent = contentLength == prefixLength ? "" : line.substr(prefixLength + 1, contentLength - prefixLength);
 
-			size_t prefixLength  = line.find_first_of(' ');
-			prefixLength         = prefixLength == std::string::npos ? line.size() : prefixLength;
-			size_t contentLength = line.size();
-
-			std::string commandPrefix  = line.substr(0, prefixLength);
-			std::string commandContent = contentLength == prefixLength ? "" : line.substr(prefixLength + 1, contentLength - prefixLength);
-
-			return { commandPrefix, commandContent };
-		}
-
+		return { commandPrefix, commandContent };
 	}
 #endif
 
@@ -170,10 +93,11 @@ namespace Brickview
 	{
 		BV_ASSERT(!s_legoMeshLoaderData, "LDrawReader engine already initialized!");
 
-		s_legoMeshLoaderData                    = new LegoMeshLoaderData();
-		s_legoMeshLoaderData->BaseDirectory     = "./data/Models/LDrawExample";
-		s_legoMeshLoaderData->SubPartsDirectory = s_legoMeshLoaderData->BaseDirectory / "p";
-		s_legoMeshLoaderData->PartsDirectory    = s_legoMeshLoaderData->BaseDirectory / "parts";
+		s_legoMeshLoaderData                      = new LegoMeshLoaderData();
+		s_legoMeshLoaderData->BaseDirectory       = "./data/LDraw/";
+		s_legoMeshLoaderData->PartsDirectory      = "parts";
+		s_legoMeshLoaderData->SubPartsDirectory   = "s";
+		s_legoMeshLoaderData->PrimitivesDirectory = "p";
 	}
 
 	void LegoMeshLoader::shutdown()
@@ -186,17 +110,17 @@ namespace Brickview
 	{
 		if (!std::filesystem::exists(filePath))
 		{
-			BV_LOG_ERROR("Couldn't load file: {}", filePath.generic_string());
+			BV_LOG_ERROR("Couldn't load: {}", filePath.generic_string());
 			return false;
 		}
 
-		std::queue<LDrawSubFileRefData> loadingQueue;
-		LDrawSubFileRefData initialFile = { filePath, glm::mat4(1.0f) };
+		std::queue<LegoMeshFileData> loadingQueue;
+		LegoMeshFileData initialFile(filePath, LegoMeshFileType::Part, glm::mat4(1.0f));
 		loadingQueue.push(initialFile);
 
 		while (!loadingQueue.empty())
 		{
-			const LDrawSubFileRefData& file = loadingQueue.front();
+			const LegoMeshFileData& file = loadingQueue.front();
 			readFile(file, mesh, loadingQueue);
 			loadingQueue.pop();
 		}
@@ -206,13 +130,17 @@ namespace Brickview
 		return true;
 	}
 
-	bool LegoMeshLoader::readFile(const LDrawSubFileRefData& file, Ref<Mesh> mesh, std::queue<LDrawSubFileRefData>& loadingQueue)
+	bool LegoMeshLoader::readFile(const LegoMeshFileData& file, Ref<Mesh> mesh, std::queue<LegoMeshFileData>& loadingQueue)
 	{
-		LDrawReader reader(file.FilePath);
+		std::filesystem::path currentFilePath = file.FilePath;
+		LegoMeshFileType currentFileType      = file.Type;
+		glm::mat4 currentTransform            = file.Transform;
+
+		LDrawReader reader(currentFilePath);
 
 		if (!reader.isValid())
 		{
-			BV_LOG_ERROR("Couldn't load file: {}", file.FilePath.generic_string());
+			BV_LOG_ERROR("Couldn't read file of type {} in {}", Utils::fileTypeToString(currentFileType), currentFilePath.generic_string());
 			return false;
 		}
 
@@ -225,25 +153,30 @@ namespace Brickview
 				case LineType::Triangle:
 				{
 					LDrawTriangleData t = reader.getLineData<LDrawTriangleData>();
-					mesh->addTriangle(t.p0, t.p1, t.p2);
+					mesh->addTriangle(t.p0, t.p1, t.p2, currentTransform);
 					break;
 				}
 				case LineType::Quadrilateral:
 				{
 					LDrawQuadData q = reader.getLineData<LDrawQuadData>();
-					mesh->addQuad(q.p0, q.p1, q.p2, q.p3);
+					mesh->addQuad(q.p0, q.p1, q.p2, q.p3, currentTransform);
 					break;
 				}
 				case LineType::SubFileRef:
 				{
 					LDrawSubFileRefData sf = reader.getLineData<LDrawSubFileRefData>();
-					loadingQueue.push(sf);
+					LegoMeshFileData newFile;
+					newFile.Type      = getChildFileType(currentFileType);
+					newFile.FilePath  = getChildFilePath(newFile.Type, sf.FilePath);
+					newFile.Transform = currentTransform * sf.Transform;
+					loadingQueue.push(newFile);
 					break;
 				}
 
-				case LineType::Empty:
 				case LineType::Comment:
-				case LineType::Line:
+					BV_LOG_INFO("LDraw file comment: {}", reader.getComment());
+					break;
+				default:
 					BV_LOG_INFO("Ignoring line with line type {}", LDrawReader::lineTypeToString(lineType));
 					break;
 			}
@@ -348,14 +281,43 @@ namespace Brickview
 		mesh->scale(0.01);
 	}
 
-	bool LegoMeshLoader::isInPartsDirectory(const std::filesystem::path& filePath)
+	std::filesystem::path LegoMeshLoader::getFullPartsDirectory()
 	{
-		return std::filesystem::exists(s_legoMeshLoaderData->PartsDirectory / filePath);
+		return s_legoMeshLoaderData->BaseDirectory / s_legoMeshLoaderData->PartsDirectory;
 	}
 
-	bool LegoMeshLoader::isInSubPartsDirectory(const std::filesystem::path& filePath)
+	std::filesystem::path LegoMeshLoader::getFullSubPartsDirectory()
 	{
-		return std::filesystem::exists(s_legoMeshLoaderData->SubPartsDirectory / filePath);
+		return getFullPartsDirectory() / s_legoMeshLoaderData->SubPartsDirectory;
+	}
+
+	std::filesystem::path LegoMeshLoader::getFullPrimitivesDirectory()
+	{
+		return s_legoMeshLoaderData->BaseDirectory / s_legoMeshLoaderData->PrimitivesDirectory;
+	}
+
+	LegoMeshFileType LegoMeshLoader::getChildFileType(LegoMeshFileType parentType)
+	{
+		if (parentType == LegoMeshFileType::Part)
+			return LegoMeshFileType::SubPart;
+
+		if (parentType == LegoMeshFileType::SubPart || parentType == LegoMeshFileType::Primitive)
+			return LegoMeshFileType::Primitive;
+
+		return LegoMeshFileType::None;
+	}
+
+	std::filesystem::path LegoMeshLoader::getChildFilePath(LegoMeshFileType parentType, std::filesystem::path& fileName)
+	{
+		switch (parentType)
+		{
+			case LegoMeshFileType::Part:      return getFullPartsDirectory() / fileName;
+			case LegoMeshFileType::SubPart:   return getFullPartsDirectory() / fileName;
+			case LegoMeshFileType::Primitive: return getFullPrimitivesDirectory() / fileName;
+		}
+
+		BV_ASSERT(false, "Unknown file type!");
+		return "";
 	}
 
 }

@@ -47,6 +47,7 @@ namespace Brickview
 
 		// For debug purposes
 		static std::string lineTypeToString(LineType type);
+		std::string getComment() const;
 
 		bool readLine();
 

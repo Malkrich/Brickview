@@ -38,7 +38,7 @@ namespace Brickview
 		m_cubeMesh  = Mesh::load("data/Meshes/Cube.obj");
 		// New lego piece system:
 		m_ldrawBrickTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
-		m_ldrawBrick = Mesh::loadLDrawExample();
+		m_ldrawBrick = Mesh::load("data/LDraw/parts/u9554.dat");
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };

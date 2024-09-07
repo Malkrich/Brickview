@@ -8,7 +8,23 @@
 namespace Brickview
 {
 
-	struct LDrawSubFileRefData;
+	enum class LegoMeshFileType
+	{
+		None = 0,
+		Part,
+		SubPart,
+		Primitive
+	};
+
+	struct LegoMeshFileData
+	{
+		LegoMeshFileData() = default;
+		LegoMeshFileData(const std::filesystem::path& filePath, LegoMeshFileType type, const glm::mat4& transform);
+
+		std::filesystem::path FilePath = "";
+		LegoMeshFileType Type = LegoMeshFileType::None;
+		glm::mat4 Transform = glm::mat4(1.0f);
+	};
 
 	class LegoMeshLoader
 	{
@@ -19,13 +35,14 @@ namespace Brickview
 		static bool load(const std::filesystem::path& filePath, Ref<Mesh> mesh);
 
 	private:
-		static bool readFile(const LDrawSubFileRefData& file, Ref<Mesh> mesh, std::queue<LDrawSubFileRefData>& loadingQueue);
+		static bool readFile(const LegoMeshFileData& file, Ref<Mesh> mesh, std::queue<LegoMeshFileData>& loadingQueue);
 		static void convertToDm(Ref<Mesh> mesh);
 
-		static bool isInPartsDirectory(const std::filesystem::path& filePath);
-		static bool isInSubPartsDirectory(const std::filesystem::path& filePath);
-
-		static bool isPrefixACommand(const std::string& prefix);
+		static std::filesystem::path getFullPartsDirectory();
+		static std::filesystem::path getFullSubPartsDirectory();
+		static std::filesystem::path getFullPrimitivesDirectory();
+		static LegoMeshFileType getChildFileType(LegoMeshFileType parentType);
+		static std::filesystem::path getChildFilePath(LegoMeshFileType parentType, std::filesystem::path& fileName);
 	};
 
 }

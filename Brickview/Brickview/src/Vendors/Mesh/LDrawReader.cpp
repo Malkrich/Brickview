@@ -17,6 +17,13 @@ namespace Brickview
 			return StringUtils::getSubStringAt(line, " ", index);
 		}
 
+		// For debug purposes
+		static std::string deserializeComment(const std::string& line)
+		{
+			size_t beginIndex = StringUtils::findNthCharacter(line, ' ', 1);
+			return line.substr(beginIndex+1);
+		}
+
 		template<typename T>
 		static T deserializePrimitiveTypeAt(const std::string& line, uint32_t index)
 		{
@@ -38,11 +45,10 @@ namespace Brickview
 		static glm::mat4 deserializeTransform(const std::string& line, uint32_t index)
 		{
 			// from: https://www.ldraw.org/article/218.html
-			float a, b, c, d, e, f, g, h, i, x, y, z;
+			float x, y, z, a, b, c, d, e, f, g, h, i;
 			x = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 0);
 			y = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 1);
 			z = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 2);
-
 			a = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 3);
 			b = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 4);
 			c = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 5);
@@ -114,6 +120,12 @@ namespace Brickview
 		}
 
 		return "Unkown";
+	}
+
+	std::string LDrawReader::getComment() const
+	{
+		std::string comment = Utils::deserializeComment(m_currentLine);
+		return comment;
 	}
 
 	bool LDrawReader::readLine()

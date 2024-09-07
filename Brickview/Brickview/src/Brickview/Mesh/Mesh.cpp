@@ -47,12 +47,6 @@ namespace Brickview
 		return mesh;
 	}
 
-	Ref<Mesh> Mesh::loadLDrawExample()
-	{
-		Ref<Mesh> ldrawExampleMesh = Mesh::load("data/LDraw/parts/u9495.dat");
-		return ldrawExampleMesh;
-	}
-
 	void Mesh::setData(const std::vector<Vertex>& vertices, const std::vector<TriangleFace> connectivities)
 	{
 		m_vertices = vertices;
@@ -60,14 +54,22 @@ namespace Brickview
 		m_lastIndex = vertices.size();
 	}
 
+	void Mesh::addTriangle(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::mat4& transform)
+	{
+		addGeometry<3, 1>({ p0, p1, p2 }, transform);
+	}
 	void Mesh::addTriangle(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2)
 	{
-		addGeometry<3, 1>({ p0, p1, p2 });
+		addTriangle(p0, p1, p2, glm::mat4(1.0f));
 	}
 
+	void Mesh::addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::mat4& transform)
+	{
+		addGeometry<4, 2>({ p0, p1, p2, p3 }, transform);
+	}
 	void Mesh::addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3)
 	{
-		addGeometry<4, 2>({ p0, p1, p2, p3 });
+		addQuad(p0, p1, p2, p3, glm::mat4(1.0f));
 	}
 
 	void Mesh::scale(float scaleFactor)
