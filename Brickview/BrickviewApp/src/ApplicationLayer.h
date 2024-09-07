@@ -34,6 +34,7 @@ namespace Brickview
 		Ref<Mesh> m_planeMesh = nullptr;
 		Ref<Mesh> m_cubeMesh = nullptr;
 		Ref<Mesh> m_ldrawBrick = nullptr;
+		glm::mat4 m_cubeMeshTransform;
 		glm::mat4 m_ldrawBrickTransform;
 
 #if 0

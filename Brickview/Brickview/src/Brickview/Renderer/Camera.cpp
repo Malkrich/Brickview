@@ -12,6 +12,7 @@ namespace Brickview
 		: m_projectionMatrix(glm::perspective(glm::radians(m_fov), m_aspectRatio, m_nearClip, m_farClip))
 	{
 		updateViewMatrix();
+		updateOrientationVectors();
 	}
 
 	void Camera::setViewportDimension(uint32_t width, uint32_t height)
@@ -33,6 +34,15 @@ namespace Brickview
 	{
 		m_aspectRatio = m_viewportWidth / m_viewportHeight;
 		m_projectionMatrix = glm::perspective(glm::radians(m_fov), m_aspectRatio, m_nearClip, m_farClip);
+	}
+
+	void Camera::updateOrientationVectors()
+	{
+		m_right   = { glm::cos(glm::radians(m_yaw)), 0.0f, glm::sin(glm::radians(m_yaw)) };
+		m_right   = glm::normalize(m_right);
+		m_up      = { 0.0f, glm::sin(glm::radians(m_pitch + 90)), glm::cos(glm::radians(m_pitch + 90)) };
+		m_up      = glm::normalize(m_up);
+		m_forward = glm::cross(m_up, m_right);
 	}
 
 }

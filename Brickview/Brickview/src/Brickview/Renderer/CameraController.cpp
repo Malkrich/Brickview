@@ -41,8 +41,11 @@ namespace Brickview
 
 	void CameraController::updatePosition()
 	{
+		glm::vec3 worldUp = { 0.0f, 1.0f, 0.0f };
+		float direction = glm::dot(worldUp, m_camera.getUp()) > 0.0f ? 1.0f : -1.0f;
+
 		float newPitch = m_camera.getPitch() - m_angleSensitivity * m_mouseOffset.y;
-		float newYaw = m_camera.getYaw() - m_angleSensitivity * m_mouseOffset.x;
+		float newYaw = m_camera.getYaw() - m_angleSensitivity * m_mouseOffset.x * direction;
 
 		glm::vec3 newPosition = Utils::SphericalToCartesian(newPitch, newYaw, m_distanceFromObject);
 		newPosition += m_targetPoint;
@@ -76,16 +79,19 @@ namespace Brickview
 
 		if (Input::isKeyPressed(BV_KEY_LEFT_SHIFT) || Input::isKeyPressed(BV_KEY_RIGHT_SHIFT))
 		{
-			glm::vec3 lookAt = m_targetPoint - m_camera.getPosition();
-			glm::vec3 up = { 0.0f, 1.0f, 0.0f };
-			glm::vec3 right = glm::normalize( glm::cross(up, lookAt) );
-			up = glm::normalize( glm::cross(lookAt, right) );
+			glm::vec3 rightDirection = m_camera.getRight();
+			glm::vec3 upDirection    = m_camera.getUp();
+			rightDirection.z *= -1.0f;
+			upDirection.z *= -1.0f;
+			BV_LOG_INFO("Camera up: [{}, {}, {}]", m_camera.getUp().x, m_camera.getUp().y, m_camera.getUp().z);
 
 			glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
-			translation += right * (float)m_mouseOffset.x;
-			translation += up * (float)m_mouseOffset.y;
-			translation *= m_translationSensitivity;
-			m_targetPoint += translation;
+			translation          -= rightDirection * (float)m_mouseOffset.x * m_translationSensitivity;
+			translation          += upDirection * (float)m_mouseOffset.y * m_translationSensitivity;
+			m_targetPoint        += translation;
+
+			// Reseting offsets to prevent rotations when calling updatePosition()
+			m_mouseOffset = { 0, 0 };
 		}
 
 		updatePosition();
