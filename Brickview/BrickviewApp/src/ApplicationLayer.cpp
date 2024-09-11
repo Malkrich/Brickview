@@ -97,18 +97,18 @@ namespace Brickview
 
 		// World guide
 		// x
-		glm::vec3 guidePosition = { 1.0f, 0.0f, 0.0f };
+		glm::vec3 guidePosition = World::getXUnitVector();
 		Material guideMaterial;
 		guideMaterial.Color = guidePosition;
 		glm::mat4 guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);
 		// y
-		guidePosition = { 0.0f, 1.0f, 0.0f };
+		guidePosition = World::getYUnitVector();
 		guideMaterial.Color = guidePosition;
 		guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);
 		// z
-		guidePosition = { 0.0f, 0.0f, 1.0f };
+		guidePosition = World::getZUnitVector();
 		guideMaterial.Color = guidePosition;
 		guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);

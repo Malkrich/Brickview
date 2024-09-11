@@ -25,5 +25,8 @@
 // Meshes
 #include "Mesh/Mesh.h"
 
+// Metric
+#include "Metric/World.h"
+
 // Utils
 #include "Utils/StringUtils.h"
