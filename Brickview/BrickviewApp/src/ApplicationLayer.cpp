@@ -94,6 +94,24 @@ namespace Brickview
 #else
 		Lego3DRenderer::drawMesh(m_planeMesh, m_ldrawBrickMaterial, glm::mat4(1.0f));
 		Lego3DRenderer::drawMesh(m_cubeMesh, m_ldrawBrickMaterial, m_cubeMeshTransform);
+
+		// World guide
+		// x
+		glm::vec3 guidePosition = { 1.0f, 0.0f, 0.0f };
+		Material guideMaterial;
+		guideMaterial.Color = guidePosition;
+		glm::mat4 guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);
+		// y
+		guidePosition = { 0.0f, 1.0f, 0.0f };
+		guideMaterial.Color = guidePosition;
+		guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);
+		// z
+		guidePosition = { 0.0f, 0.0f, 1.0f };
+		guideMaterial.Color = guidePosition;
+		guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);
 #endif
 		Lego3DRenderer::end();
 		m_viewport->endFrame();
