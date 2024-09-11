@@ -2,28 +2,14 @@
 #include "CameraController.h"
 #include "Core/Input.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/rotate_vector.hpp>
+#include "Utils/MathUtils.h"
+#include "Metric/World.h"
 
 namespace Brickview
 {
 
 	namespace Utils
 	{
-		static glm::vec3 SphericalToCartesian(float pitch, float yaw, float distance)
-		{
-			float radPitch = glm::radians(pitch);
-			float radYaw   = glm::radians(yaw);
-			constexpr float pi = glm::pi<float>();
-			glm::vec3 position =
-			{
-				glm::cos(-radPitch) * glm::cos(pi/2.0f - radYaw),
-				glm::sin(-radPitch),
-				glm::cos(-radPitch) * glm::sin(pi/2.0f - radYaw)
-			};
-			position *= distance;
-			return position;
-		}
 	}
 
 	CameraController::CameraController()
@@ -41,13 +27,12 @@ namespace Brickview
 
 	void CameraController::updatePosition()
 	{
-		glm::vec3 worldUp = { 0.0f, 1.0f, 0.0f };
-		float direction = glm::dot(worldUp, m_camera.getUp()) > 0.0f ? 1.0f : -1.0f;
+		float direction = glm::dot(World::getUpVector(), m_camera.getUpVector()) > 0.0f ? 1.0f : -1.0f;
 
 		float newPitch = m_camera.getPitch() - m_angleSensitivity * m_mouseOffset.y;
 		float newYaw = m_camera.getYaw() - m_angleSensitivity * m_mouseOffset.x * direction;
 
-		glm::vec3 newPosition = Utils::SphericalToCartesian(newPitch, newYaw, m_distanceFromObject);
+		glm::vec3 newPosition = MathUtils::SphericalToCartesian(newPitch, newYaw, m_distanceFromObject);
 		newPosition += m_targetPoint;
 
 		m_camera.setPosition(newPosition);
@@ -79,16 +64,10 @@ namespace Brickview
 
 		if (Input::isKeyPressed(BV_KEY_LEFT_SHIFT) || Input::isKeyPressed(BV_KEY_RIGHT_SHIFT))
 		{
-			glm::vec3 rightDirection = m_camera.getRight();
-			glm::vec3 upDirection    = m_camera.getUp();
-			rightDirection.z *= -1.0f;
-			upDirection.z *= -1.0f;
-			BV_LOG_INFO("Camera up: [{}, {}, {}]", m_camera.getUp().x, m_camera.getUp().y, m_camera.getUp().z);
-
-			glm::vec3 translation = { 0.0f, 0.0f, 0.0f };
-			translation          -= rightDirection * (float)m_mouseOffset.x * m_translationSensitivity;
-			translation          += upDirection * (float)m_mouseOffset.y * m_translationSensitivity;
-			m_targetPoint        += translation;
+			glm::vec3 translation(0.0f);
+			translation   -= m_camera.getRightVector() * (float)m_mouseOffset.x * m_translationSensitivity;
+			translation   += m_camera.getUpVector() * (float)m_mouseOffset.y * m_translationSensitivity;
+			m_targetPoint += translation;
 
 			// Reseting offsets to prevent rotations when calling updatePosition()
 			m_mouseOffset = { 0, 0 };

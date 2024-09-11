@@ -1,6 +1,8 @@
 #include "Pch.h"
 #include "Camera.h"
 
+#include "Metric/World.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -38,11 +40,10 @@ namespace Brickview
 
 	void Camera::updateOrientationVectors()
 	{
-		m_right   = { glm::cos(glm::radians(m_yaw)), 0.0f, glm::sin(glm::radians(m_yaw)) };
-		m_right   = glm::normalize(m_right);
-		m_up      = { 0.0f, glm::sin(glm::radians(m_pitch + 90)), glm::cos(glm::radians(m_pitch + 90)) };
-		m_up      = glm::normalize(m_up);
-		m_forward = glm::cross(m_up, m_right);
+		glm::quat orientation = glm::quat(glm::vec3(glm::radians(m_pitch), glm::radians(m_yaw), 0.0f));
+		glm::mat3 transform   = glm::toMat3(orientation);
+		m_rightVector         = transform * World::getXUnitVector();
+		m_upVector            = transform * World::getUpVector();
 	}
 
 }
