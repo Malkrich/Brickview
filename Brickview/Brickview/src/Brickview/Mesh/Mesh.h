@@ -84,8 +84,8 @@ namespace Brickview
 			m_vertices.reserve(VertexCount);
 			for (uint32_t i = 0; i < VertexCount; i++)
 			{
-				glm::vec4 pos = glm::vec4(positions[i], 1.0f) * transform;
-				Vertex v = { glm::vec3(pos.x, pos.y, pos.z), normal};
+				glm::vec3 pos = glm::vec3(transform * glm::vec4(positions[i], 1.0f));
+				Vertex v = { pos, normal };
 				m_vertices.push_back(v);
 			}
 

@@ -41,7 +41,7 @@ namespace Brickview
 	bool LegoMeshLoader::readFile(const LegoMeshFileData& file, Ref<Mesh> mesh, std::queue<LegoMeshFileData>& loadingQueue)
 	{
 		std::filesystem::path currentFilePath = file.FilePath;
-		glm::mat4 currentTransform            = file.Transform;
+		const glm::mat4& currentTransform     = file.Transform;
 
 		LDrawReader reader(currentFilePath);
 
@@ -84,6 +84,7 @@ namespace Brickview
 						loadingQueue.push(newFile);
 						break;
 					}
+					BV_LOG_ERROR("Couldn't find file {}", newFilePath.string());
 				}
 
 #if 0
