@@ -11,14 +11,8 @@ namespace Brickview
 
 	LegoMeshFileData::LegoMeshFileData(const std::filesystem::path& filePath, LdrawFileType type, const glm::mat4& transform)
 		: FilePath(filePath)
-		, Type(type)
 		, Transform(transform)
 	{}
-
-	namespace Utils
-	{
-
-	}
 
 	bool LegoMeshLoader::load(const std::filesystem::path& filePath, Ref<Mesh> mesh)
 	{
@@ -47,46 +41,44 @@ namespace Brickview
 	bool LegoMeshLoader::readFile(const LegoMeshFileData& file, Ref<Mesh> mesh, std::queue<LegoMeshFileData>& loadingQueue)
 	{
 		std::filesystem::path currentFilePath = file.FilePath;
-		LdrawFileType currentFileType         = file.Type;
 		glm::mat4 currentTransform            = file.Transform;
 
 		LDrawReader reader(currentFilePath);
 
 		if (!reader.isValid())
 		{
-			BV_LOG_ERROR("Couldn't read file of type {} in {}", LDrawFileManager::fileTypeToString(currentFileType), currentFilePath.generic_string());
+			BV_LOG_ERROR("Couldn't read file in {}", currentFilePath.generic_string());
 			return false;
 		}
 
 		while (reader.readLine())
 		{
-			LineType lineType = reader.getLineType();
+			LDrawLineType lineType = reader.getLineType();
 
 			switch (lineType)
 			{
-				case LineType::Triangle:
+				case LDrawLineType::Triangle:
 				{
 					LDrawTriangleData t = reader.getLineData<LDrawTriangleData>();
 					mesh->addTriangle(t.p0, t.p1, t.p2, currentTransform);
 					break;
 				}
-				case LineType::Quadrilateral:
+				case LDrawLineType::Quadrilateral:
 				{
 					LDrawQuadData q = reader.getLineData<LDrawQuadData>();
 					mesh->addQuad(q.p0, q.p1, q.p2, q.p3, currentTransform);
 					break;
 				}
-				case LineType::SubFileRef:
+				case LDrawLineType::SubFileRef:
 				{
 					LDrawSubFileRefData sf = reader.getLineData<LDrawSubFileRefData>();
 					auto [newFileType, newFilePath] = LDrawFileManager::findFile(sf.FilePath);
 
 					if (newFileType != LdrawFileType::None)
 					{
-						BV_LOG_INFO("Found file of type {} in {}", LDrawFileManager::fileTypeToString(newFileType), newFilePath.string());
+						BV_LOG_INFO("Adding file {} to the loading queue", newFilePath.string());
 
 						LegoMeshFileData newFile;
-						newFile.Type      = newFileType;
 						newFile.FilePath  = newFilePath;
 						newFile.Transform = currentTransform * sf.Transform;
 						loadingQueue.push(newFile);

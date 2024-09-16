@@ -104,17 +104,17 @@ namespace Brickview
 		m_fileStream = std::ifstream(filePath);
 	}
 
-	std::string LDrawReader::lineTypeToString(LineType type)
+	std::string LDrawReader::lineTypeToString(LDrawLineType type)
 	{
 		switch (type)
 		{
-			case LineType::Empty:         return "Empty";
-			case LineType::Comment:       return "Comment";
-			case LineType::SubFileRef:    return "Sub-file reference";
-			case LineType::Line:          return "Line";
-			case LineType::Triangle:      return "Triangle";
-			case LineType::Quadrilateral: return "Quadrilateral";
-			case LineType::OptionalFile:  return "Optional file";
+			case LDrawLineType::Empty:         return "Empty";
+			case LDrawLineType::Comment:       return "Comment";
+			case LDrawLineType::SubFileRef:    return "Sub-file reference";
+			case LDrawLineType::Line:          return "Line";
+			case LDrawLineType::Triangle:      return "Triangle";
+			case LDrawLineType::Quadrilateral: return "Quadrilateral";
+			case LDrawLineType::OptionalFile:  return "Optional file";
 		}
 
 		return "Unkown";
@@ -135,12 +135,12 @@ namespace Brickview
 		return (bool)s;
 	}
 
-	LineType LDrawReader::deserializeLineType(const std::string& line)
+	LDrawLineType LDrawReader::deserializeLineType(const std::string& line)
 	{
 		if (line.empty())
-			return LineType::Empty;
+			return LDrawLineType::Empty;
 
-		LineType lineType = (LineType)Utils::deserializePrimitiveTypeAt<uint32_t>(line, 0);
+		LDrawLineType lineType = (LDrawLineType)Utils::deserializePrimitiveTypeAt<uint32_t>(line, 0);
 		return lineType;
 	}
 

@@ -15,7 +15,6 @@ namespace Brickview
 		LegoMeshFileData(const std::filesystem::path& filePath, LdrawFileType type, const glm::mat4& transform);
 
 		std::filesystem::path FilePath = "";
-		LdrawFileType Type = LdrawFileType::None;
 		glm::mat4 Transform = glm::mat4(1.0f);
 	};
 

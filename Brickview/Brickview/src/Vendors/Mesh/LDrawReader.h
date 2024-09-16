@@ -7,7 +7,7 @@
 namespace Brickview
 {
 
-	enum class LineType
+	enum class LDrawLineType
 	{
 		Empty = -1,
 		Comment = 0,
@@ -46,14 +46,14 @@ namespace Brickview
 		LDrawReader(const std::filesystem::path& filePath);
 
 		// For debug purposes
-		static std::string lineTypeToString(LineType type);
+		static std::string lineTypeToString(LDrawLineType type);
 		std::string getComment() const;
 
 		bool readLine();
 
 		bool isValid() const { return m_valid; }
 
-		LineType getLineType() const { return m_currentLineType; }
+		LDrawLineType getLineType() const { return m_currentLineType; }
 		template<typename T>
 		T getLineData() const
 		{
@@ -62,7 +62,7 @@ namespace Brickview
 		}
 
 	private:
-		LineType deserializeLineType(const std::string& line);
+		LDrawLineType deserializeLineType(const std::string& line);
 
 	private:
 		// Global file states
@@ -71,7 +71,7 @@ namespace Brickview
 
 		// Current states
 		std::string m_currentLine;
-		LineType m_currentLineType = LineType::Empty;
+		LDrawLineType m_currentLineType = LDrawLineType::Empty;
 	};
 
 }
