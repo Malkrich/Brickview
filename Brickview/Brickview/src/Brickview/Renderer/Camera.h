@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Metric/World.h"
+
 #include <glm/glm.hpp>
 
 namespace Brickview
@@ -8,7 +10,7 @@ namespace Brickview
 	class Camera
 	{
 	public:
-		Camera();
+		Camera(const glm::vec3& position = glm::vec3(0.0f), float pitch = 0.0f, float yaw = 0.0f);
 
 		void setViewportDimension(uint32_t width, uint32_t height);
 
@@ -17,14 +19,13 @@ namespace Brickview
 
 		float getPitch() const { return m_pitch; }
 		float getYaw() const { return m_yaw; }
-		const glm::vec3& getUpVector() const { return m_upVector; }
-		const glm::vec3& getRightVector() const { return m_rightVector; }
+		glm::vec3 getUpVector() const { return m_cameraVectorTransform * World::getUpVector(); }
+		glm::vec3 getRightVector() const { return m_cameraVectorTransform * World::getXUnitVector(); }
 		void setRotation(float pitch, float yaw)
 		{
 			m_pitch = pitch;
 			m_yaw = yaw;
 			updateViewMatrix();
-			updateOrientationVectors();
 		}
 
 		glm::mat4 getViewProjectionMatrix() const { return m_projectionMatrix * m_viewMatrix; }
@@ -32,7 +33,6 @@ namespace Brickview
 	private:
 		void updateViewMatrix();
 		void updateProjectionMatrix();
-		void updateOrientationVectors();
 
 	private:
 		float m_fov = 45.0f, m_nearClip = 0.01f, m_farClip = 100.0f;
@@ -42,12 +42,11 @@ namespace Brickview
 		glm::mat4 m_viewMatrix;
 		glm::mat4 m_projectionMatrix;
 
-		glm::vec3 m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::vec3 m_position;
 		// https://learnopengl.com/Getting-Started/Camera
 		// In degrees
-		float m_pitch = 0.0f, m_yaw = 0.0f;
-		glm::vec3 m_upVector = { 0.0f, 1.0f, 0.0f };
-		glm::vec3 m_rightVector = { 1.0f, 0.0f, 0.0f };
+		float m_pitch, m_yaw;
+		glm::mat3 m_cameraVectorTransform;
 	};
 
 }

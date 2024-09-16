@@ -13,33 +13,39 @@ namespace Brickview
 	}
 
 	CameraController::CameraController()
-	{
-		updatePosition();
-	}
+		: CameraController(CameraControllerSpecifications())
+	{}
 
 	CameraController::CameraController(const CameraControllerSpecifications& spec)
 		: m_currentMousePosition(-1)
 		, m_targetPoint(spec.TargetPosition)
+		, m_distanceFromObject(spec.DistanceFromObject)
 		, m_laptopMode(spec.LaptopMode)
 	{
-		updatePosition();
+		glm::vec3 initPosition = { 0.0f, 0.0f, m_distanceFromObject };
+		m_camera = Camera(initPosition);
 	}
 
-	void CameraController::updatePosition()
+	glm::vec3 CameraController::computeTranslationOffset(const glm::ivec2& mouseOffset) const
 	{
-		float direction = glm::dot(World::getUpVector(), m_camera.getUpVector()) > 0.0f ? 1.0f : -1.0f;
+		glm::vec3 translation(0.0f);
+		translation -= m_camera.getRightVector() * (float)mouseOffset.x * s_translationSensitivity;
+		translation += m_camera.getUpVector() * (float)mouseOffset.y * s_translationSensitivity;
+		return translation;
+	}
 
-		float newPitch = m_camera.getPitch() - m_angleSensitivity * m_mouseOffset.y;
-		float newYaw = m_camera.getYaw() - m_angleSensitivity * m_mouseOffset.x * direction;
+	std::tuple<glm::vec3, CameraController::EulerRotation> CameraController::computeNewRotationAndTranslation(const glm::ivec2& mouseOffset) const
+	{
+		// The dot product gives a negative value when the camera is looking below the object
+		float yawOffsetSense = glm::dot(World::getUpVector(), m_camera.getUpVector()) > 0.0f ? 1.0f : -1.0f;
 
-		glm::vec3 newPosition = MathUtils::SphericalToCartesian(newPitch, newYaw, m_distanceFromObject);
-		newPosition += m_targetPoint;
+		EulerRotation newRotation(0.0f);
+		newRotation.x         = m_camera.getPitch() - s_angleSensitivity * mouseOffset.y;
+		newRotation.y         = m_camera.getYaw() - s_angleSensitivity * mouseOffset.x * yawOffsetSense;
+		glm::vec3 newPosition = MathUtils::SphericalToCartesian(newRotation.x, newRotation.y, m_distanceFromObject);
+		newPosition          += m_targetPoint;
 
-		m_camera.setPosition(newPosition);
-		m_camera.setRotation(newPitch, newYaw);
-
-		// reseting mouse offset to prevent the update of the orientation
-		m_mouseOffset = { 0, 0 };
+		return { newPosition, newRotation };
 	}
 
 	void CameraController::onEvent(Event& e)
@@ -57,23 +63,29 @@ namespace Brickview
 		if (!m_isCameraControlled)
 			return false;
 
-		m_mouseOffset.x = e.getPosX() - m_currentMousePosition.x;
-		m_mouseOffset.y = e.getPosY() - m_currentMousePosition.y;
+		glm::ivec2 mouseOffset(0);
+		mouseOffset.x = e.getPosX() - m_currentMousePosition.x;
+		mouseOffset.y = e.getPosY() - m_currentMousePosition.y;
 		m_currentMousePosition.x = e.getPosX();
 		m_currentMousePosition.y = e.getPosY();
 
+		glm::vec3 newPosition     = m_camera.getPosition();
+		EulerRotation newRotation = { m_camera.getPitch(), m_camera.getYaw(), 0.0f };
+
 		if (Input::isKeyPressed(BV_KEY_LEFT_SHIFT) || Input::isKeyPressed(BV_KEY_RIGHT_SHIFT))
 		{
-			glm::vec3 translation(0.0f);
-			translation   -= m_camera.getRightVector() * (float)m_mouseOffset.x * m_translationSensitivity;
-			translation   += m_camera.getUpVector() * (float)m_mouseOffset.y * m_translationSensitivity;
-			m_targetPoint += translation;
-
-			// Reseting offsets to prevent rotations when calling updatePosition()
-			m_mouseOffset = { 0, 0 };
+			glm::vec3 translationOffset = computeTranslationOffset(mouseOffset);
+			newPosition   += translationOffset;
+			m_targetPoint += translationOffset;
 		}
-
-		updatePosition();
+		else
+		{
+			auto [position, rotation] = computeNewRotationAndTranslation(mouseOffset);
+			newPosition = position;
+			newRotation = rotation;
+		}
+	
+		updateCameraPositionAndRotation(newPosition, newRotation);
 
 		return false;
 	}
@@ -106,11 +118,11 @@ namespace Brickview
 		if (!m_isViewportHovered)
 			return false;
 
-		static const float scrollSensitivity = 0.05f;
+		m_distanceFromObject  -= (float)e.getOffsetY() * s_scrollSensitivity;
+		glm::vec3 newPosition  = MathUtils::SphericalToCartesian(m_camera.getPitch(), m_camera.getYaw(), m_distanceFromObject);
+		newPosition           += m_targetPoint;
 
-		m_distanceFromObject -= (float)e.getOffsetY() * scrollSensitivity;
-
-		updatePosition();
+		updateCameraPosition(newPosition);
 
 		return false;
 	}
