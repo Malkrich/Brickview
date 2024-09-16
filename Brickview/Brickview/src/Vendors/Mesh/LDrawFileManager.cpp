@@ -12,7 +12,7 @@ namespace Brickview
 		std::filesystem::path PrimitivesDirectory;
 
 		std::unordered_map<std::filesystem::path, LDrawPrimitiveType> PrimitiveTypeOfSubDirs;
-		std::unordered_map<std::filesystem::path, LdrawFileType> FileTypeOfDirs;
+		std::unordered_map<std::filesystem::path, LDrawFileType> FileTypeOfDirs;
 	};
 
 	static LdrawFileManagerData* s_ldrawFileManagerData = nullptr;
@@ -29,9 +29,9 @@ namespace Brickview
 		s_ldrawFileManagerData->PrimitiveTypeOfSubDirs[""]   = LDrawPrimitiveType::None;
 		s_ldrawFileManagerData->PrimitiveTypeOfSubDirs["8"]  = LDrawPrimitiveType::NoDetails;
 		s_ldrawFileManagerData->PrimitiveTypeOfSubDirs["48"] = LDrawPrimitiveType::Details;
-		s_ldrawFileManagerData->FileTypeOfDirs["s"]          = LdrawFileType::SubPart;
-		s_ldrawFileManagerData->FileTypeOfDirs["48"]         = LdrawFileType::Primitive;
-		s_ldrawFileManagerData->FileTypeOfDirs["8"]          = LdrawFileType::Primitive;
+		s_ldrawFileManagerData->FileTypeOfDirs["s"]          = LDrawFileType::SubPart;
+		s_ldrawFileManagerData->FileTypeOfDirs["48"]         = LDrawFileType::Primitive;
+		s_ldrawFileManagerData->FileTypeOfDirs["8"]          = LDrawFileType::Primitive;
 	}
 
 	void LDrawFileManager::shutdown()
@@ -55,31 +55,36 @@ namespace Brickview
 		return s_ldrawFileManagerData->BaseDirectory / s_ldrawFileManagerData->PrimitivesDirectory / primitiveSubDirFromType(type);
 	}
 
-	std::tuple<LdrawFileType, std::filesystem::path> LDrawFileManager::findFile(const std::filesystem::path& fileName)
+	std::tuple<std::filesystem::path, LDrawFileType> LDrawFileManager::getFileFromRawFileName(const std::filesystem::path& fileName)
 	{
-		LdrawFileType fileType = LdrawFileType::None;
+		// TODO: add a cache system to prevent calling findFile all the time.
+		return findFile(fileName);
+	}
+
+	std::tuple<std::filesystem::path, LDrawFileType> LDrawFileManager::findFile(const std::filesystem::path& fileName)
+	{
+		LDrawFileType fileType = LDrawFileType::None;
 		LDrawPrimitiveType primitiveType = LDrawPrimitiveType::None;
 
 		if (fileName.has_parent_path())
 		{
 			auto parentDir = fileName.parent_path();
 			fileType       = fileTypeFromParentDir(parentDir);
-			if (fileType == LdrawFileType::Primitive)
+			if (fileType == LDrawFileType::Primitive)
 				primitiveType  = primitiveTypeFromParentDir(parentDir);
 		}
 		else
 		{
 			fileType = fileTypeFromUnknownFile(fileName);
-			if (fileType == LdrawFileType::Primitive)
+			if (fileType == LDrawFileType::Primitive)
 				primitiveType = primitiveTypeFromUnknownFile(fileName);
 		}
 
 		std::filesystem::path fullFilePath = filePathFromTypes(fileType, primitiveType) / fileName.filename();
-
-		return { fileType, fullFilePath };
+		return { fullFilePath, fileType };
 	}
 
-	LdrawFileType LDrawFileManager::fileTypeFromParentDir(const std::filesystem::path& parentDir)
+	LDrawFileType LDrawFileManager::fileTypeFromParentDir(const std::filesystem::path& parentDir)
 	{
 		BV_ASSERT(s_ldrawFileManagerData->FileTypeOfDirs.contains(parentDir),
 			"Parent path {} doesn't exist for file type!", parentDir.string());
@@ -87,22 +92,22 @@ namespace Brickview
 		return s_ldrawFileManagerData->FileTypeOfDirs.at(parentDir);
 	}
 
-	LdrawFileType LDrawFileManager::fileTypeFromUnknownFile(const std::filesystem::path& fileName)
+	LDrawFileType LDrawFileManager::fileTypeFromUnknownFile(const std::filesystem::path& fileName)
 	{
 		// is in parts directory
 		if (std::filesystem::exists(getFullPartsDirectory() / fileName))
-			return LdrawFileType::Part;
+			return LDrawFileType::Part;
 		// is in sub-parts
 		else if (std::filesystem::exists(getFullSubPartsDirectory() / fileName))
-			return LdrawFileType::SubPart;
+			return LDrawFileType::SubPart;
 		// is in primitive dir
 		else if (std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::None) / fileName)
 			|| std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::NoDetails) / fileName)
 			|| std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::Details) / fileName))
-			return LdrawFileType::Primitive;
+			return LDrawFileType::Primitive;
 
 		BV_ASSERT(false, "Ldraw file type search failed for file {}!", fileName.filename().string());
-		return LdrawFileType::None;
+		return LDrawFileType::None;
 	}
 
 	LDrawPrimitiveType LDrawFileManager::primitiveTypeFromParentDir(const std::filesystem::path& parentDir)
@@ -129,14 +134,14 @@ namespace Brickview
 		return LDrawPrimitiveType::None;
 	}
 
-	std::filesystem::path LDrawFileManager::filePathFromTypes(LdrawFileType fileType, LDrawPrimitiveType primitiveType)
+	std::filesystem::path LDrawFileManager::filePathFromTypes(LDrawFileType fileType, LDrawPrimitiveType primitiveType)
 	{
 		switch (fileType)
 		{
-			case LdrawFileType::None:      return "";
-			case LdrawFileType::Part:      return getFullPartsDirectory();
-			case LdrawFileType::SubPart:   return getFullSubPartsDirectory();
-			case LdrawFileType::Primitive: return getFullPrimitivesDirectory(primitiveType);
+			case LDrawFileType::None:      return "";
+			case LDrawFileType::Part:      return getFullPartsDirectory();
+			case LDrawFileType::SubPart:   return getFullSubPartsDirectory();
+			case LDrawFileType::Primitive: return getFullPrimitivesDirectory(primitiveType);
 		}
 
 		BV_ASSERT(false, "File type unknown!");
@@ -157,14 +162,14 @@ namespace Brickview
 	}
 
 	// For debug
-	std::string LDrawFileManager::fileTypeToString(LdrawFileType type)
+	std::string LDrawFileManager::fileTypeToString(LDrawFileType type)
 	{
 		switch (type)
 		{
-			case LdrawFileType::None:      return "None";
-			case LdrawFileType::Part:      return "Parts";
-			case LdrawFileType::SubPart:   return "Sub-parts";
-			case LdrawFileType::Primitive: return "Primitive";
+			case LDrawFileType::None:      return "None";
+			case LDrawFileType::Part:      return "Parts";
+			case LDrawFileType::SubPart:   return "Sub-parts";
+			case LDrawFileType::Primitive: return "Primitive";
 		}
 
 		return "Unknown";

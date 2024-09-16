@@ -12,7 +12,7 @@ namespace Brickview
 	struct LegoMeshFileData
 	{
 		LegoMeshFileData() = default;
-		LegoMeshFileData(const std::filesystem::path& filePath, LdrawFileType type, const glm::mat4& transform);
+		LegoMeshFileData(const std::filesystem::path& filePath, LDrawFileType type, const glm::mat4& transform);
 
 		std::filesystem::path FilePath = "";
 		glm::mat4 Transform = glm::mat4(1.0f);

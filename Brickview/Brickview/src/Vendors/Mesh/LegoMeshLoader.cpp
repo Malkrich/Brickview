@@ -9,7 +9,7 @@
 namespace Brickview
 {
 
-	LegoMeshFileData::LegoMeshFileData(const std::filesystem::path& filePath, LdrawFileType type, const glm::mat4& transform)
+	LegoMeshFileData::LegoMeshFileData(const std::filesystem::path& filePath, LDrawFileType type, const glm::mat4& transform)
 		: FilePath(filePath)
 		, Transform(transform)
 	{}
@@ -23,7 +23,7 @@ namespace Brickview
 		}
 
 		std::queue<LegoMeshFileData> loadingQueue;
-		LegoMeshFileData initialFile(filePath, LdrawFileType::Part, glm::mat4(1.0f));
+		LegoMeshFileData initialFile(filePath, LDrawFileType::Part, glm::mat4(1.0f));
 		loadingQueue.push(initialFile);
 
 		while (!loadingQueue.empty())
@@ -72,9 +72,9 @@ namespace Brickview
 				case LDrawLineType::SubFileRef:
 				{
 					LDrawSubFileRefData sf = reader.getLineData<LDrawSubFileRefData>();
-					auto [newFileType, newFilePath] = LDrawFileManager::findFile(sf.FilePath);
+					auto[newFilePath, newFileType] = LDrawFileManager::getFileFromRawFileName(sf.FilePath);
 
-					if (newFileType != LdrawFileType::None)
+					if (newFileType != LDrawFileType::None)
 					{
 						BV_LOG_INFO("Adding file {} to the loading queue", newFilePath.string());
 

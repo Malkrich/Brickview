@@ -6,7 +6,7 @@
 namespace Brickview
 {
 
-	enum class LdrawFileType
+	enum class LDrawFileType
 	{
 		None = 0,
 		Part,
@@ -31,18 +31,20 @@ namespace Brickview
 		static std::filesystem::path getFullSubPartsDirectory();
 		static std::filesystem::path getFullPrimitivesDirectory(LDrawPrimitiveType type);
 
-		static std::tuple<LdrawFileType, std::filesystem::path> findFile(const std::filesystem::path& fileName);
+		static std::tuple<std::filesystem::path, LDrawFileType> getFileFromRawFileName(const std::filesystem::path& fileName);
 
 		// For debug
-		static std::string fileTypeToString(LdrawFileType type);
+		static std::string fileTypeToString(LDrawFileType type);
 
 	private:
-		static LdrawFileType fileTypeFromParentDir(const std::filesystem::path& parentDir);
-		static LdrawFileType fileTypeFromUnknownFile(const std::filesystem::path& fileName);
+		static std::tuple<std::filesystem::path, LDrawFileType> findFile(const std::filesystem::path& fileName);
+
+		static LDrawFileType fileTypeFromParentDir(const std::filesystem::path& parentDir);
+		static LDrawFileType fileTypeFromUnknownFile(const std::filesystem::path& fileName);
 		static LDrawPrimitiveType primitiveTypeFromParentDir(const std::filesystem::path& parentDir);
 		static LDrawPrimitiveType primitiveTypeFromUnknownFile(const std::filesystem::path& fileName);
 
-		static std::filesystem::path filePathFromTypes(LdrawFileType fileType, LDrawPrimitiveType primitiveType);
+		static std::filesystem::path filePathFromTypes(LDrawFileType fileType, LDrawPrimitiveType primitiveType);
 		static std::filesystem::path primitiveSubDirFromType(LDrawPrimitiveType type);
 	};
 
