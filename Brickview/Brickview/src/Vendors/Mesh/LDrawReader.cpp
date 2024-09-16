@@ -59,14 +59,12 @@ namespace Brickview
 			h = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 10);
 			i = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 11);
 
-			float values[] =
-			{
-				a,    b,    c,    x,
-				d,    e,    f,    y,
-				g,    h,    i,    z,
-				0.0f, 0.0f, 0.0f, 1.0f
-			};
-			glm::mat4 transform = glm::make_mat4(values);
+			glm::mat4 transform;
+			transform[0] = { a, d, g, 0.0f };
+			transform[1] = { b, e, h, 0.0f };
+			transform[2] = { c, f, i, 0.0f };
+			transform[3] = { x, y, z, 1.0f };
+
 			return transform;
 		}
 	}

@@ -2,7 +2,7 @@
 #include "BrickviewCore.h"
 
 #include "Renderer/Renderer/Lego3DRenderer.h"
-#include "Mesh/LegoMeshLoader.h"
+#include "Vendors/Mesh/LDrawFileManager.h"
 
 namespace Brickview::BrickviewCore
 {
@@ -10,13 +10,13 @@ namespace Brickview::BrickviewCore
 	void init()
 	{
 		Lego3DRenderer::init();
-		LegoMeshLoader::init();
+		LDrawFileManager::init();
 	}
 
 	void shutdown()
 	{
 		Lego3DRenderer::shutdown();
-		LegoMeshLoader::shutdown();
+		LDrawFileManager::shutdown();
 	}
 
 }
