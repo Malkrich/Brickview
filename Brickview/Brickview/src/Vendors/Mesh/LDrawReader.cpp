@@ -36,9 +36,9 @@ namespace Brickview
 		static glm::vec3 deserializeVector3At(const std::string& line, uint32_t firstElementIndex)
 		{
 			glm::vec3 v(0.0);
-			v.x = (float)deserializePrimitiveTypeAt<int32_t>(line, firstElementIndex + 0);
-			v.y = (float)deserializePrimitiveTypeAt<int32_t>(line, firstElementIndex + 1);
-			v.z = (float)deserializePrimitiveTypeAt<int32_t>(line, firstElementIndex + 2);
+			v.x = deserializePrimitiveTypeAt<float>(line, firstElementIndex + 0);
+			v.y = deserializePrimitiveTypeAt<float>(line, firstElementIndex + 1);
+			v.z = deserializePrimitiveTypeAt<float>(line, firstElementIndex + 2);
 			return v;
 		}
 
@@ -46,18 +46,18 @@ namespace Brickview
 		{
 			// from: https://www.ldraw.org/article/218.html
 			float x, y, z, a, b, c, d, e, f, g, h, i;
-			x = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 0);
-			y = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 1);
-			z = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 2);
-			a = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 3);
-			b = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 4);
-			c = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 5);
-			d = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 6);
-			e = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 7);
-			f = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 8);
-			g = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 9);
-			h = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 10);
-			i = (float)deserializePrimitiveTypeAt<int32_t>(line, index + 11);
+			x = deserializePrimitiveTypeAt<float>(line, index + 0);
+			y = deserializePrimitiveTypeAt<float>(line, index + 1);
+			z = deserializePrimitiveTypeAt<float>(line, index + 2);
+			a = deserializePrimitiveTypeAt<float>(line, index + 3);
+			b = deserializePrimitiveTypeAt<float>(line, index + 4);
+			c = deserializePrimitiveTypeAt<float>(line, index + 5);
+			d = deserializePrimitiveTypeAt<float>(line, index + 6);
+			e = deserializePrimitiveTypeAt<float>(line, index + 7);
+			f = deserializePrimitiveTypeAt<float>(line, index + 8);
+			g = deserializePrimitiveTypeAt<float>(line, index + 9);
+			h = deserializePrimitiveTypeAt<float>(line, index + 10);
+			i = deserializePrimitiveTypeAt<float>(line, index + 11);
 
 			glm::mat4 transform;
 			transform[0] = { a, d, g, 0.0f };
