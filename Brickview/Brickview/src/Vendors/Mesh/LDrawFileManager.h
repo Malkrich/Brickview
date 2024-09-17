@@ -17,8 +17,8 @@ namespace Brickview
 	enum class LDrawPrimitiveType
 	{
 		None = 0,
-		NoDetails,
-		Details
+		LowRes,
+		HiRes
 	};
 
 	struct LDrawFileData

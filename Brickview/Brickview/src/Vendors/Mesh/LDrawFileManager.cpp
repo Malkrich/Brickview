@@ -27,8 +27,8 @@ namespace Brickview
 		s_ldrawFileManagerData->SubPartsDirectory            = "s";
 		s_ldrawFileManagerData->PrimitivesDirectory          = "p";
 		s_ldrawFileManagerData->PrimitiveTypeOfSubDirs[""]   = LDrawPrimitiveType::None;
-		s_ldrawFileManagerData->PrimitiveTypeOfSubDirs["8"]  = LDrawPrimitiveType::NoDetails;
-		s_ldrawFileManagerData->PrimitiveTypeOfSubDirs["48"] = LDrawPrimitiveType::Details;
+		s_ldrawFileManagerData->PrimitiveTypeOfSubDirs["8"]  = LDrawPrimitiveType::LowRes;
+		s_ldrawFileManagerData->PrimitiveTypeOfSubDirs["48"] = LDrawPrimitiveType::HiRes;
 		s_ldrawFileManagerData->FileTypeOfDirs["s"]          = LDrawFileType::SubPart;
 		s_ldrawFileManagerData->FileTypeOfDirs["48"]         = LDrawFileType::Primitive;
 		s_ldrawFileManagerData->FileTypeOfDirs["8"]          = LDrawFileType::Primitive;
@@ -102,8 +102,8 @@ namespace Brickview
 			return LDrawFileType::SubPart;
 		// is in primitive dir
 		else if (std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::None) / fileName)
-			|| std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::NoDetails) / fileName)
-			|| std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::Details) / fileName))
+			|| std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::LowRes) / fileName)
+			|| std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::HiRes) / fileName))
 			return LDrawFileType::Primitive;
 
 		BV_ASSERT(false, "Ldraw file type search failed for file {}!", fileName.filename().string());
@@ -124,11 +124,11 @@ namespace Brickview
 		if (std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::None) / fileName))
 			return LDrawPrimitiveType::None;
 		// is in detailed primitive directory
-		else if (std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::NoDetails) / fileName))
-			return LDrawPrimitiveType::NoDetails;
+		else if (std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::LowRes) / fileName))
+			return LDrawPrimitiveType::LowRes;
 		// is in no detailed primitive directory
-		else if (std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::Details) / fileName))
-			return LDrawPrimitiveType::Details;
+		else if (std::filesystem::exists(getFullPrimitivesDirectory(LDrawPrimitiveType::HiRes) / fileName))
+			return LDrawPrimitiveType::HiRes;
 
 		BV_ASSERT(false, "LDraw primitive search failed for file {}!", fileName.filename().string());
 		return LDrawPrimitiveType::None;
@@ -152,9 +152,9 @@ namespace Brickview
 	{
 		switch (type)
 		{
-			case LDrawPrimitiveType::None:      return "";
-			case LDrawPrimitiveType::NoDetails: return "8";
-			case LDrawPrimitiveType::Details:   return "48";
+			case LDrawPrimitiveType::None:   return "";
+			case LDrawPrimitiveType::LowRes: return "8";
+			case LDrawPrimitiveType::HiRes:  return "48";
 		}
 
 		BV_ASSERT(false, "File type unknown!");
