@@ -9,10 +9,10 @@
 namespace Brickview
 {
 
-	struct LegoMeshFileData
+	struct LoadingQueueFileData
 	{
-		LegoMeshFileData() = default;
-		LegoMeshFileData(const std::filesystem::path& filePath, LDrawFileType type, const glm::mat4& transform);
+		LoadingQueueFileData() = default;
+		LoadingQueueFileData(const std::filesystem::path& filePath, LDrawFileType type, const glm::mat4& transform);
 
 		std::filesystem::path FilePath = "";
 		glm::mat4 Transform = glm::mat4(1.0f);
@@ -25,7 +25,7 @@ namespace Brickview
 
 	private:
 		// Loading
-		static bool readFile(const LegoMeshFileData& file, Ref<Mesh> mesh, std::queue<LegoMeshFileData>& loadingQueue);
+		static bool readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh, std::queue<LoadingQueueFileData>& loadingQueue);
 		static void convertToDm(Ref<Mesh> mesh);
 	};
 

@@ -64,7 +64,7 @@ namespace Brickview
 			transform[1] = { b, e, h, 0.0f };
 			transform[2] = { c, f, i, 0.0f };
 			transform[3] = { x, y, z, 1.0f };
-
+			
 			return transform;
 		}
 	}

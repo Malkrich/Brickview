@@ -21,6 +21,13 @@ namespace Brickview
 		Details
 	};
 
+	struct LDrawFileData
+	{
+		std::filesystem::path FilePath;
+		LDrawFileType FileType;
+		LDrawPrimitiveType PrimitiveType;
+	};
+
 	class LDrawFileManager
 	{
 	public:
@@ -31,13 +38,13 @@ namespace Brickview
 		static std::filesystem::path getFullSubPartsDirectory();
 		static std::filesystem::path getFullPrimitivesDirectory(LDrawPrimitiveType type);
 
-		static std::tuple<std::filesystem::path, LDrawFileType> getFileFromRawFileName(const std::filesystem::path& fileName);
+		static LDrawFileData getFileFromRawFileName(const std::filesystem::path& fileName);
 
 		// For debug
 		static std::string fileTypeToString(LDrawFileType type);
 
 	private:
-		static std::tuple<std::filesystem::path, LDrawFileType> findFile(const std::filesystem::path& fileName);
+		static LDrawFileData findFile(const std::filesystem::path& fileName);
 
 		static LDrawFileType fileTypeFromParentDir(const std::filesystem::path& parentDir);
 		static LDrawFileType fileTypeFromUnknownFile(const std::filesystem::path& fileName);

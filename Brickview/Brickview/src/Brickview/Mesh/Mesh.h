@@ -63,10 +63,14 @@ namespace Brickview
 
 		// Data modifications
 		void setData(const std::vector<Vertex>& vertices, const std::vector<TriangleFace> indices);
+
+		void addTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2);
+		void addTriangle(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::mat4& transform);
 		void addTriangle(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2);
-		void addTriangle(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::mat4& trasnform);
+
+		void addQuad(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Vertex& v3);
+		void addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::mat4& transform);
 		void addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
-		void addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::mat4& trasnform);
 
 		// Geometry modifications
 		void scale(float scaleFactor);
@@ -74,26 +78,22 @@ namespace Brickview
 
 	private:
 		template<uint32_t VertexCount, uint32_t TriangleCount>
-		void addGeometry(const std::array<glm::vec3, VertexCount>& positions, const glm::mat4& transform)
+		void addGeometry(const std::array<Vertex, VertexCount>& vertices)
 		{
-			BV_ASSERT(TriangleCount <= 2, "Geometry which is not triangle nor quad is not supported!");
-			// Normal calculation
-			glm::vec3 normal = glm::normalize(glm::cross(positions[2] - positions[0], positions[1] - positions[0]));
+			BV_ASSERT(TriangleCount <= 2, "Only triangle and quand are the accepted geometry to be added in Mesh!");
 
 			// Geometry
-			m_vertices.reserve(VertexCount);
+			m_vertices.reserve(m_vertices.size() + VertexCount);
 			for (uint32_t i = 0; i < VertexCount; i++)
-			{
-				glm::vec3 pos = glm::vec3(transform * glm::vec4(positions[i], 1.0f));
-				Vertex v = { pos, normal };
-				m_vertices.push_back(v);
-			}
+				m_vertices.push_back(vertices[i]);
 
-			// Connectivity
-			m_connectivities.reserve(TriangleCount);
+			// Connectivities
+			// Triangle 1
+			m_connectivities.reserve(m_connectivities.size() + TriangleCount);
 			TriangleFace t1 = { 0, 1, 2 };
 			t1.addOffset(m_lastIndex);
 			m_connectivities.push_back(t1);
+			// Triangle 2 -> if adding a quad
 			if constexpr(TriangleCount > 1)
 			{
 				TriangleFace t2 = { 2, 3, 0 };

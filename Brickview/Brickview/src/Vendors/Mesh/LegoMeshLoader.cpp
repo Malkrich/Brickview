@@ -9,7 +9,7 @@
 namespace Brickview
 {
 
-	LegoMeshFileData::LegoMeshFileData(const std::filesystem::path& filePath, LDrawFileType type, const glm::mat4& transform)
+	LoadingQueueFileData::LoadingQueueFileData(const std::filesystem::path& filePath, LDrawFileType type, const glm::mat4& transform)
 		: FilePath(filePath)
 		, Transform(transform)
 	{}
@@ -22,13 +22,13 @@ namespace Brickview
 			return false;
 		}
 
-		std::queue<LegoMeshFileData> loadingQueue;
-		LegoMeshFileData initialFile(filePath, LDrawFileType::Part, glm::mat4(1.0f));
+		std::queue<LoadingQueueFileData> loadingQueue;
+		LoadingQueueFileData initialFile(filePath, LDrawFileType::Part, glm::mat4(1.0f));
 		loadingQueue.push(initialFile);
 
 		while (!loadingQueue.empty())
 		{
-			const LegoMeshFileData& file = loadingQueue.front();
+			const LoadingQueueFileData& file = loadingQueue.front();
 			readFile(file, mesh, loadingQueue);
 			loadingQueue.pop();
 		}
@@ -38,7 +38,7 @@ namespace Brickview
 		return true;
 	}
 
-	bool LegoMeshLoader::readFile(const LegoMeshFileData& file, Ref<Mesh> mesh, std::queue<LegoMeshFileData>& loadingQueue)
+	bool LegoMeshLoader::readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh, std::queue<LoadingQueueFileData>& loadingQueue)
 	{
 		std::filesystem::path currentFilePath = file.FilePath;
 		const glm::mat4& currentTransform     = file.Transform;
@@ -72,19 +72,19 @@ namespace Brickview
 				case LDrawLineType::SubFileRef:
 				{
 					LDrawSubFileRefData sf = reader.getLineData<LDrawSubFileRefData>();
-					auto[newFilePath, newFileType] = LDrawFileManager::getFileFromRawFileName(sf.FilePath);
+					LDrawFileData fileData = LDrawFileManager::getFileFromRawFileName(sf.FilePath);
 
-					if (newFileType != LDrawFileType::None)
+					if (fileData.FileType != LDrawFileType::None)
 					{
-						BV_LOG_INFO("Adding file {} to the loading queue", newFilePath.string());
+						BV_LOG_INFO("Adding file {} to the loading queue", fileData.FilePath.string());
 
-						LegoMeshFileData newFile;
-						newFile.FilePath  = newFilePath;
+						LoadingQueueFileData newFile;
+						newFile.FilePath  = fileData.FilePath;
 						newFile.Transform = currentTransform * sf.Transform;
 						loadingQueue.push(newFile);
 						break;
 					}
-					BV_LOG_ERROR("Couldn't find file {}", newFilePath.string());
+					BV_LOG_ERROR("Couldn't find file {}", fileData.FilePath.string());
 				}
 
 #if 0

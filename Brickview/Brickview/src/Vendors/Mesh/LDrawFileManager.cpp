@@ -55,13 +55,13 @@ namespace Brickview
 		return s_ldrawFileManagerData->BaseDirectory / s_ldrawFileManagerData->PrimitivesDirectory / primitiveSubDirFromType(type);
 	}
 
-	std::tuple<std::filesystem::path, LDrawFileType> LDrawFileManager::getFileFromRawFileName(const std::filesystem::path& fileName)
+	LDrawFileData LDrawFileManager::getFileFromRawFileName(const std::filesystem::path& fileName)
 	{
 		// TODO: add a cache system to prevent calling findFile all the time.
 		return findFile(fileName);
 	}
 
-	std::tuple<std::filesystem::path, LDrawFileType> LDrawFileManager::findFile(const std::filesystem::path& fileName)
+	LDrawFileData LDrawFileManager::findFile(const std::filesystem::path& fileName)
 	{
 		LDrawFileType fileType = LDrawFileType::None;
 		LDrawPrimitiveType primitiveType = LDrawPrimitiveType::None;
@@ -81,7 +81,7 @@ namespace Brickview
 		}
 
 		std::filesystem::path fullFilePath = filePathFromTypes(fileType, primitiveType) / fileName.filename();
-		return { fullFilePath, fileType };
+		return { fullFilePath, fileType, primitiveType };
 	}
 
 	LDrawFileType LDrawFileManager::fileTypeFromParentDir(const std::filesystem::path& parentDir)
