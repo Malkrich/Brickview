@@ -3,6 +3,7 @@
 
 #include "Utils/StringUtils.h"
 #include "LDrawReader.h"
+#include "LDrawCommandManager.h"
 
 #include <glm/glm.hpp>
 
@@ -33,6 +34,7 @@ namespace Brickview
 			loadingQueue.pop();
 		}
 
+		// TODO: switch all points y coord (LDraw is -y vertical)
 		convertToDm(mesh);
 
 		return true;
@@ -86,12 +88,16 @@ namespace Brickview
 					}
 					BV_LOG_ERROR("Couldn't find file {}", fileData.FilePath.string());
 				}
-
+				case LDrawLineType::Comment:
+					if (reader.isCurrentLineCommand())
+					{
+						LDrawCommandData command = reader.getLineData<LDrawCommandData>();
+						break;
+					}
 #if 0
-				case LineType::Comment:
 					BV_LOG_INFO("LDraw file comment: {}", reader.getComment());
-					break;
 #endif
+					break;
 				default:
 					break;
 			}

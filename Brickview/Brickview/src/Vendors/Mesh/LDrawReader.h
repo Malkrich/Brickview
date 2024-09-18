@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LDrawCommandManager.h"
+
 #include <glm/glm.hpp>
 
 #include <filesystem>
@@ -40,6 +42,14 @@ namespace Brickview
 		glm::mat4 Transform;
 	};
 
+	struct LDrawCommandData
+	{
+		static LDrawCommandData deserialize(const std::string& line);
+
+		LDrawCommandExtension Extension;
+		std::vector<LDrawCommandArgument> Arguments;
+	};
+
 	class LDrawReader
 	{
 	public:
@@ -53,7 +63,9 @@ namespace Brickview
 
 		bool isValid() const { return m_valid; }
 
+
 		LDrawLineType getLineType() const { return m_currentLineType; }
+		bool isCurrentLineCommand() const { return m_isCurrentLineCommand; }
 		template<typename T>
 		T getLineData() const
 		{
@@ -72,6 +84,7 @@ namespace Brickview
 		// Current states
 		std::string m_currentLine;
 		LDrawLineType m_currentLineType = LDrawLineType::Empty;
+		bool m_isCurrentLineCommand = false;
 	};
 
 }

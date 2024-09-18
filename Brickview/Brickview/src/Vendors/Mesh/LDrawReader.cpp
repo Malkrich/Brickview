@@ -67,6 +67,7 @@ namespace Brickview
 			
 			return transform;
 		}
+
 	}
 
 	LDrawTriangleData LDrawTriangleData::deserialize(const std::string& line)
@@ -94,6 +95,31 @@ namespace Brickview
 		sf.Transform = Utils::deserializeTransform(line, 2);
 		sf.FilePath  = Utils::deserializeElementAt(line, 14);
 		return sf;
+	}
+
+	LDrawCommandData LDrawCommandData::deserialize(const std::string& line)
+	{
+		LDrawCommandData command;
+		std::string rawCommandExtension = Utils::deserializeElementAt(line, 1);
+		command.Extension = LDrawCommandManager::getCommandExtension(rawCommandExtension);
+
+		uint32_t argIndex = 2;
+		bool isCommandArgument = true;
+		while (isCommandArgument)
+		{
+			std::string rawCommandArg = Utils::deserializeElementAt(line, argIndex);
+			isCommandArgument = rawCommandArg != "";
+
+			if (isCommandArgument)
+			{
+				LDrawCommandArgument arg = LDrawCommandManager::getCommandArgument(rawCommandArg);
+				command.Arguments.push_back(arg);
+			}
+
+			argIndex++;
+		}
+
+		return command;
 	}
 
 	LDrawReader::LDrawReader(const std::filesystem::path& filePath)
@@ -132,6 +158,14 @@ namespace Brickview
 
 		m_currentLineType = deserializeLineType(m_currentLine);
 
+		if (m_currentLineType == LDrawLineType::Comment)
+		{
+			std::string rawCommandExtension = Utils::deserializeElementAt(m_currentLine, 1);
+			m_isCurrentLineCommand = LDrawCommandManager::isCommand(rawCommandExtension);
+		}
+		else
+			m_isCurrentLineCommand = false;
+
 		return (bool)s;
 	}
 
@@ -141,6 +175,7 @@ namespace Brickview
 			return LDrawLineType::Empty;
 
 		LDrawLineType lineType = (LDrawLineType)Utils::deserializePrimitiveTypeAt<uint32_t>(line, 0);
+
 		return lineType;
 	}
 
