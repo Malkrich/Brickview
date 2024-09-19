@@ -23,6 +23,7 @@ namespace Brickview
 			return false;
 		}
 
+		LoadingSettings settings;
 		std::queue<LoadingQueueFileData> loadingQueue;
 		LoadingQueueFileData initialFile(filePath, LDrawFileType::Part, glm::mat4(1.0f));
 		loadingQueue.push(initialFile);
@@ -30,7 +31,7 @@ namespace Brickview
 		while (!loadingQueue.empty())
 		{
 			const LoadingQueueFileData& file = loadingQueue.front();
-			readFile(file, mesh, loadingQueue);
+			readFile(file, mesh, settings, loadingQueue);
 			loadingQueue.pop();
 		}
 
@@ -40,7 +41,8 @@ namespace Brickview
 		return true;
 	}
 
-	bool LegoMeshLoader::readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh, std::queue<LoadingQueueFileData>& loadingQueue)
+	bool LegoMeshLoader::readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh, 
+		LoadingSettings& settings, std::queue<LoadingQueueFileData>& loadingQueue)
 	{
 		std::filesystem::path currentFilePath = file.FilePath;
 		const glm::mat4& currentTransform     = file.Transform;
@@ -62,13 +64,19 @@ namespace Brickview
 				case LDrawLineType::Triangle:
 				{
 					LDrawTriangleData t = reader.getLineData<LDrawTriangleData>();
-					mesh->addTriangle(t.p0, t.p1, t.p2, currentTransform);
+					if (!settings.Inverted)
+						mesh->addTriangle(t.p0, t.p1, t.p2, currentTransform);
+					else
+						mesh->addTriangle(t.p2, t.p1, t.p0, currentTransform);
 					break;
 				}
 				case LDrawLineType::Quadrilateral:
 				{
 					LDrawQuadData q = reader.getLineData<LDrawQuadData>();
-					mesh->addQuad(q.p0, q.p1, q.p2, q.p3, currentTransform);
+					if (!settings.Inverted)
+						mesh->addQuad(q.p0, q.p1, q.p2, q.p3, currentTransform);
+					else
+						mesh->addQuad(q.p3, q.p2, q.p1, q.p0, currentTransform);
 					break;
 				}
 				case LDrawLineType::SubFileRef:
@@ -91,7 +99,8 @@ namespace Brickview
 				case LDrawLineType::Comment:
 					if (reader.isCurrentLineCommand())
 					{
-						LDrawCommandData command = reader.getLineData<LDrawCommandData>();
+						LDrawCommandData commandData = reader.getLineData<LDrawCommandData>();
+						LDrawCommandManager::executeCommand(commandData.Extension, commandData.Arguments, settings);
 						break;
 					}
 #if 0

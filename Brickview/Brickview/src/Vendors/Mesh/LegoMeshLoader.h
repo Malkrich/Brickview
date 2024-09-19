@@ -9,6 +9,11 @@
 namespace Brickview
 {
 
+	struct LoadingSettings
+	{
+		bool Inverted = false;
+	};
+
 	struct LoadingQueueFileData
 	{
 		LoadingQueueFileData() = default;
@@ -25,7 +30,8 @@ namespace Brickview
 
 	private:
 		// Loading
-		static bool readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh, std::queue<LoadingQueueFileData>& loadingQueue);
+		static bool readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh,
+			LoadingSettings& settings, std::queue<LoadingQueueFileData>& loadingQueue);
 		static void convertToDm(Ref<Mesh> mesh);
 	};
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "LegoMeshLoader.h"
+
 namespace Brickview
 {
 
@@ -28,6 +30,8 @@ namespace Brickview
 		static LDrawCommandExtension getCommandExtension(const std::string& rawExtension);
 		// Command arguments
 		static LDrawCommandArgument getCommandArgument(const std::string& rawArgument);
+
+		static void executeCommand(LDrawCommandExtension extension, const std::vector<LDrawCommandArgument>& args, LoadingSettings& settings);
 	};
 
 }

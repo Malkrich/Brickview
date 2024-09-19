@@ -32,12 +32,14 @@ namespace Brickview
 
 	bool LDrawCommandManager::isCommand(const std::string& rawExtension)
 	{
+		// TODO (backward compatibility):
+		// needs to check whether rawExtension contains "!" before the command extension
 		return s_ldrawCommandManagerData->CommandExtensionLookup.contains(rawExtension);
 	}
 
 	LDrawCommandExtension LDrawCommandManager::getCommandExtension(const std::string& rawExtension)
 	{
-		if (isCommand(rawExtension))
+		if (s_ldrawCommandManagerData->CommandExtensionLookup.contains(rawExtension))
 			return s_ldrawCommandManagerData->CommandExtensionLookup.at(rawExtension);
 
 		return LDrawCommandExtension::None;
@@ -49,6 +51,11 @@ namespace Brickview
 			return s_ldrawCommandManagerData->CommandArgumentLookup.at(rawArgument);
 		else
 			return LDrawCommandArgument::None;
+	}
+
+	void LDrawCommandManager::executeCommand(LDrawCommandExtension extension, const std::vector<LDrawCommandArgument>& args, LoadingSettings& settings)
+	{
+
 	}
 
 }
