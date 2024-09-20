@@ -1,7 +1,5 @@
 #pragma once
 
-#include "LDrawCommandManager.h"
-
 #include <glm/glm.hpp>
 
 #include <filesystem>
@@ -17,8 +15,10 @@ namespace Brickview
 		Line = 2,
 		Triangle = 3,
 		Quadrilateral = 4,
-		OptionalFile = 5
+		OptionalFile = 5,
 	};
+
+	enum class LDrawGeometryWinding { Unknown = 0, CW, CCW };
 
 	struct LDrawTriangleData
 	{
@@ -42,6 +42,8 @@ namespace Brickview
 		glm::mat4 Transform;
 	};
 
+	enum class LDrawCommandExtension;
+	enum class LDrawCommandArgument;
 	struct LDrawCommandData
 	{
 		static LDrawCommandData deserialize(const std::string& line);
@@ -53,19 +55,25 @@ namespace Brickview
 	class LDrawReader
 	{
 	public:
-		LDrawReader(const std::filesystem::path& filePath);
+		struct States
+		{
+			LDrawGeometryWinding Winding = LDrawGeometryWinding::Unknown;
+			bool Inverted = false;
+		};
+
+	public:
+		LDrawReader(const std::filesystem::path& filePath, bool inverted);
 
 		// For debug purposes
 		static std::string lineTypeToString(LDrawLineType type);
 		std::string getComment() const;
 
 		bool readLine();
-
 		bool isValid() const { return m_valid; }
 
-
 		LDrawLineType getLineType() const { return m_currentLineType; }
-		bool isCurrentLineCommand() const { return m_isCurrentLineCommand; }
+		LDrawGeometryWinding getCurrentWindingState() const;
+		bool isCurrentLineInverted() const { return m_currentLineStates.Inverted; }
 		template<typename T>
 		T getLineData() const
 		{
@@ -80,11 +88,12 @@ namespace Brickview
 		// Global file states
 		std::ifstream m_fileStream;
 		bool m_valid = true;
+		bool m_fileInverted;
 
 		// Current states
 		std::string m_currentLine;
 		LDrawLineType m_currentLineType = LDrawLineType::Empty;
-		bool m_isCurrentLineCommand = false;
+		States m_currentLineStates;
 	};
 
 }

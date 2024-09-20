@@ -2,6 +2,7 @@
 #include "LDrawReader.h"
 
 #include "Utils/StringUtils.h"
+#include "LDrawCommandManager.h"
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -122,7 +123,8 @@ namespace Brickview
 		return command;
 	}
 
-	LDrawReader::LDrawReader(const std::filesystem::path& filePath)
+	LDrawReader::LDrawReader(const std::filesystem::path& filePath, bool inverted)
+		: m_fileInverted(inverted)
 	{
 		if (!std::filesystem::exists(filePath))
 			m_valid = false;
@@ -152,19 +154,37 @@ namespace Brickview
 		return comment;
 	}
 
+	LDrawGeometryWinding LDrawReader::getCurrentWindingState() const
+	{
+		LDrawGeometryWinding winding = m_currentLineStates.Winding;
+		// Not inverted or unknown winding case
+		if (!m_currentLineStates.Inverted || winding == LDrawGeometryWinding::Unknown)
+			return winding;
+
+		// Inverted case
+		return winding == LDrawGeometryWinding::CW ? LDrawGeometryWinding::CCW : LDrawGeometryWinding::CW;
+	}
+
 	bool LDrawReader::readLine()
 	{
 		std::istream& s = std::getline(m_fileStream, m_currentLine);
 
 		m_currentLineType = deserializeLineType(m_currentLine);
 
+		// Meta Command
+		bool currentLineIsCommand = false;
 		if (m_currentLineType == LDrawLineType::Comment)
 		{
 			std::string rawCommandExtension = Utils::deserializeElementAt(m_currentLine, 1);
-			m_isCurrentLineCommand = LDrawCommandManager::isCommand(rawCommandExtension);
+			currentLineIsCommand = LDrawCommandManager::isCommand(rawCommandExtension);
 		}
-		else
-			m_isCurrentLineCommand = false;
+
+		m_currentLineStates.Inverted = m_fileInverted;
+		if (currentLineIsCommand)
+		{
+			LDrawCommandData commandData = getLineData<LDrawCommandData>();
+			LDrawCommandManager::executeCommand(commandData.Extension, commandData.Arguments, m_currentLineStates);
+		}
 
 		return (bool)s;
 	}

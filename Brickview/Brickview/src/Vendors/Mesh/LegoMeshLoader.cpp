@@ -23,7 +23,6 @@ namespace Brickview
 			return false;
 		}
 
-		LoadingSettings settings;
 		std::queue<LoadingQueueFileData> loadingQueue;
 		LoadingQueueFileData initialFile(filePath, LDrawFileType::Part, glm::mat4(1.0f));
 		loadingQueue.push(initialFile);
@@ -31,7 +30,7 @@ namespace Brickview
 		while (!loadingQueue.empty())
 		{
 			const LoadingQueueFileData& file = loadingQueue.front();
-			readFile(file, mesh, settings, loadingQueue);
+			readFile(file, mesh, loadingQueue);
 			loadingQueue.pop();
 		}
 
@@ -41,13 +40,12 @@ namespace Brickview
 		return true;
 	}
 
-	bool LegoMeshLoader::readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh, 
-		LoadingSettings& settings, std::queue<LoadingQueueFileData>& loadingQueue)
+	bool LegoMeshLoader::readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh, std::queue<LoadingQueueFileData>& loadingQueue)
 	{
 		std::filesystem::path currentFilePath = file.FilePath;
 		const glm::mat4& currentTransform     = file.Transform;
 
-		LDrawReader reader(currentFilePath);
+		LDrawReader reader(currentFilePath, file.Inverted);
 
 		if (!reader.isValid())
 		{
@@ -64,19 +62,25 @@ namespace Brickview
 				case LDrawLineType::Triangle:
 				{
 					LDrawTriangleData t = reader.getLineData<LDrawTriangleData>();
-					if (!settings.Inverted)
+					auto winding = reader.getCurrentWindingState();
+					if (winding == LDrawGeometryWinding::CW)
 						mesh->addTriangle(t.p0, t.p1, t.p2, currentTransform);
-					else
+					else if (winding == LDrawGeometryWinding::CCW)
 						mesh->addTriangle(t.p2, t.p1, t.p0, currentTransform);
+					else
+						BV_LOG_ERROR("Unknown winding for triangle!");
 					break;
 				}
 				case LDrawLineType::Quadrilateral:
 				{
 					LDrawQuadData q = reader.getLineData<LDrawQuadData>();
-					if (!settings.Inverted)
+					auto winding = reader.getCurrentWindingState();
+					if (winding == LDrawGeometryWinding::CW)
 						mesh->addQuad(q.p0, q.p1, q.p2, q.p3, currentTransform);
-					else
+					else if (winding == LDrawGeometryWinding::CCW)
 						mesh->addQuad(q.p3, q.p2, q.p1, q.p0, currentTransform);
+					else
+						BV_LOG_ERROR("Unknown winding for quad!");
 					break;
 				}
 				case LDrawLineType::SubFileRef:
@@ -91,22 +95,17 @@ namespace Brickview
 						LoadingQueueFileData newFile;
 						newFile.FilePath  = fileData.FilePath;
 						newFile.Transform = currentTransform * sf.Transform;
+						newFile.Inverted  = reader.isCurrentLineInverted();
 						loadingQueue.push(newFile);
 						break;
 					}
 					BV_LOG_ERROR("Couldn't find file {}", fileData.FilePath.string());
 				}
-				case LDrawLineType::Comment:
-					if (reader.isCurrentLineCommand())
-					{
-						LDrawCommandData commandData = reader.getLineData<LDrawCommandData>();
-						LDrawCommandManager::executeCommand(commandData.Extension, commandData.Arguments, settings);
-						break;
-					}
 #if 0
+				case LDrawLineType::Comment:
 					BV_LOG_INFO("LDraw file comment: {}", reader.getComment());
-#endif
 					break;
+#endif
 				default:
 					break;
 			}
