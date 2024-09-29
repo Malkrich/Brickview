@@ -91,6 +91,8 @@ namespace Brickview
 		bool m_fileInverted;
 
 		// Current states
+		uint32_t m_currentLineIndex = 0;
+		uint32_t m_invertNextResetLineIndex = 0;
 		std::string m_currentLine;
 		LDrawLineType m_currentLineType = LDrawLineType::Empty;
 		States m_currentLineStates;

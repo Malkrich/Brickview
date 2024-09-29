@@ -10,9 +10,13 @@ namespace Brickview
 {
 	namespace Utils
 	{
-		inline static glm::vec3 computeNormal(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2)
+		static glm::vec3 computeNormal(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::mat4& geometryTransform)
 		{
-			return glm::normalize(glm::cross(p2 - p0, p1 - p0));
+			glm::vec3 normal = glm::cross(p2 - p0, p1 - p0);
+
+			glm::mat3 normalTransform = glm::transpose(glm::inverse(geometryTransform));
+
+			return glm::normalize(normalTransform * normal);
 		}
 	}
 
@@ -72,7 +76,7 @@ namespace Brickview
 		glm::vec3 tp0 = transform * glm::vec4(p0, 1.0f);
 		glm::vec3 tp1 = transform * glm::vec4(p1, 1.0f);
 		glm::vec3 tp2 = transform * glm::vec4(p2, 1.0f);
-		glm::vec3 normal = Utils::computeNormal(tp0, tp1, tp2);
+		glm::vec3 normal = Utils::computeNormal(p0, p1, p2, transform);
 
 		Vertex v0 = { tp0, normal };
 		Vertex v1 = { tp1, normal };
@@ -97,7 +101,12 @@ namespace Brickview
 		glm::vec3 tp1 = transform * glm::vec4(p1, 1.0f);
 		glm::vec3 tp2 = transform * glm::vec4(p2, 1.0f);
 		glm::vec3 tp3 = transform * glm::vec4(p3, 1.0f);
-		glm::vec3 normal = Utils::computeNormal(tp0, tp1, tp2);
+
+		// normal calculation
+		glm::vec3 normal = Utils::computeNormal(p0, p1, p2, transform);
+		//glm::mat3 normalTransform = glm::transpose(glm::inverse(transform));
+		//normal = normalTransform * normal;
+		//normal = glm::normalize(normal);
 
 		Vertex v0 = { tp0, normal };
 		Vertex v1 = { tp1, normal };

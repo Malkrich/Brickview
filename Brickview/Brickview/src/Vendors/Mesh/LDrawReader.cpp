@@ -179,13 +179,20 @@ namespace Brickview
 			currentLineIsCommand = LDrawCommandManager::isCommand(rawCommandExtension);
 		}
 
-		m_currentLineStates.Inverted = m_fileInverted;
+		// Reset invert next
+		if (m_currentLineIndex >= m_invertNextResetLineIndex)
+			m_currentLineStates.Inverted = m_fileInverted;
+
 		if (currentLineIsCommand)
 		{
 			LDrawCommandData commandData = getLineData<LDrawCommandData>();
 			LDrawCommandManager::executeCommand(commandData.Extension, commandData.Arguments, m_currentLineStates);
+
+			if (m_currentLineStates.Inverted != m_fileInverted)
+				m_invertNextResetLineIndex = m_currentLineIndex + 2;
 		}
 
+		m_currentLineIndex++;
 		return (bool)s;
 	}
 
