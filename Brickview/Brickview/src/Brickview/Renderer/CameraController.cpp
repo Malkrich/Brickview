@@ -8,10 +8,6 @@
 namespace Brickview
 {
 
-	namespace Utils
-	{
-	}
-
 	CameraController::CameraController()
 		: CameraController(CameraControllerSpecifications())
 	{}

@@ -31,6 +31,9 @@ namespace Brickview
 		m_viewport = createScope<Viewport>(width, height);
 
 		// Camera
+		CameraControllerSpecifications cameraControlSpec;
+		cameraControlSpec.DistanceFromObject = 0.2;
+		m_cameraControl = CameraController(cameraControlSpec);
 		m_cameraControl.setLaptopMode(m_laptopMode);
 
 		// Basic meshes
@@ -41,7 +44,18 @@ namespace Brickview
 		m_ldrawBrickTransform = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
 		// 35252p02.dat
 		// 1.dat
-		m_ldrawBrick = Mesh::load("data/LDraw/parts/35252p02.dat");
+		m_fileIndexOffset = (m_selectedMesh / m_maxDisplayableFiles) * m_maxDisplayableFiles;
+		uint32_t index = 0;
+		for (const auto& file : std::filesystem::directory_iterator(m_ldrawBaseDir))
+		{
+			if (index == m_selectedMesh)
+			{
+				m_ldrawBrick = Mesh::load(file);
+				break;
+			}
+
+			index++;
+		}
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
@@ -171,6 +185,7 @@ namespace Brickview
 		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
 		ImGui::Separator();
 
+		// Lego files explorer
 		ImGui::Text("Lego parts explorer");
 		if (ImGui::Button("<"))
 		{

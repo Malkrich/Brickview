@@ -72,9 +72,9 @@ namespace Brickview
 		bool m_laptopMode = false;
 
 		// Constants
-		inline static float s_scrollSensitivity = 0.05f;
+		inline static float s_scrollSensitivity = 0.02f;
 		inline static float s_angleSensitivity = 0.15f;
-		inline static float s_translationSensitivity = s_angleSensitivity / 50.0f;
+		inline static float s_translationSensitivity = 0.0003f;
 	};
 
 }

@@ -22,12 +22,14 @@ namespace Brickview
 	class LegoMeshLoader
 	{
 	public:
+		static void init();
+		static void shutdown();
+
 		static bool load(const std::filesystem::path& filePath, Ref<Mesh> mesh);
 
 	private:
 		// Loading
 		static bool readFile(const LoadingQueueFileData& file, Ref<Mesh> mesh, std::queue<LoadingQueueFileData>& loadingQueue);
-		static void convertToDm(Ref<Mesh> mesh);
 	};
 
 }

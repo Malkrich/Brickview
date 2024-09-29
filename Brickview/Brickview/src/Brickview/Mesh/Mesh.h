@@ -73,6 +73,7 @@ namespace Brickview
 		void addQuad(const glm::vec3& p0, const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3);
 
 		// Geometry modifications
+		void transform(const glm::mat4& transform);
 		void scale(float scaleFactor);
 		void scale(const glm::vec3& scaleVector);
 

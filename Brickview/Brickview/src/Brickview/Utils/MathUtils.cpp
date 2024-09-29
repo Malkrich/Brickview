@@ -23,4 +23,9 @@ namespace Brickview::MathUtils
 		return position;
 	}
 
+	glm::mat3 computeNormalTransform(const glm::mat4& transform)
+	{
+		return glm::transpose(glm::inverse(transform));
+	}
+
 }

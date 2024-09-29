@@ -3,6 +3,7 @@
 
 #include "Vendors/Mesh/LegoMeshLoader.h"
 #include "Vendors/Mesh/ObjLoader.h"
+#include "Utils/MathUtils.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -14,7 +15,7 @@ namespace Brickview
 		{
 			glm::vec3 normal = glm::cross(p2 - p0, p1 - p0);
 
-			glm::mat3 normalTransform = glm::transpose(glm::inverse(geometryTransform));
+			glm::mat3 normalTransform = MathUtils::computeNormalTransform(geometryTransform);
 
 			return glm::normalize(normalTransform * normal);
 		}
@@ -76,6 +77,8 @@ namespace Brickview
 		glm::vec3 tp0 = transform * glm::vec4(p0, 1.0f);
 		glm::vec3 tp1 = transform * glm::vec4(p1, 1.0f);
 		glm::vec3 tp2 = transform * glm::vec4(p2, 1.0f);
+
+		// Normal calculation
 		glm::vec3 normal = Utils::computeNormal(p0, p1, p2, transform);
 
 		Vertex v0 = { tp0, normal };
@@ -104,9 +107,6 @@ namespace Brickview
 
 		// normal calculation
 		glm::vec3 normal = Utils::computeNormal(p0, p1, p2, transform);
-		//glm::mat3 normalTransform = glm::transpose(glm::inverse(transform));
-		//normal = normalTransform * normal;
-		//normal = glm::normalize(normal);
 
 		Vertex v0 = { tp0, normal };
 		Vertex v1 = { tp1, normal };
@@ -121,6 +121,17 @@ namespace Brickview
 		addQuad(p0, p1, p2, p3, glm::mat4(1.0f));
 	}
 
+	void Mesh::transform(const glm::mat4& transform)
+	{
+		glm::mat3 normalTransform = MathUtils::computeNormalTransform(transform);
+
+		for (Vertex& v : m_vertices)
+		{
+			v.Position = transform * glm::vec4(v.Position, 1.0f);
+			v.Normal = glm::normalize(normalTransform * v.Normal);
+		}
+	}
+
 	void Mesh::scale(float scaleFactor)
 	{
 		scale(glm::vec3(scaleFactor));
@@ -129,12 +140,7 @@ namespace Brickview
 	void Mesh::scale(const glm::vec3& scaleVector)
 	{
 		glm::mat4 scaleTransform = glm::scale(glm::mat4(1.0), scaleVector);
-		for (Vertex& v : m_vertices)
-		{
-			glm::vec4 pos = glm::vec4(v.Position, 1.0f);
-			pos = scaleTransform * pos;
-			v.Position = glm::vec3(pos.x, pos.y, pos.z);
-		}
+		transform(scaleTransform);
 	}
 
 }

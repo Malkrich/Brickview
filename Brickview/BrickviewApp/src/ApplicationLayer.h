@@ -39,15 +39,15 @@ namespace Brickview
 
 		// Lego file explorer
 		std::filesystem::path m_ldrawBaseDir = "./data/LDraw/parts/";
+		uint32_t m_selectedMesh = 979;
 		uint32_t m_maxDisplayableFiles = 10;
-		uint32_t m_fileIndexOffset = 0;
-		uint32_t m_selectedMesh = 1;
+		uint32_t m_fileIndexOffset;
 
 		Material m_ldrawBrickMaterial;
 		Light m_light;
 		RenderType m_renderType = RenderType::Solid;
 
-		CameraController m_cameraControl = CameraController();
+		CameraController m_cameraControl;
 		bool m_laptopMode = false;
 
 		float m_dt = 0.0f;

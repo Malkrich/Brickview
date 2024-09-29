@@ -6,6 +6,7 @@
 #include "LDrawCommandManager.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Brickview
 {
@@ -14,6 +15,35 @@ namespace Brickview
 		: FilePath(filePath)
 		, Transform(transform)
 	{}
+
+	struct LegoMeshLoaderData
+	{
+		glm::mat4 LDUToMeterTransform;
+		glm::mat4 LDrawToBrickviewSpaceTransform;
+	};
+
+	static LegoMeshLoaderData* s_legoMeshLoaderData;
+
+	void LegoMeshLoader::init()
+	{
+		s_legoMeshLoaderData = new LegoMeshLoaderData();
+
+		// Convert LDU to mm
+		// 1 LDU = 0.4 mm
+		// Convert mm to dm
+		// 1 mm = 0.001 m;
+		s_legoMeshLoaderData->LDUToMeterTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4 * 0.001));
+		// Up direction from LDraw is negative: https://www.ldraw.org/article/218.html (section The LDraw Co-ordinate System)
+		glm::mat4 lDrawToBrickviewSpaceTransform(1.0f);
+		lDrawToBrickviewSpaceTransform[1] = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
+		s_legoMeshLoaderData->LDrawToBrickviewSpaceTransform = lDrawToBrickviewSpaceTransform;
+	}
+
+	void LegoMeshLoader::shutdown()
+	{
+		delete s_legoMeshLoaderData;
+		s_legoMeshLoaderData = nullptr;
+	}
 
 	bool LegoMeshLoader::load(const std::filesystem::path& filePath, Ref<Mesh> mesh)
 	{
@@ -34,8 +64,10 @@ namespace Brickview
 			loadingQueue.pop();
 		}
 
-		// TODO: switch all points y coord (LDraw is -y vertical)
-		convertToDm(mesh);
+		// Convert to meter
+		mesh->transform(s_legoMeshLoaderData->LDUToMeterTransform);
+		// Convert LDraw space to Brickview space
+		mesh->transform(s_legoMeshLoaderData->LDrawToBrickviewSpaceTransform);
 
 		return true;
 	}
@@ -110,16 +142,6 @@ namespace Brickview
 		}
 
 		return true;
-	}
-
-	void LegoMeshLoader::convertToDm(Ref<Mesh> mesh)
-	{
-		// Convert LDU to mm
-		// 1 LDU = 0.4 mm
-		mesh->scale(0.4);
-		// Convert mm to dm
-		// 1 mm = 0.01 dm;
-		mesh->scale(0.01);
 	}
 
 }
