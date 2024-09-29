@@ -171,7 +171,7 @@ namespace Brickview
 		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
 		ImGui::Separator();
 
-#if 0
+		ImGui::Text("Lego parts explorer");
 		if (ImGui::Button("<"))
 		{
 			if (m_fileIndexOffset > 0)
@@ -183,7 +183,7 @@ namespace Brickview
 
 		uint32_t fileIndex = 0;
 		bool selected = false;
-		for (const auto& file : std::filesystem::directory_iterator(m_ldrawDir))
+		for (const auto& file : std::filesystem::directory_iterator(m_ldrawBaseDir))
 		{
 			if (fileIndex < m_fileIndexOffset)
 			{
@@ -206,7 +206,6 @@ namespace Brickview
 
 			fileIndex++;
 		}
-#endif
 		ImGui::End();
 
 		ImGui::Begin("Renderer");

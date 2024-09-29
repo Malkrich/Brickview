@@ -37,11 +37,11 @@ namespace Brickview
 		glm::mat4 m_cubeMeshTransform;
 		glm::mat4 m_ldrawBrickTransform;
 
-#if 0
-		const uint32_t m_maxDisplayableFiles = 10;
+		// Lego file explorer
+		std::filesystem::path m_ldrawBaseDir = "./data/LDraw/parts/";
+		uint32_t m_maxDisplayableFiles = 10;
 		uint32_t m_fileIndexOffset = 0;
 		uint32_t m_selectedMesh = 1;
-#endif
 
 		Material m_ldrawBrickMaterial;
 		Light m_light;
