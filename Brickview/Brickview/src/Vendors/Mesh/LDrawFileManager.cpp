@@ -13,6 +13,9 @@ namespace Brickview
 
 		std::unordered_map<std::filesystem::path, LDrawPrimitiveType> PrimitiveTypeOfSubDirs;
 		std::unordered_map<std::filesystem::path, LDrawFileType> FileTypeOfDirs;
+
+		// Cache
+		std::unordered_map<std::filesystem::path, LDrawFileData> ExistingFiles;
 	};
 
 	static LdrawFileManagerData* s_ldrawFileManagerData = nullptr;
@@ -55,10 +58,15 @@ namespace Brickview
 		return s_ldrawFileManagerData->BaseDirectory / s_ldrawFileManagerData->PrimitivesDirectory / primitiveSubDirFromType(type);
 	}
 
-	LDrawFileData LDrawFileManager::getFileFromRawFileName(const std::filesystem::path& fileName)
+	const LDrawFileData& LDrawFileManager::getFileFromRawFileName(const std::filesystem::path& fileName)
 	{
-		// TODO: add a cache system to prevent calling findFile all the time.
-		return findFile(fileName);
+		if (!s_ldrawFileManagerData->ExistingFiles.contains(fileName))
+		{
+			LDrawFileData fileData = findFile(fileName);
+			s_ldrawFileManagerData->ExistingFiles[fileName] = fileData;
+		}
+
+		return s_ldrawFileManagerData->ExistingFiles.at(fileName);
 	}
 
 	LDrawFileData LDrawFileManager::findFile(const std::filesystem::path& fileName)

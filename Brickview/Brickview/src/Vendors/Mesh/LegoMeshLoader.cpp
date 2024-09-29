@@ -86,12 +86,10 @@ namespace Brickview
 				case LDrawLineType::SubFileRef:
 				{
 					LDrawSubFileRefData sf = reader.getLineData<LDrawSubFileRefData>();
-					LDrawFileData fileData = LDrawFileManager::getFileFromRawFileName(sf.FilePath);
+					const LDrawFileData& fileData = LDrawFileManager::getFileFromRawFileName(sf.FilePath);
 
 					if (fileData.FileType != LDrawFileType::None)
 					{
-						BV_LOG_INFO("Adding file {} to the loading queue", fileData.FilePath.string());
-
 						LoadingQueueFileData newFile;
 						newFile.FilePath  = fileData.FilePath;
 						newFile.Transform = currentTransform * sf.Transform;

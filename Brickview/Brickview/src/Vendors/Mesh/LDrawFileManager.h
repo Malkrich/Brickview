@@ -38,7 +38,7 @@ namespace Brickview
 		static std::filesystem::path getFullSubPartsDirectory();
 		static std::filesystem::path getFullPrimitivesDirectory(LDrawPrimitiveType type);
 
-		static LDrawFileData getFileFromRawFileName(const std::filesystem::path& fileName);
+		static const LDrawFileData& getFileFromRawFileName(const std::filesystem::path& fileName);
 
 		// For debug
 		static std::string fileTypeToString(LDrawFileType type);
