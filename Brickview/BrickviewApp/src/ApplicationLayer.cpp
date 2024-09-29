@@ -40,10 +40,8 @@ namespace Brickview
 		m_planeMesh = Mesh::load("data/Meshes/Plane.obj");
 		m_cubeMesh  = Mesh::load("data/Meshes/Cube.obj");
 		m_cubeMeshTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
-		// New lego piece system:
+
 		m_ldrawBrickTransform = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
-		// 35252p02.dat
-		// 1.dat
 		m_fileIndexOffset = (m_selectedMesh / m_maxDisplayableFiles) * m_maxDisplayableFiles;
 		uint32_t index = 0;
 		for (const auto& file : std::filesystem::directory_iterator(m_ldrawBaseDir))
@@ -53,7 +51,6 @@ namespace Brickview
 				m_ldrawBrick = Mesh::load(file);
 				break;
 			}
-
 			index++;
 		}
 		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
