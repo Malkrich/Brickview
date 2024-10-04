@@ -4,28 +4,9 @@
 namespace Brickview
 {
 
-	enum ObjComponents : uint32_t
+	bool operator==(const ObjFace::ObjVertexIndex& o1, const ObjFace::ObjVertexIndex& o2)
 	{
-		Position = 0,
-		Texture  = 1,
-		Normal   = 2
-	};
-
-	struct ObjFace
-	{
-		struct ObjVertexIndex
-		{
-			uint32_t PositionIndex;
-			// TODO : add unsigned int TextureIndex;
-			uint32_t NormalIndex;
-		};
-
-		ObjVertexIndex Indices[3];
-	};
-
-	bool operator<(const ObjFace::ObjVertexIndex& a, const ObjFace::ObjVertexIndex& b)
-	{
-		return std::make_pair(a.PositionIndex, a.NormalIndex) < std::make_pair(b.PositionIndex, b.NormalIndex);
+		return o1.PositionIndex == o2.PositionIndex && o1.NormalIndex == o2.NormalIndex;
 	}
 
 	bool ObjLoader::load(const std::filesystem::path& filePath, Ref<Mesh> mesh)
@@ -93,7 +74,7 @@ namespace Brickview
 			}
 		}
 
-		std::map<ObjFace::ObjVertexIndex, uint32_t> indexOfVertex;
+		std::unordered_map<ObjFace::ObjVertexIndex, uint32_t> indexOfVertex;
 		uint32_t currentIndex = 0;
 
 		std::vector<Vertex> vertices;

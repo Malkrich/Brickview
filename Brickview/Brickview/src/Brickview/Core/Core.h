@@ -29,4 +29,13 @@ namespace Brickview
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 
+	// std add-ons
+	// from boost: https://stackoverflow.com/questions/2590677/how-do-i-combine-hash-values-in-c0x
+	template<typename T>
+	inline void hashCombine(size_t& seed, const T& v)
+	{
+		std::hash<T> hv;
+		seed ^= hv(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	}
+
 }

@@ -102,7 +102,7 @@ namespace Brickview
 		m_viewport->beginFrame();
 		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-#if 1
+#if 0
 		Lego3DRenderer::drawMesh(m_ldrawBrick, m_ldrawBrickMaterial, m_ldrawBrickTransform);
 #else
 		Lego3DRenderer::drawMesh(m_planeMesh, m_ldrawBrickMaterial, glm::mat4(1.0f));
