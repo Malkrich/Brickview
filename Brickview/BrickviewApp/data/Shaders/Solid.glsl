@@ -3,6 +3,7 @@
 
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
+layout (location = 2) in mat4 a_transform;
 
 uniform mat4 u_viewProjection;
 
@@ -11,9 +12,10 @@ out vec3 f_normal;
 
 void main()
 {
-    f_currentPosition = a_position;
+    vec4 worldPosition = a_transform * vec4(a_position, 1.0);
+    f_currentPosition = vec3(worldPosition);
     f_normal = a_normal;
-    gl_Position = u_viewProjection * vec4(f_currentPosition, 1.0);
+    gl_Position = u_viewProjection * worldPosition;
 }
 
 
@@ -26,7 +28,7 @@ in vec3 f_normal;
 out vec4 color;
 
 uniform vec3 u_cameraPosition;
-uniform bool u_showNormals;
+//uniform bool u_showNormals;
 
 void main()
 {
@@ -41,5 +43,6 @@ void main()
     renderedColor *= diffuse;
     renderedColor += ambient;
 
-    color = vec4(u_showNormals ? normalColor * renderedColor: renderedColor, 1.0);
+    color = vec4(renderedColor, 1.0);
+    //color = vec4(u_showNormals ? normalColor * renderedColor: renderedColor, 1.0);
 }

@@ -46,4 +46,10 @@ namespace Brickview
 		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
+	void RenderCommand::drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount)
+	{
+		vertexArray->bind();
+		glDrawElementsInstanced(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0, instanceCount);
+	}
+
 }

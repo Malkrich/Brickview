@@ -33,9 +33,11 @@ namespace Brickview
 
 		Ref<Mesh> m_planeMesh = nullptr;
 		Ref<Mesh> m_cubeMesh = nullptr;
-		Ref<Mesh> m_ldrawBrick = nullptr;
 		glm::mat4 m_cubeMeshTransform;
 		glm::mat4 m_ldrawBrickTransform;
+		Ref<Mesh> m_legoBrick = nullptr;
+		Material m_legoBrickMaterial;
+		std::vector<glm::mat4> m_legoBrickTransforms;
 
 		// Lego file explorer
 		std::filesystem::path m_ldrawBaseDir = "./data/LDraw/parts/";
@@ -43,7 +45,6 @@ namespace Brickview
 		uint32_t m_maxDisplayableFiles = 10;
 		uint32_t m_fileIndexOffset;
 
-		Material m_ldrawBrickMaterial;
 		Light m_light;
 		RenderType m_renderType = RenderType::Solid;
 

@@ -18,6 +18,12 @@ namespace Brickview
 			, Type(type)
 			, Normalized(normalized)
 		{}
+		BufferElement(uint32_t index, const std::string& name, BufferElementType type, bool normalized = false)
+			: Name(name)
+			, Index(index)
+			, Type(type)
+			, Normalized(normalized)
+		{}
 
 		std::string Name;
 		uint32_t Index = 0;

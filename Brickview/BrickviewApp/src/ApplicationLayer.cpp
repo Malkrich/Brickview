@@ -13,8 +13,7 @@ namespace Brickview
 {
 
 	ApplicationLayer::ApplicationLayer()
-		: m_ldrawBrickTransform(1.0f)
-		, m_ldrawBrickMaterial()
+		: m_legoBrickMaterial()
 		, m_light()
 	{}
 
@@ -23,9 +22,6 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
-		// Render type
-		Lego3DRenderer::setRenderType(m_renderType);
-
 		uint32_t width = Input::getWindowSize().x;
 		uint32_t height = Input::getWindowSize().y;
 		m_viewport = createScope<Viewport>(width, height);
@@ -41,19 +37,23 @@ namespace Brickview
 		m_cubeMesh  = Mesh::load("data/Meshes/Cube.obj");
 		m_cubeMeshTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
 
-		m_ldrawBrickTransform = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
+		m_legoBrickTransforms.reserve(3);
+		m_legoBrickTransforms.push_back(glm::mat4(1.0f));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.0f, 0.0f)));
+
 		m_fileIndexOffset = (m_selectedMesh / m_maxDisplayableFiles) * m_maxDisplayableFiles;
 		uint32_t index = 0;
 		for (const auto& file : std::filesystem::directory_iterator(m_ldrawBaseDir))
 		{
 			if (index == m_selectedMesh)
 			{
-				m_ldrawBrick = Mesh::load(file);
+				m_legoBrick = Mesh::load(file);
 				break;
 			}
 			index++;
 		}
-		m_ldrawBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
+		m_legoBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
 		m_light.Color = { 1.0f, 1.0f, 1.0f };
@@ -102,8 +102,8 @@ namespace Brickview
 		m_viewport->beginFrame();
 		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
 
-#if 0
-		Lego3DRenderer::drawMesh(m_ldrawBrick, m_ldrawBrickMaterial, m_ldrawBrickTransform);
+#if 1
+		Lego3DRenderer::drawMeshes(m_legoBrick, m_legoBrickMaterial, m_legoBrickTransforms);
 #else
 		Lego3DRenderer::drawMesh(m_planeMesh, m_ldrawBrickMaterial, glm::mat4(1.0f));
 		Lego3DRenderer::drawMesh(m_cubeMesh, m_ldrawBrickMaterial, m_cubeMeshTransform);
@@ -213,7 +213,7 @@ namespace Brickview
 			if (ImGui::Selectable(itemName.c_str(), selected))
 			{
 				m_selectedMesh = fileIndex;
-				m_ldrawBrick = Mesh::load(filePath);
+				m_legoBrick = Mesh::load(filePath);
 			}
 
 			fileIndex++;
@@ -222,59 +222,9 @@ namespace Brickview
 
 		ImGui::Begin("Renderer");
 
-		// Render Type
-		ImGui::SeparatorText("Render Settings:");
-
-		std::array<const char*, 2> renderTypeItems = { "Solid", "Rendered" };
-		int renderTypeIndex = (int)m_renderType;
-		if (ImGui::Combo("Render type", &renderTypeIndex, renderTypeItems.data(), renderTypeItems.size()))
-		{
-			m_renderType = (RenderType)renderTypeIndex;
-			Lego3DRenderer::setRenderType(m_renderType);
-		}
-
-		bool drawLight = Lego3DRenderer::isDrawingLights();
-		if (ImGui::Checkbox("Draw lights", &drawLight))
-			Lego3DRenderer::drawLights(drawLight);
-
-		// Render
-		const Ref<RenderSettings>& renderSettings = Lego3DRenderer::getRenderSettings();
-		if (renderSettings)
-		{
-			ImGui::SeparatorText("Render settings:");
-			for (const auto& [name, param] : *renderSettings)
-			{
-				ImGui::Text("%s", name.c_str());
-				ImGui::SameLine();
-				switch (param.Type)
-				{
-					case BasicTypes::None:
-						BV_ASSERT(false, "Type none is not dispayable!");
-						break;
-					default:
-						BV_ASSERT(false, "Render setting type not implemented yet!");
-						break;
-					case BasicTypes::Bool:
-					{
-						std::string paramName = std::format("##{}", name);
-						bool state = renderSettings->get<bool>(name);
-						if (ImGui::Checkbox(paramName.c_str(), &state))
-						{
-							renderSettings->set<bool>(name, state);
-						}
-						break;
-					}
-				}
-			}
-		}
-
 		ImGui::SeparatorText("Render statistics:");
 		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);
 		ImGui::Text("Fps: %.3f", m_dt == 0.0f ? 0.0f : 1.0f / m_dt);
-
-		//ImGui::Text("Draw calls: %i", RenderedRenderer::getStats().DrawCalls);
-		//ImGui::Text("Mesh vertex count: %i", RenderedRenderer::getStats().MeshVertexCount);
-		//ImGui::Text("Mesh index count: %i", RenderedRenderer::getStats().MeshIndicesCount);
 
 		ImGui::End();
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RendererBase.h"
+#include "RenderSystem.h"
 #include "Renderer/Camera.h"
 #include "Renderer/Light.h"
 #include "Mesh/Mesh.h"
@@ -26,18 +26,11 @@ namespace Brickview
 
 		// Read only
 		static const Ref<ShaderLibrary>& getShaderLibrary();
-		static const Ref<RenderSettings>& getRenderSettings();
-
-		static void setRenderType(RenderType type);
-		static bool isDrawingLights();
-		static void drawLights(bool drawLights);
 
 		static void begin(const Camera& camera, const Light& light);
 		static void end();
 		static void drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform);
-
-	private:
-		static Scope<RendererBase> rendererFromType(RenderType type);
+		static void drawMeshes(const Ref<Mesh>& mesh, const Material& material, const std::vector<glm::mat4>& transforms);
 	};
 
 }

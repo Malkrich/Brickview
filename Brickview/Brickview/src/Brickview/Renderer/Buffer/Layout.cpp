@@ -40,7 +40,7 @@ namespace Brickview
 	void Layout::computeOffsetAndStride()
 	{
 		uint32_t offset = 0;
-		uint32_t index = 0;
+		uint32_t index = m_elements[0].Index;
 		for(auto& element : m_elements)
 		{
 			element.Index = index;
