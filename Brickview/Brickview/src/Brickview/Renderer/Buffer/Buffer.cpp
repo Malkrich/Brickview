@@ -4,6 +4,7 @@
 #include "Renderer/OpenGLError.h"
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 namespace Utils
 {
@@ -183,13 +184,33 @@ namespace Brickview
 		{
 			unsigned int elementCount = Utils::getElementCount(element.Type);
 			GLenum elementType = Utils::getOpenGLElementType(element.Type);
-			glVertexAttribPointer(element.Index,
-								  elementCount,
-								  elementType,
-								  element.Normalized ? GL_TRUE : GL_FALSE,
-								  stride,
-								  (const void*)element.Offset);
-			glEnableVertexAttribArray(element.Index);
+			switch (element.Type)
+			{
+			case BufferElementType::Mat4:
+				glVertexAttribPointer(element.Index + 0, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(0 * sizeof(glm::vec4)));
+				glEnableVertexAttribArray(element.Index + 0);
+				glVertexAttribPointer(element.Index + 1, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(1 * sizeof(glm::vec4)));
+				glEnableVertexAttribArray(element.Index + 1);
+				glVertexAttribPointer(element.Index + 2, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(2 * sizeof(glm::vec4)));
+				glEnableVertexAttribArray(element.Index + 2);
+				glVertexAttribPointer(element.Index + 3, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(3 * sizeof(glm::vec4)));
+				glEnableVertexAttribArray(element.Index + 3);
+
+				glVertexAttribDivisor(element.Index + 0, 1);
+				glVertexAttribDivisor(element.Index + 1, 1);
+				glVertexAttribDivisor(element.Index + 2, 1);
+				glVertexAttribDivisor(element.Index + 3, 1);
+				break;
+			default:
+				glVertexAttribPointer(element.Index,
+									  elementCount,
+									  elementType,
+									  element.Normalized ? GL_TRUE : GL_FALSE,
+									  stride,
+									  (const void*)element.Offset);
+				glEnableVertexAttribArray(element.Index);
+				break;
+			}
 		}
 
 		m_vertexBuffers.push_back(vertexBuffer);

@@ -20,7 +20,7 @@ namespace Brickview
 
 		static void setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
-		static void draw(const Ref<VertexArray>& vertexArray);
+		static void drawIndices(const Ref<VertexArray>& vertexArray);
 		static void drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount);
 	};
 

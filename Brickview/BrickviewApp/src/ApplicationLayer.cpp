@@ -39,8 +39,12 @@ namespace Brickview
 
 		m_legoBrickTransforms.reserve(3);
 		m_legoBrickTransforms.push_back(glm::mat4(1.0f));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.0f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(-0.1f, 0.0f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.1f, 0.0f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.1f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.1f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.1f)));
 
 		m_fileIndexOffset = (m_selectedMesh / m_maxDisplayableFiles) * m_maxDisplayableFiles;
 		uint32_t index = 0;

@@ -4,6 +4,7 @@
 #include "Renderer/Buffer/Layout.h"
 
 #include "Renderer/Renderer/RenderCommand.h"
+#include "Renderer/OpenGLError.h"
 
 // TEMP
 #include <glad/glad.h>
@@ -29,6 +30,7 @@ namespace Brickview
 	{
 		const std::vector<Vertex>& meshData = mesh->getVertices();
 		const std::vector<TriangleFace>& meshConnectivities = mesh->getConnectivities();
+		m_instanceCount = transforms.size();
 
 		m_meshVertexBuffer = createRef<VertexBuffer>(
 			meshData.size() * sizeof(Vertex),
@@ -55,6 +57,8 @@ namespace Brickview
 		m_meshVertexArray->addVertexBuffer(m_meshVertexBuffer);
 		m_meshVertexArray->setIndexBuffer(m_meshIndexBuffer);
 		m_meshVertexArray->addVertexBuffer(m_meshTransformBuffer);
+
+		CHECK_GL_ERROR();
 	}
 
 	void SolidRenderSystem::end()
@@ -68,7 +72,7 @@ namespace Brickview
 
 		m_meshVertexArray->bind();
 
-		//RenderCommand::drawInstances(m_meshVao);
+		RenderCommand::drawInstances(m_meshVertexArray, m_instanceCount);
 	}
 
 }

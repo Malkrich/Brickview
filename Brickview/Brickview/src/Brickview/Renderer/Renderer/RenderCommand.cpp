@@ -40,7 +40,7 @@ namespace Brickview
 		glViewport(x, y, width, height);
 	}
 
-	void RenderCommand::draw(const Ref<VertexArray>& vertexArray)
+	void RenderCommand::drawIndices(const Ref<VertexArray>& vertexArray)
 	{
 		vertexArray->bind();
 		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);

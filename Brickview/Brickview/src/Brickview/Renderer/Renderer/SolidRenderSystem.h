@@ -31,6 +31,7 @@ namespace Brickview
 		Ref<VertexBuffer> m_meshVertexBuffer;
 		Ref<IndexBuffer> m_meshIndexBuffer;
 		Ref<VertexBuffer> m_meshTransformBuffer;
+		uint32_t m_instanceCount;
 
 		// Camera data
 		glm::mat4 m_viewProjectionMatrix;
