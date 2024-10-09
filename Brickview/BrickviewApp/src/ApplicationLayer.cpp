@@ -32,20 +32,7 @@ namespace Brickview
 		m_cameraControl = CameraController(cameraControlSpec);
 		m_cameraControl.setLaptopMode(m_laptopMode);
 
-		// Basic meshes
-		m_planeMesh = Mesh::load("data/Meshes/Plane.obj");
-		m_cubeMesh  = Mesh::load("data/Meshes/Cube.obj");
-		m_cubeMeshTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.2f));
-
-		m_legoBrickTransforms.reserve(3);
-		m_legoBrickTransforms.push_back(glm::mat4(1.0f));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(-0.1f, 0.0f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.1f, 0.0f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.1f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.1f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.1f)));
-
+#ifdef DEV_BRANCH
 		m_fileIndexOffset = (m_selectedMesh / m_maxDisplayableFiles) * m_maxDisplayableFiles;
 		uint32_t index = 0;
 		for (const auto& file : std::filesystem::directory_iterator(m_ldrawBaseDir))
@@ -58,6 +45,20 @@ namespace Brickview
 			index++;
 		}
 		m_legoBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
+#else
+		// lego mesh data
+		m_legoBrick = Mesh::load(m_ldrawBaseDir / "1.dat");
+#endif
+
+		// Lego mesh transforms
+		m_legoBrickTransforms.reserve(3);
+		m_legoBrickTransforms.push_back(glm::mat4(1.0f));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(-0.1f, 0.0f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.1f, 0.0f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.1f, 0.0f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.1f)));
+		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.1f)));
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
 		m_light.Color = { 1.0f, 1.0f, 1.0f };
@@ -104,33 +105,12 @@ namespace Brickview
 		m_dt = dt;
 
 		m_viewport->beginFrame();
+
 		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
-
-#if 1
+		// Instanced base rendering
 		Lego3DRenderer::drawMeshes(m_legoBrick, m_legoBrickMaterial, m_legoBrickTransforms);
-#else
-		Lego3DRenderer::drawMesh(m_planeMesh, m_ldrawBrickMaterial, glm::mat4(1.0f));
-		Lego3DRenderer::drawMesh(m_cubeMesh, m_ldrawBrickMaterial, m_cubeMeshTransform);
-
-		// World guide
-		// x
-		glm::vec3 guidePosition = World::getXUnitVector();
-		Material guideMaterial;
-		guideMaterial.Color = guidePosition;
-		glm::mat4 guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);
-		// y
-		guidePosition = World::getYUnitVector();
-		guideMaterial.Color = guidePosition;
-		guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);
-		// z
-		guidePosition = World::getZUnitVector();
-		guideMaterial.Color = guidePosition;
-		guideTransform = glm::translate(glm::mat4(1.0f), guidePosition) * glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
-		Lego3DRenderer::drawMesh(m_cubeMesh, guideMaterial, guideTransform);
-#endif
 		Lego3DRenderer::end();
+
 		m_viewport->endFrame();
 	}
 
@@ -186,6 +166,7 @@ namespace Brickview
 		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
 		ImGui::Separator();
 
+#ifdef DEV_BRANCH
 		// Lego files explorer
 		ImGui::Text("Lego parts explorer");
 		if (ImGui::Button("<"))
@@ -222,6 +203,7 @@ namespace Brickview
 
 			fileIndex++;
 		}
+#endif
 		ImGui::End();
 
 		ImGui::Begin("Renderer");

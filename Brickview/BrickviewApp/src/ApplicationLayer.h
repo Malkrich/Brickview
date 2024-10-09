@@ -31,22 +31,22 @@ namespace Brickview
 	private:
 		Scope<Viewport> m_viewport = nullptr;
 
-		Ref<Mesh> m_planeMesh = nullptr;
-		Ref<Mesh> m_cubeMesh = nullptr;
-		glm::mat4 m_cubeMeshTransform;
-		glm::mat4 m_ldrawBrickTransform;
 		Ref<Mesh> m_legoBrick = nullptr;
 		Material m_legoBrickMaterial;
 		std::vector<glm::mat4> m_legoBrickTransforms;
 
 		// Lego file explorer
+#ifdef DEV_BRANCH
 		std::filesystem::path m_ldrawBaseDir = "./data/LDraw/parts/";
 		uint32_t m_selectedMesh = 979;
 		uint32_t m_maxDisplayableFiles = 10;
 		uint32_t m_fileIndexOffset;
+#else
+		std::filesystem::path m_ldrawBaseDir = "./data/Meshes/LDrawExample/parts/";
+#endif
 
+		// Lights
 		Light m_light;
-		RenderType m_renderType = RenderType::Solid;
 
 		CameraController m_cameraControl;
 		bool m_laptopMode = false;
