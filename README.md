@@ -28,7 +28,6 @@ The editor camera can be controlled with the mouse and the keyboard:
 | Middle Mouse Button       | Camera rotation around the center (0, 0, 0)               |
 | Mouse Scroll              | Zoom in/Zoom out                                          |
 | Maj + Middle Mouse Button | Camera translation                                        |
-| Numpad 0                  | Camera translation to the center (0, 0, 0)                |
 
 ## Resources
 
