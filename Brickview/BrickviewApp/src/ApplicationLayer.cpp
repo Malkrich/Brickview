@@ -12,14 +12,6 @@
 namespace Brickview
 {
 
-	ApplicationLayer::ApplicationLayer()
-		: m_legoBrickMaterial()
-		, m_light()
-	{}
-
-	ApplicationLayer::~ApplicationLayer()
-	{}
-
 	void ApplicationLayer::onAttach()
 	{
 		uint32_t width = Input::getWindowSize().x;
@@ -32,33 +24,19 @@ namespace Brickview
 		m_cameraControl = CameraController(cameraControlSpec);
 		m_cameraControl.setLaptopMode(m_laptopMode);
 
-#ifdef DEV_BRANCH
-		m_fileIndexOffset = (m_selectedMesh / m_maxDisplayableFiles) * m_maxDisplayableFiles;
-		uint32_t index = 0;
-		for (const auto& file : std::filesystem::directory_iterator(m_ldrawBaseDir))
-		{
-			if (index == m_selectedMesh)
-			{
-				m_legoBrick = Mesh::load(file);
-				break;
-			}
-			index++;
-		}
-		m_legoBrickMaterial.Color = { 0.8f, 0.2f, 0.2f };
-#else
-		// lego mesh data
-		m_legoBrick = Mesh::load(m_ldrawBaseDir / "1.dat");
-#endif
-
 		// Lego mesh transforms
-		m_legoBrickTransforms.reserve(3);
-		m_legoBrickTransforms.push_back(glm::mat4(1.0f));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(-0.1f, 0.0f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.1f, 0.0f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.1f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.1f, 0.0f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.1f)));
-		m_legoBrickTransforms.push_back(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.1f)));
+		// Marge
+		m_margeMesh = Mesh::load(m_ldrawBaseDir / "979.dat");
+		m_margeMeshTransforms.reserve(2);
+		m_margeMeshTransforms.emplace_back(glm::vec3(-0.1f, 0.0f, 0.0f));
+		m_margeMeshTransforms.emplace_back(glm::vec3(-0.1f, -0.1f, 0.0f));
+		m_margeMeshMaterial.Color = { 0.8f, 0.2f, 0.2f };
+		// Shelf
+		m_shelfMesh = Mesh::load(m_ldrawBaseDir / "1.dat");
+		m_shelfMeshTransforms.reserve(2);
+		m_shelfMeshTransforms.emplace_back(glm::vec3(0.1f, 0.1f, 0.0f));
+		m_shelfMeshTransforms.emplace_back(glm::vec3(0.1f, -0.1f, 0.0f));
+		m_shelfMeshMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
 		m_light.Color = { 1.0f, 1.0f, 1.0f };
@@ -104,14 +82,34 @@ namespace Brickview
 	{
 		m_dt = dt;
 
+		std::vector<glm::mat4> margeMatTransforms;
+		margeMatTransforms.reserve(m_margeMeshTransforms.size());
+		for (const auto& t : m_margeMeshTransforms)
+			margeMatTransforms.push_back(t.getTransform());
+
+		std::vector<glm::mat4> shelfMatTransforms;
+		shelfMatTransforms.reserve(m_shelfMeshTransforms.size());
+		for (const auto& t : m_shelfMeshTransforms)
+			shelfMatTransforms.push_back(t.getTransform());
+
+
 		m_viewport->beginFrame();
 
 		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
 		// Instanced base rendering
-		Lego3DRenderer::drawMeshes(m_legoBrick, m_legoBrickMaterial, m_legoBrickTransforms);
+		Lego3DRenderer::drawMeshes(m_margeMesh, m_margeMeshMaterial, margeMatTransforms);
+		Lego3DRenderer::drawMeshes(m_shelfMesh, m_shelfMeshMaterial, shelfMatTransforms);
 		Lego3DRenderer::end();
 
 		m_viewport->endFrame();
+	}
+
+	static void renderTransformGui(const std::string& displayName, const Transform& transform)
+	{
+		auto sliderName = std::format("##slider{}", displayName);
+		ImGui::Text("%s", displayName.c_str());
+		ImGui::SameLine();
+		ImGui::SliderFloat3(sliderName.c_str(), (float*)glm::value_ptr(transform.Translation), -0.5, 0.5);
 	}
 
 	void ApplicationLayer::onGuiRender()
@@ -164,46 +162,21 @@ namespace Brickview
 		// Light
 		ImGui::SliderFloat3("Light Position", (float*)glm::value_ptr(m_light.Position), -5.0f, 5.0f);
 		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
-		ImGui::Separator();
 
-#ifdef DEV_BRANCH
-		// Lego files explorer
-		ImGui::Text("Lego parts explorer");
-		if (ImGui::Button("<"))
+		// Transforms
+		// Marge
+		for (size_t i = 0; i < m_margeMeshTransforms.size(); i++)
 		{
-			if (m_fileIndexOffset > 0)
-				m_fileIndexOffset -= m_maxDisplayableFiles;
+			std::string name = std::format("Marge{}", i);
+			renderTransformGui(name, m_margeMeshTransforms[i]);
 		}
-		ImGui::SameLine();
-		if (ImGui::Button(">"))
-			m_fileIndexOffset += m_maxDisplayableFiles;
-
-		uint32_t fileIndex = 0;
-		bool selected = false;
-		for (const auto& file : std::filesystem::directory_iterator(m_ldrawBaseDir))
+		// Shelf
+		for (size_t i = 0; i < m_shelfMeshTransforms.size(); i++)
 		{
-			if (fileIndex < m_fileIndexOffset)
-			{
-				fileIndex++;
-				continue;
-			}
-			if (fileIndex > m_fileIndexOffset + m_maxDisplayableFiles - 1)
-				break;
-
-			const std::filesystem::path& filePath = file.path();
-			std::string fileName = filePath.filename().string();
-
-			selected = fileIndex == m_selectedMesh;
-			std::string itemName = std::format("{} : {}", fileIndex, fileName);
-			if (ImGui::Selectable(itemName.c_str(), selected))
-			{
-				m_selectedMesh = fileIndex;
-				m_legoBrick = Mesh::load(filePath);
-			}
-
-			fileIndex++;
+			std::string name = std::format("Shelf{}", i);
+			renderTransformGui(name, m_shelfMeshTransforms[i]);
 		}
-#endif
+
 		ImGui::End();
 
 		ImGui::Begin("Renderer");

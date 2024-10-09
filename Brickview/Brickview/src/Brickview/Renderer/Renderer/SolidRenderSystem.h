@@ -13,6 +13,17 @@
 namespace Brickview
 {
 
+	struct InstanceSubmission
+	{
+		InstanceSubmission(Ref<VertexArray> vao, uint32_t instanceCount)
+			: Vao(vao)
+			, InstanceCount(instanceCount)
+		{}
+
+		Ref<VertexArray> Vao;
+		uint32_t InstanceCount;
+	};
+
 	class SolidRenderSystem : public RenderSystem
 	{
 	public:
@@ -22,16 +33,12 @@ namespace Brickview
 		virtual void begin(const Camera& camera, const Light& light) override;
 		virtual void end() override;
 
-		virtual void drawMeshes(const Ref<Mesh>& mesh, const Material& material, const std::vector<glm::mat4>& transforms);
+		virtual void drawMeshes(const Ref<Mesh>& mesh, const Material& material, const std::vector<glm::mat4>& transforms) override;
 
 	private:
-		Ref<Shader> m_systemShader;
+		Ref<Shader> m_solidShader;
 
-		Ref<VertexArray> m_meshVertexArray;
-		Ref<VertexBuffer> m_meshVertexBuffer;
-		Ref<IndexBuffer> m_meshIndexBuffer;
-		Ref<VertexBuffer> m_meshTransformBuffer;
-		uint32_t m_instanceCount;
+		std::vector<InstanceSubmission> m_submissions;
 
 		// Camera data
 		glm::mat4 m_viewProjectionMatrix;

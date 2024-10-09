@@ -4,21 +4,15 @@
 #include "Renderer/Buffer/Layout.h"
 
 #include "Renderer/Renderer/RenderCommand.h"
-#include "Renderer/OpenGLError.h"
-
-// TEMP
-#include <glad/glad.h>
 
 namespace Brickview
 {
 
 	SolidRenderSystem::SolidRenderSystem(const Ref<ShaderLibrary>& shaderLib)
-		: m_systemShader(shaderLib->get("Solid"))
+		: m_solidShader(shaderLib->get("Solid"))
 	{}
 
-	SolidRenderSystem::~SolidRenderSystem()
-	{
-	}
+	SolidRenderSystem::~SolidRenderSystem() {}
 
 	void SolidRenderSystem::begin(const Camera& camera, const Light& light)
 	{
@@ -30,35 +24,34 @@ namespace Brickview
 	{
 		const std::vector<Vertex>& meshData = mesh->getVertices();
 		const std::vector<TriangleFace>& meshConnectivities = mesh->getConnectivities();
-		m_instanceCount = transforms.size();
 
-		m_meshVertexBuffer = createRef<VertexBuffer>(
+		Ref<VertexBuffer> meshVertexBuffer = createRef<VertexBuffer>(
 			meshData.size() * sizeof(Vertex),
 			(void*)meshData.data());
 		Layout meshGeoLayout = {
 			{ "a_position", BufferElementType::Float3 },
-			{ "a_normal", BufferElementType::Float3 }};
-		m_meshVertexBuffer->setBufferLayout(meshGeoLayout);
+			{ "a_normal", BufferElementType::Float3 } };
+		meshVertexBuffer->setBufferLayout(meshGeoLayout);
 
-		m_meshIndexBuffer = createRef<IndexBuffer>(
+		Ref<IndexBuffer> meshIndexBuffer = createRef<IndexBuffer>(
 			meshConnectivities.size() * sizeof(TriangleFace),
 			(void*)meshConnectivities.data());
 
-		m_meshTransformBuffer = createRef<VertexBuffer>(
+		Ref<VertexBuffer> meshTransformBuffer = createRef<VertexBuffer>(
 			transforms.size() * sizeof(glm::mat4),
-			(void*)transforms.data()
-		);
+			(void*)transforms.data());
 		Layout meshTransformLayout = {
 			{ 2, "a_transform", BufferElementType::Mat4 }
 		};
-		m_meshTransformBuffer->setBufferLayout(meshTransformLayout);
-		
-		m_meshVertexArray = createRef<VertexArray>();
-		m_meshVertexArray->addVertexBuffer(m_meshVertexBuffer);
-		m_meshVertexArray->setIndexBuffer(m_meshIndexBuffer);
-		m_meshVertexArray->addVertexBuffer(m_meshTransformBuffer);
+		meshTransformBuffer->setBufferLayout(meshTransformLayout);
 
-		CHECK_GL_ERROR();
+		Ref<VertexArray> vao = createRef<VertexArray>();
+		vao->addVertexBuffer(meshVertexBuffer);
+		vao->setIndexBuffer(meshIndexBuffer);
+		vao->addVertexBuffer(meshTransformBuffer);
+
+		m_submissions.push_back({ vao, transforms.size() });
+		vao->unbind();
 	}
 
 	void SolidRenderSystem::end()
@@ -67,12 +60,13 @@ namespace Brickview
 		uniforms["u_viewProjection"] = m_viewProjectionMatrix;
 		uniforms["u_cameraPosition"] = m_cameraPosition;
 
-		m_systemShader->bind();
-		m_systemShader->setUniforms(uniforms);
+		m_solidShader->bind();
+		m_solidShader->setUniforms(uniforms);
 
-		m_meshVertexArray->bind();
-
-		RenderCommand::drawInstances(m_meshVertexArray, m_instanceCount);
+		for (const auto& submission : m_submissions)
+			RenderCommand::drawInstances(submission.Vao, submission.InstanceCount);
+			
+		m_submissions.clear();
 	}
 
 }

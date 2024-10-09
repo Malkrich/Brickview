@@ -1,8 +1,10 @@
 #type vertex
 #version 330 core
 
+// Per vertices
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
+// Per instances
 layout (location = 2) in mat4 a_transform;
 
 uniform mat4 u_viewProjection;

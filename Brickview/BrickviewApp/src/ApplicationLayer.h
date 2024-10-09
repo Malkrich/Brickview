@@ -5,11 +5,26 @@
 namespace Brickview
 {
 
+	// Temp (has to be moved in ECS section)
+	struct Transform
+	{
+		Transform(const glm::vec3& translation)
+			: Translation(translation)
+		{}
+
+		glm::vec3 Translation;
+
+		glm::mat4 getTransform() const
+		{
+			return glm::translate(glm::mat4(1.0f), Translation);
+		}
+	};
+
 	class ApplicationLayer : public Layer
 	{
 	public:
-		ApplicationLayer();
-		virtual ~ApplicationLayer();
+		ApplicationLayer() {}
+		virtual ~ApplicationLayer() {}
 
 		virtual void onAttach() override;
 		virtual void onDetach() override;
@@ -31,19 +46,16 @@ namespace Brickview
 	private:
 		Scope<Viewport> m_viewport = nullptr;
 
-		Ref<Mesh> m_legoBrick = nullptr;
-		Material m_legoBrickMaterial;
-		std::vector<glm::mat4> m_legoBrickTransforms;
-
-		// Lego file explorer
-#ifdef DEV_BRANCH
+		// LDraw
 		std::filesystem::path m_ldrawBaseDir = "./data/LDraw/parts/";
-		uint32_t m_selectedMesh = 979;
-		uint32_t m_maxDisplayableFiles = 10;
-		uint32_t m_fileIndexOffset;
-#else
-		std::filesystem::path m_ldrawBaseDir = "./data/Meshes/LDrawExample/parts/";
-#endif
+		// Marge
+		Ref<Mesh> m_margeMesh = nullptr;
+		Material m_margeMeshMaterial;
+		std::vector<Transform> m_margeMeshTransforms;
+		// Shelf
+		Ref<Mesh> m_shelfMesh = nullptr;
+		Material m_shelfMeshMaterial;
+		std::vector<Transform> m_shelfMeshTransforms;
 
 		// Lights
 		Light m_light;
