@@ -32,7 +32,7 @@ namespace Brickview
 		// 1 LDU = 0.4 mm
 		// Convert mm to dm
 		// 1 mm = 0.001 m;
-		s_legoMeshLoaderData->LDUToMeterTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4 * 0.001));
+		s_legoMeshLoaderData->LDUToMeterTransform = glm::scale(glm::mat4(1.0f), glm::vec3(0.4f * 0.001f));
 		// Up direction from LDraw is negative: https://www.ldraw.org/article/218.html (section The LDraw Co-ordinate System)
 		glm::mat4 lDrawToBrickviewSpaceTransform(1.0f);
 		lDrawToBrickviewSpaceTransform[1] = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);

@@ -13,7 +13,8 @@ project "BrickviewApp"
         "../Brickview/src/Brickview/",
         "../vendors/glm/",
         "../vendors/imgui/",
-        "../vendors/spdlog/include"
+        "../vendors/spdlog/include",
+        "../vendors/entt/include/"
     }
 
     files

@@ -20,7 +20,7 @@ namespace Brickview
 
 		// Camera
 		CameraControllerSpecifications cameraControlSpec;
-		cameraControlSpec.DistanceFromObject = 0.2;
+		cameraControlSpec.DistanceFromObject = 0.2f;
 		m_cameraControl = CameraController(cameraControlSpec);
 		m_cameraControl.setLaptopMode(m_laptopMode);
 

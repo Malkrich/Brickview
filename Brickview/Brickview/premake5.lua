@@ -16,16 +16,14 @@ project "Brickview"
         "../vendors/GLFW/glfw-3.3.8/include",
         "../vendors/glad/include",
         "../vendors/spdlog/include",
-        "../vendors/imgui/"
+        "../vendors/imgui/",
+        "../vendors/entt/include/"
     }
 
     files
     {
         "src/**.h",
         "src/**.cpp",
-
-        "../vendors/glm/**.hpp",
-        "../vendors/glm/**.inl"
     }
 
     pchheader "Pch.h"
