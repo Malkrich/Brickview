@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/Time.h"
 #include "Core/Event/Event.h"
 
 namespace Brickview
@@ -14,7 +15,7 @@ namespace Brickview
 		virtual void onDetach() = 0;
 
 		virtual void onEvent(Event& e) = 0;
-		virtual void onUpdate(float dt) = 0;
+		virtual void onUpdate(DeltaTime dt) = 0;
 		virtual void onGuiRender() = 0;
 	};
 

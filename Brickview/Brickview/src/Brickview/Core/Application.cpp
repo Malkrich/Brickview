@@ -54,7 +54,7 @@ namespace Brickview
 		while(m_running)
 		{
 			float time = Time::getTime();
-			float dt = time - m_currentTime;
+			DeltaTime dt = time - m_currentTime;
 			m_currentTime = time;
 
 			for(auto layer : *m_layerStack)
