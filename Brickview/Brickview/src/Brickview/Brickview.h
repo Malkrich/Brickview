@@ -22,6 +22,11 @@
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
 
+// Scene
+#include "Scene/Scene.h"
+#include "Scene/Entity.h"
+#include "Scene/Components.h"
+
 // Meshes
 #include "Mesh/Mesh.h"
 

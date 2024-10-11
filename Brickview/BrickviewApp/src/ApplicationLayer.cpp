@@ -14,6 +14,8 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
+		m_scene = createRef<Scene>();
+
 		uint32_t width = Input::getWindowSize().x;
 		uint32_t height = Input::getWindowSize().y;
 		m_viewport = createScope<Viewport>(width, height);

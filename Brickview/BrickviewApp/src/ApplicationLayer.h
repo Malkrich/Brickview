@@ -60,6 +60,9 @@ namespace Brickview
 		// Lights
 		Light m_light;
 
+		// Scene
+		Ref<Scene> m_scene;
+
 		CameraController m_cameraControl;
 		bool m_laptopMode = false;
 
