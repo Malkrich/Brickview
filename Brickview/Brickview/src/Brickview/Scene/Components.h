@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Renderer/Camera.h"
+#include "Renderer/Light.h"
+#include "Mesh/Mesh.h"
+
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -30,8 +34,14 @@ namespace Brickview
 
 	struct LegoPartComponent
 	{
-		Ref<Mesh> Geometry;
-		// TODO: add part ID
+		// TODO: move mesh object to Mesh collection
+		Ref<Mesh> Mesh;
+
+		// TEMP: shouldn't load here
+		LegoPartComponent()
+			: Mesh(Mesh::load("./data/LDraw/parts/1.dat"))
+		{}
+		LegoPartComponent(const LegoPartComponent&) = default;
 	};
 
 }

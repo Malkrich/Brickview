@@ -15,6 +15,12 @@ namespace Brickview
 	void ApplicationLayer::onAttach()
 	{
 		m_scene = createRef<Scene>();
+		auto entity1 = m_scene->createEntity();
+		entity1.addComponent<LegoPartComponent>();
+		auto entity2 = m_scene->createEntity();
+		entity2.addComponent<LegoPartComponent>();
+		auto& t = entity2.getComponent<TransformComponent>();
+		t.Translation = { 0.1f, 0.0f, 0.0f };
 
 		uint32_t width = Input::getWindowSize().x;
 		uint32_t height = Input::getWindowSize().y;
@@ -25,20 +31,6 @@ namespace Brickview
 		cameraControlSpec.DistanceFromObject = 0.2f;
 		m_cameraControl = CameraController(cameraControlSpec);
 		m_cameraControl.setLaptopMode(m_laptopMode);
-
-		// Lego mesh transforms
-		// Marge
-		m_margeMesh = Mesh::load(m_ldrawBaseDir / "979.dat");
-		m_margeMeshTransforms.reserve(2);
-		m_margeMeshTransforms.emplace_back(glm::vec3(-0.1f, 0.0f, 0.0f));
-		m_margeMeshTransforms.emplace_back(glm::vec3(-0.1f, -0.1f, 0.0f));
-		m_margeMeshMaterial.Color = { 0.8f, 0.2f, 0.2f };
-		// Shelf
-		m_shelfMesh = Mesh::load(m_ldrawBaseDir / "1.dat");
-		m_shelfMeshTransforms.reserve(2);
-		m_shelfMeshTransforms.emplace_back(glm::vec3(0.1f, 0.1f, 0.0f));
-		m_shelfMeshTransforms.emplace_back(glm::vec3(0.1f, -0.1f, 0.0f));
-		m_shelfMeshMaterial.Color = { 0.8f, 0.2f, 0.2f };
 
 		m_light.Position = { 0.0f, 1.5f, 0.0f };
 		m_light.Color = { 1.0f, 1.0f, 1.0f };
@@ -80,38 +72,14 @@ namespace Brickview
 		return true;
 	}
 
-	void ApplicationLayer::onUpdate(float dt)
+	void ApplicationLayer::onUpdate(DeltaTime dt)
 	{
 		m_dt = dt;
 
-		std::vector<glm::mat4> margeMatTransforms;
-		margeMatTransforms.reserve(m_margeMeshTransforms.size());
-		for (const auto& t : m_margeMeshTransforms)
-			margeMatTransforms.push_back(t.getTransform());
-
-		std::vector<glm::mat4> shelfMatTransforms;
-		shelfMatTransforms.reserve(m_shelfMeshTransforms.size());
-		for (const auto& t : m_shelfMeshTransforms)
-			shelfMatTransforms.push_back(t.getTransform());
-
-
 		m_viewport->beginFrame();
-
-		Lego3DRenderer::begin(m_cameraControl.getCamera(), m_light);
-		// Instanced base rendering
-		Lego3DRenderer::drawMeshes(m_margeMesh, m_margeMeshMaterial, margeMatTransforms);
-		Lego3DRenderer::drawMeshes(m_shelfMesh, m_shelfMeshMaterial, shelfMatTransforms);
-		Lego3DRenderer::end();
-
+		const Camera& camera = m_cameraControl.getCamera();
+		m_scene->onUpdate(dt, camera, m_light);
 		m_viewport->endFrame();
-	}
-
-	static void renderTransformGui(const std::string& displayName, const Transform& transform)
-	{
-		auto sliderName = std::format("##slider{}", displayName);
-		ImGui::Text("%s", displayName.c_str());
-		ImGui::SameLine();
-		ImGui::SliderFloat3(sliderName.c_str(), (float*)glm::value_ptr(transform.Translation), -0.5, 0.5);
 	}
 
 	void ApplicationLayer::onGuiRender()
@@ -165,27 +133,13 @@ namespace Brickview
 		ImGui::SliderFloat3("Light Position", (float*)glm::value_ptr(m_light.Position), -5.0f, 5.0f);
 		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
 
-		// Transforms
-		// Marge
-		for (size_t i = 0; i < m_margeMeshTransforms.size(); i++)
-		{
-			std::string name = std::format("Marge{}", i);
-			renderTransformGui(name, m_margeMeshTransforms[i]);
-		}
-		// Shelf
-		for (size_t i = 0; i < m_shelfMeshTransforms.size(); i++)
-		{
-			std::string name = std::format("Shelf{}", i);
-			renderTransformGui(name, m_shelfMeshTransforms[i]);
-		}
-
 		ImGui::End();
 
 		ImGui::Begin("Renderer");
 
 		ImGui::SeparatorText("Render statistics:");
-		ImGui::Text("ts: %.3f ms", m_dt * 1000.0f);
-		ImGui::Text("Fps: %.3f", m_dt == 0.0f ? 0.0f : 1.0f / m_dt);
+		ImGui::Text("ts: %.3f ms", m_dt.getMilliseconds());
+		ImGui::Text("Fps: %.3f", m_dt.getSeconds() == 0.0f ? 0.0f : 1.0f / m_dt.getSeconds());
 
 		ImGui::End();
 

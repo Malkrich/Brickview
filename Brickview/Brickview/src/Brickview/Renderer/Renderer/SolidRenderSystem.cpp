@@ -20,6 +20,11 @@ namespace Brickview
 		m_cameraPosition       = camera.getPosition();
 	}
 
+	void SolidRenderSystem::drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
+	{
+		SolidRenderSystem::drawMeshes(mesh, material, { transform });
+	}
+
 	void SolidRenderSystem::drawMeshes(const Ref<Mesh>& mesh, const Material& material, const std::vector<glm::mat4>& transforms)
 	{
 		const std::vector<Vertex>& meshData = mesh->getVertices();
