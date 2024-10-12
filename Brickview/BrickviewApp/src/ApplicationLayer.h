@@ -2,6 +2,8 @@
 
 #include <Brickview.h>
 
+#include "Panels/LegoPartsExplorerPanel.h"
+
 namespace Brickview
 {
 
@@ -31,9 +33,6 @@ namespace Brickview
 	private:
 		Scope<Viewport> m_viewport = nullptr;
 
-		// LDraw
-		std::filesystem::path m_ldrawBaseDir = "./data/LDraw/parts/";
-
 		// Scene
 		Ref<Scene> m_scene;
 
@@ -41,6 +40,9 @@ namespace Brickview
 		bool m_laptopMode = false;
 
 		DeltaTime m_dt = 0.0f;
+
+		// Panels
+		Scope<LegoPartsExplorerPanel> m_legoPartsExplorerPanel;
 	};
 
 }

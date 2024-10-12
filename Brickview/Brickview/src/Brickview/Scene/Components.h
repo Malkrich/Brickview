@@ -9,6 +9,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <filesystem>
+
 namespace Brickview
 {
 
@@ -34,12 +36,16 @@ namespace Brickview
 
 	struct LegoPartComponent
 	{
+		// TODO:
+		//LegoPartID ID;
+		//LegoColor Color;
+
 		// TODO: move mesh object to Mesh collection
 		Ref<Mesh> Mesh;
 
 		// TEMP: shouldn't load here
-		LegoPartComponent()
-			: Mesh(Mesh::load("./data/LDraw/parts/1.dat"))
+		LegoPartComponent(const std::filesystem::path& filePath)
+			: Mesh(Mesh::load(filePath))
 		{}
 		LegoPartComponent(const LegoPartComponent&) = default;
 	};

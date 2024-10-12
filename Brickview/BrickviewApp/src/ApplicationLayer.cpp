@@ -14,18 +14,10 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
+		// Scene
 		m_scene = createRef<Scene>();
-		auto entity1 = m_scene->createEntity();
-		entity1.addComponent<LegoPartComponent>();
-		auto entity2 = m_scene->createEntity();
-		entity2.addComponent<LegoPartComponent>();
-		auto& t2 = entity2.getComponent<TransformComponent>();
-		t2.Translation = { 0.1f, 0.0f, 0.0f };
-		auto entity3 = m_scene->createEntity();
-		entity3.addComponent<LegoPartComponent>();
-		auto& t3 = entity3.getComponent<TransformComponent>();
-		t3.Translation = { -0.1f, 0.0f, 0.0f };
 
+		// Viewport
 		uint32_t width = Input::getWindowSize().x;
 		uint32_t height = Input::getWindowSize().y;
 		m_viewport = createScope<Viewport>(width, height);
@@ -35,6 +27,14 @@ namespace Brickview
 		cameraControlSpec.DistanceFromObject = 0.2f;
 		m_cameraControl = CameraController(cameraControlSpec);
 		m_cameraControl.setLaptopMode(m_laptopMode);
+
+		// Panels
+		m_legoPartsExplorerPanel = createScope<LegoPartsExplorerPanel>("./data/LDraw/parts/");
+		m_legoPartsExplorerPanel->setOnLoadCallback([&](const std::filesystem::path& filePath)
+		{
+			Entity e = m_scene->createEntity();
+			e.addComponent<LegoPartComponent>(filePath);
+		});
 	}
 
 	void ApplicationLayer::onDetach()
@@ -133,6 +133,8 @@ namespace Brickview
 		ImGui::Text("Fps: %.3f", m_dt.getSeconds() == 0.0f ? 0.0f : 1.0f / m_dt.getSeconds());
 
 		ImGui::End();
+
+		m_legoPartsExplorerPanel->onImGuiRender();
 
 		endDockspace();
 	}
