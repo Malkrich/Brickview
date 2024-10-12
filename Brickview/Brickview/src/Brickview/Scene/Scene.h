@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Time.h"
+#include "Renderer/Camera.h"
 
 #include <entt.hpp>
 
@@ -16,7 +17,7 @@ namespace Brickview
 
 		Entity createEntity();
 
-		void onUpdate(DeltaTime dt, const Camera& camera, const Light& light);
+		void onUpdate(DeltaTime dt, const Camera& camera);
 
 	private:
 		entt::registry m_registry;

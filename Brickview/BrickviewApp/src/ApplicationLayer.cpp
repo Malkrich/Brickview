@@ -19,21 +19,22 @@ namespace Brickview
 		entity1.addComponent<LegoPartComponent>();
 		auto entity2 = m_scene->createEntity();
 		entity2.addComponent<LegoPartComponent>();
-		auto& t = entity2.getComponent<TransformComponent>();
-		t.Translation = { 0.1f, 0.0f, 0.0f };
+		auto& t2 = entity2.getComponent<TransformComponent>();
+		t2.Translation = { 0.1f, 0.0f, 0.0f };
+		auto entity3 = m_scene->createEntity();
+		entity3.addComponent<LegoPartComponent>();
+		auto& t3 = entity3.getComponent<TransformComponent>();
+		t3.Translation = { -0.1f, 0.0f, 0.0f };
 
 		uint32_t width = Input::getWindowSize().x;
 		uint32_t height = Input::getWindowSize().y;
 		m_viewport = createScope<Viewport>(width, height);
 
-		// Camera
+		// Editor camera
 		CameraControllerSpecifications cameraControlSpec;
 		cameraControlSpec.DistanceFromObject = 0.2f;
 		m_cameraControl = CameraController(cameraControlSpec);
 		m_cameraControl.setLaptopMode(m_laptopMode);
-
-		m_light.Position = { 0.0f, 1.5f, 0.0f };
-		m_light.Color = { 1.0f, 1.0f, 1.0f };
 	}
 
 	void ApplicationLayer::onDetach()
@@ -78,7 +79,7 @@ namespace Brickview
 
 		m_viewport->beginFrame();
 		const Camera& camera = m_cameraControl.getCamera();
-		m_scene->onUpdate(dt, camera, m_light);
+		m_scene->onUpdate(dt, camera);
 		m_viewport->endFrame();
 	}
 
@@ -122,16 +123,6 @@ namespace Brickview
 				shaderData.Shader->reload(shaderFilePath);
 			}
 		}
-
-		ImGui::End();
-
-		// Scene hierarchy
-		ImGui::Begin("Scene:", nullptr, ImGuiWindowFlags_NoNav);
-		ImGui::SeparatorText("Scene hierarchy:");
-
-		// Light
-		ImGui::SliderFloat3("Light Position", (float*)glm::value_ptr(m_light.Position), -5.0f, 5.0f);
-		ImGui::ColorEdit3("Light Color", (float*)glm::value_ptr(m_light.Color));
 
 		ImGui::End();
 

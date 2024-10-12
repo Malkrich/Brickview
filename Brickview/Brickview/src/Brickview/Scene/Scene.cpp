@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Components.h"
 #include "Renderer/Renderer/Lego3DRenderer.h"
+#include "Renderer/Light.h"
 #include "Renderer/Material.h"
 
 #include <glm/glm.hpp>
@@ -21,20 +22,25 @@ namespace Brickview
 		return entity;
 	}
 
-	void Scene::onUpdate(DeltaTime dt, const Camera& camera, const Light& light)
+	void Scene::onUpdate(DeltaTime dt, const Camera& camera)
 	{
 		// Rendering
+		// TEMP: add light to ECS
+		Light light;
 		Lego3DRenderer::begin(camera, light);
 
-		//auto meshEntities = m_registry.view<TransformComponent, LegoPartComponent>();
-		//for (auto e : meshEntities)
-		//{
-		//	Entity entity = Entity(e, this);
-		//	glm::mat4 transform = entity.getComponent<TransformComponent>().getTransform();
-		//	auto& meshComponent = entity.getComponent<LegoPartComponent>();
-		//	Material material;
-		//	Lego3DRenderer::drawMesh(meshComponent.Mesh, material, transform);
-		//}
+		auto meshEntities = m_registry.view<TransformComponent, LegoPartComponent>();
+		for (auto e : meshEntities)
+		{
+			Entity entity = { e, this };
+
+			glm::mat4 transform = entity.getComponent<TransformComponent>().getTransform();
+			const Ref<Mesh>& legoMesh = entity.getComponent<LegoPartComponent>().Mesh;
+			// TEMP: add material to ECS
+			Material material = Material();
+
+			Lego3DRenderer::drawMesh(legoMesh, material, transform);
+		}
 
 		Lego3DRenderer::end();
 	}

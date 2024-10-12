@@ -34,9 +34,6 @@ namespace Brickview
 		// LDraw
 		std::filesystem::path m_ldrawBaseDir = "./data/LDraw/parts/";
 
-		// Lights
-		Light m_light;
-
 		// Scene
 		Ref<Scene> m_scene;
 
