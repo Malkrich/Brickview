@@ -1,6 +1,9 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
+// Prevents warnings from the external header
+#pragma warning(push, 0)
+	#include <spdlog/spdlog.h>
+#pragma warning(pop)
 
 namespace Brickview
 {
