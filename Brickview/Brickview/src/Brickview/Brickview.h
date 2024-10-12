@@ -16,6 +16,7 @@
 
 // Render
 #include "Renderer/Renderer/Lego3DRenderer.h"
+#include "Renderer/Texture2D.h"
 #include "Renderer/Viewport.h"
 #include "Renderer/Camera.h"
 #include "Renderer/CameraController.h"

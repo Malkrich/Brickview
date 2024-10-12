@@ -17,13 +17,21 @@ project "Brickview"
         "../vendors/glad/include",
         "../vendors/spdlog/include",
         "../vendors/imgui/",
-        "../vendors/entt/include/"
+        "../vendors/entt/include/",
+        "../vendors/stb_image/"
     }
 
     files
     {
         "src/**.h",
         "src/**.cpp",
+
+        -- glm
+        "../vendors/glm/glm/**.hpp",
+        "../vendors/glm/glm/**.inl",
+        -- stb image
+        "../vendors/stb_image/**.h",
+        "../vendors/stb_image/**.cpp"
     }
 
     pchheader "Pch.h"
