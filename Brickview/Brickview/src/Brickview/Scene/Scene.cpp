@@ -35,7 +35,7 @@ namespace Brickview
 			Entity entity = { e, this };
 
 			glm::mat4 transform = entity.getComponent<TransformComponent>().getTransform();
-			const Ref<Mesh>& legoMesh = entity.getComponent<LegoPartComponent>().Mesh;
+			const Ref<Mesh>& legoMesh = entity.getComponent<LegoPartComponent>().Geometry;
 			// TEMP: add material to ECS
 			Material material = Material();
 

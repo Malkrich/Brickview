@@ -26,11 +26,21 @@ namespace Brickview
 		uint32_t i = 0;
 		for (const auto& dirEntry : std::filesystem::directory_iterator(m_legoPartsDirectory))
 		{
+			if (i < m_fileOffset)
+			{
+				i++;
+				continue;
+			}
+
 			const auto& filePath = dirEntry.path();
 			std::string itemName = filePath.stem().string();
-			ImGui::Button(itemName.c_str());
+			if (ImGui::Button(itemName.c_str()))
+			{
+				Ref<Mesh> mesh = Mesh::load(filePath);
+				m_onFileLoadCallback(mesh);
+			}
 
-			if (i > 10)
+			if (i > m_fileOffset + m_maxDisplayedFile)
 				break;
 
 			i++;

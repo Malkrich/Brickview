@@ -30,10 +30,10 @@ namespace Brickview
 
 		// Panels
 		m_legoPartsExplorerPanel = createScope<LegoPartsExplorerPanel>("./data/LDraw/parts/");
-		m_legoPartsExplorerPanel->setOnLoadCallback([&](const std::filesystem::path& filePath)
+		m_legoPartsExplorerPanel->setOnLoadCallback([&](Ref<Mesh> mesh)
 		{
 			Entity e = m_scene->createEntity();
-			e.addComponent<LegoPartComponent>(filePath);
+			e.addComponent<LegoPartComponent>(mesh);
 		});
 	}
 

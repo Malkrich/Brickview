@@ -41,11 +41,10 @@ namespace Brickview
 		//LegoColor Color;
 
 		// TODO: move mesh object to Mesh collection
-		Ref<Mesh> Mesh;
+		Ref<Mesh> Geometry;
 
-		// TEMP: shouldn't load here
-		LegoPartComponent(const std::filesystem::path& filePath)
-			: Mesh(Mesh::load(filePath))
+		LegoPartComponent(Ref<Mesh> geometry)
+			: Geometry(geometry)
 		{}
 		LegoPartComponent(const LegoPartComponent&) = default;
 	};
