@@ -4,7 +4,6 @@
 #include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Camera.h"
-#include "Renderer/Mesh.h"
 #include "Renderer/GpuMesh.h"
 #include "Renderer/Material.h"
 #include "Lego/LegoPart.h"
@@ -13,15 +12,8 @@
 
 namespace Brickview
 {
-
-	using TransformBuffer = std::array<glm::mat4, 1000>;
-
-	struct InstanceData
-	{
-		Ref<GpuMesh> Mesh = nullptr;
-		TransformBuffer InstanceTransforms;
-		size_t InstanceCount = 0;
-	};
+	
+	struct InstanceData;
 
 	class SolidRenderSystem : public RenderSystem
 	{
@@ -32,10 +24,14 @@ namespace Brickview
 		virtual void begin(const Camera& camera, const Light& light) override;
 		virtual void end() override;
 
+		virtual const RenderStatistics& getRenderStatistics() const { return m_renderStatistics; }
+
 		virtual void drawLegoPart(const LegoPartComponent& legoPart, const glm::mat4& transform) override;
 
 	private:
 		void flush(const InstanceData& instanceData);
+
+		void resetStats();
 
 	private:
 		Ref<Shader> m_solidShader;
@@ -47,6 +43,9 @@ namespace Brickview
 
 		// Instance manager
 		std::unordered_map<LegoPartID, InstanceData> m_instanceRegistry;
+
+		// stats
+		RenderStatistics m_renderStatistics;
 	};
 
 }

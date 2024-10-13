@@ -66,4 +66,9 @@ namespace Brickview
 		s_lego3DRendererData->RenderSystem->drawLegoPart(legoPart, transform);
 	}
 
+	const RenderStatistics& Lego3DRenderer::getRenderStatistics()
+	{
+		return s_lego3DRendererData->RenderSystem->getRenderStatistics();
+	}
+
 }

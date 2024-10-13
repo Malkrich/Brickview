@@ -133,6 +133,10 @@ namespace Brickview
 		ImGui::SeparatorText("Render statistics:");
 		ImGui::Text("ts: %.3f ms", m_dt.getMilliseconds());
 		ImGui::Text("Fps: %.3f", m_dt.getSeconds() == 0.0f ? 0.0f : 1.0f / m_dt.getSeconds());
+		
+		const RenderStatistics& renderStats = Lego3DRenderer::getRenderStatistics();
+		ImGui::Text("Draw calls: %i", renderStats.DrawCalls);
+		ImGui::Text("Max Instance count: %i", renderStats.MaxInstanceCount);
 
 		ImGui::End();
 

@@ -8,6 +8,15 @@
 namespace Brickview
 {
 
+	using TransformBuffer = std::array<glm::mat4, 1000>;
+
+	struct InstanceData
+	{
+		Ref<GpuMesh> Mesh = nullptr;
+		TransformBuffer InstanceTransforms;
+		size_t InstanceCount = 0;
+	};
+
 	SolidRenderSystem::SolidRenderSystem(const Ref<ShaderLibrary>& shaderLib)
 		: m_solidShader(shaderLib->get("Solid"))
 	{}
@@ -21,6 +30,8 @@ namespace Brickview
 
 		m_uniforms["u_viewProjection"] = m_viewProjectionMatrix;
 		m_uniforms["u_cameraPosition"] = m_cameraPosition;
+
+		resetStats();
 	}
 
 	void SolidRenderSystem::drawLegoPart(const LegoPartComponent& legoPart, const glm::mat4& transform)
@@ -37,11 +48,16 @@ namespace Brickview
 		instanceData.InstanceTransforms[instanceData.InstanceCount] = transform;
 		instanceData.InstanceCount++;
 
+		// stats
+		if (m_renderStatistics.MaxInstanceCount < instanceData.InstanceCount)
+			m_renderStatistics.MaxInstanceCount = instanceData.InstanceCount;
+
 		if (instanceData.InstanceCount == instanceData.InstanceTransforms.size())
 		{
 			flush(instanceData);
 			instanceData.InstanceCount = 0;
 		}
+
 	}
 
 	void SolidRenderSystem::flush(const InstanceData& instanceData)
@@ -67,6 +83,7 @@ namespace Brickview
 		m_solidShader->setUniforms(m_uniforms);
 
 		RenderCommand::drawInstances(vao, instanceData.InstanceCount);
+		m_renderStatistics.DrawCalls++;
 
 		vao->unbind();
 	}
@@ -81,6 +98,11 @@ namespace Brickview
 		}
 
 		m_instanceRegistry.clear();
+	}
+
+	void SolidRenderSystem::resetStats()
+	{
+		m_renderStatistics = RenderStatistics();
 	}
 
 }

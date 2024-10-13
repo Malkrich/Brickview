@@ -31,6 +31,8 @@ namespace Brickview
 		static void end();
 		static void drawMesh(const Ref<GpuMesh>& mesh, const Material& material, const glm::mat4& transform);
 		static void drawLegoPart(const LegoPartComponent& legoPart, const glm::mat4& transform);
+
+		static const RenderStatistics& getRenderStatistics();
 	};
 
 }
