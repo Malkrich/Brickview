@@ -61,9 +61,4 @@ namespace Brickview
 		s_lego3DRendererData->RenderSystem->drawMesh(mesh, material, transform);
 	}
 
-	void Lego3DRenderer::drawMeshes(const Ref<Mesh>& mesh, const Material& material, const std::vector<glm::mat4>& transforms)
-	{
-		s_lego3DRendererData->RenderSystem->drawMeshes(mesh, material, transforms);
-	}
-
 }

@@ -30,7 +30,6 @@ namespace Brickview
 		static void begin(const Camera& camera, const Light& light);
 		static void end();
 		static void drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform);
-		static void drawMeshes(const Ref<Mesh>& mesh, const Material& material, const std::vector<glm::mat4>& transforms);
 	};
 
 }

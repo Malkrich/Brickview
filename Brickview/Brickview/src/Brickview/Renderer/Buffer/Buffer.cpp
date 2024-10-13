@@ -187,6 +187,7 @@ namespace Brickview
 			switch (element.Type)
 			{
 			case BufferElementType::Mat4:
+				// /!\: This implementation is for instance rendering only
 				glVertexAttribPointer(element.Index + 0, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(0 * sizeof(glm::vec4)));
 				glEnableVertexAttribArray(element.Index + 0);
 				glVertexAttribPointer(element.Index + 1, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(1 * sizeof(glm::vec4)));
@@ -196,6 +197,7 @@ namespace Brickview
 				glVertexAttribPointer(element.Index + 3, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(3 * sizeof(glm::vec4)));
 				glEnableVertexAttribArray(element.Index + 3);
 
+				// Move this because it depends whether it is instance rendering or not
 				glVertexAttribDivisor(element.Index + 0, 1);
 				glVertexAttribDivisor(element.Index + 1, 1);
 				glVertexAttribDivisor(element.Index + 2, 1);
@@ -214,6 +216,12 @@ namespace Brickview
 		}
 
 		m_vertexBuffers.push_back(vertexBuffer);
+	}
+
+	void VertexArray::addGeometry(const Ref<GpuMesh>& gpuMesh)
+	{
+		addVertexBuffer(gpuMesh->getGeometryVertexBuffer());
+		setIndexBuffer(gpuMesh->getGeometryIndexBuffer());
 	}
 
 	void VertexArray::setIndexBuffer(const Ref<IndexBuffer>& indexBuffer)

@@ -4,24 +4,23 @@
 #include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Camera.h"
-#include "Mesh/Mesh.h"
+#include "Renderer/Mesh.h"
+#include "Renderer/GpuMesh.h"
+
 #include "Renderer/Material.h"
-#include "Renderer/Light.h"
 
 #include <glm/glm.hpp>
 
 namespace Brickview
 {
 
-	struct InstanceSubmission
-	{
-		InstanceSubmission(Ref<VertexArray> vao, uint32_t instanceCount)
-			: Vao(vao)
-			, InstanceCount(instanceCount)
-		{}
+	using TransformBuffer = std::array<glm::mat4, 1000>;
 
-		Ref<VertexArray> Vao;
-		uint32_t InstanceCount;
+	struct InstanceData
+	{
+		Ref<GpuMesh> Mesh;
+		TransformBuffer InstanceTransforms;
+		uint32_t InstanceCount = 0;
 	};
 
 	class SolidRenderSystem : public RenderSystem
@@ -34,16 +33,20 @@ namespace Brickview
 		virtual void end() override;
 
 		virtual void drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform) override;
-		virtual void drawMeshes(const Ref<Mesh>& mesh, const Material& material, const std::vector<glm::mat4>& transforms) override;
+
+	private:
+		void flush(const InstanceData& instanceData);
 
 	private:
 		Ref<Shader> m_solidShader;
 
-		std::vector<InstanceSubmission> m_submissions;
-
 		// Camera data
+		UniformMap m_uniforms;
 		glm::mat4 m_viewProjectionMatrix;
 		glm::vec3 m_cameraPosition;
+
+		// Instance manager
+		std::unordered_map<std::string, InstanceData> m_instanceRegistry;
 	};
 
 }

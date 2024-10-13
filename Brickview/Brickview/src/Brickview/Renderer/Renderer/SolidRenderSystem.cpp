@@ -18,60 +18,48 @@ namespace Brickview
 	{
 		m_viewProjectionMatrix = camera.getViewProjectionMatrix();
 		m_cameraPosition       = camera.getPosition();
+
+		m_uniforms["u_viewProjection"] = m_viewProjectionMatrix;
+		m_uniforms["u_cameraPosition"] = m_cameraPosition;
 	}
 
-	void SolidRenderSystem::drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform)
+	void SolidRenderSystem::drawMesh(const Ref<GpuMesh>& mesh, const Material& material, const glm::mat4& transform)
 	{
-		SolidRenderSystem::drawMeshes(mesh, material, { transform });
 	}
 
-	void SolidRenderSystem::drawMeshes(const Ref<Mesh>& mesh, const Material& material, const std::vector<glm::mat4>& transforms)
+	void SolidRenderSystem::flush(const InstanceData& instanceData)
 	{
-		const std::vector<Vertex>& meshData = mesh->getVertices();
-		const std::vector<TriangleFace>& meshConnectivities = mesh->getConnectivities();
-
-		Ref<VertexBuffer> meshVertexBuffer = createRef<VertexBuffer>(
-			meshData.size() * sizeof(Vertex),
-			(void*)meshData.data());
-		Layout meshGeoLayout = {
-			{ "a_position", BufferElementType::Float3 },
-			{ "a_normal", BufferElementType::Float3 } };
-		meshVertexBuffer->setBufferLayout(meshGeoLayout);
-
-		Ref<IndexBuffer> meshIndexBuffer = createRef<IndexBuffer>(
-			meshConnectivities.size() * sizeof(TriangleFace),
-			(void*)meshConnectivities.data());
+		// Transform buffer
+		const TransformBuffer& instanceTransforms = instanceData.InstanceTransforms;
+		uint32_t transformBufferSize = instanceData.InstanceCount * sizeof(glm::mat4);
 
 		Ref<VertexBuffer> meshTransformBuffer = createRef<VertexBuffer>(
-			transforms.size() * sizeof(glm::mat4),
-			(void*)transforms.data());
+			transformBufferSize,
+			(void*)instanceTransforms.data());
 		Layout meshTransformLayout = {
 			{ 2, "a_transform", BufferElementType::Mat4 }
 		};
 		meshTransformBuffer->setBufferLayout(meshTransformLayout);
 
 		Ref<VertexArray> vao = createRef<VertexArray>();
-		vao->addVertexBuffer(meshVertexBuffer);
-		vao->setIndexBuffer(meshIndexBuffer);
+		vao->addGeometry(instanceData.Mesh);
 		vao->addVertexBuffer(meshTransformBuffer);
 
-		m_submissions.push_back({ vao, transforms.size() });
+		m_solidShader->bind();
+		m_solidShader->setUniforms(m_uniforms);
+
+		RenderCommand::drawInstances(vao, instanceData.InstanceCount);
+
 		vao->unbind();
 	}
 
 	void SolidRenderSystem::end()
 	{
-		UniformMap uniforms;
-		uniforms["u_viewProjection"] = m_viewProjectionMatrix;
-		uniforms["u_cameraPosition"] = m_cameraPosition;
-
-		m_solidShader->bind();
-		m_solidShader->setUniforms(uniforms);
-
-		for (const auto& submission : m_submissions)
-			RenderCommand::drawInstances(submission.Vao, submission.InstanceCount);
-			
-		m_submissions.clear();
+		for (const auto& element : m_instanceRegistry)
+		{
+			const InstanceData& instanceData = element.second;
+			flush(instanceData);
+		}
 	}
 
 }

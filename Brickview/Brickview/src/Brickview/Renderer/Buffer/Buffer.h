@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer/GpuMesh.h"
 #include "Layout.h"
 
 namespace Brickview
@@ -54,6 +55,7 @@ namespace Brickview
 		void unbind() const;
 
 		void addVertexBuffer(const Ref<VertexBuffer>& vertexBuffer);
+		void addGeometry(const Ref<GpuMesh>& gpuMesh);
 		void setIndexBuffer(const  Ref<IndexBuffer>& indexBuffer);
 
 		const std::vector<Ref<VertexBuffer>>& getVertexBuffers() const { return m_vertexBuffers; }
