@@ -11,7 +11,7 @@ namespace Brickview
 		m_defaultLegoPartIcon = createRef<Texture2D>("./data/Icons/legoPartIcon.png");
 	}
 
-	void LegoPartsExplorerPanel::onImGuiRender()
+	void LegoPartsExplorerPanel::onGuiRender()
 	{
 		ImGui::Begin("Lego Part Explorer");
 
@@ -36,8 +36,7 @@ namespace Brickview
 			std::string itemName = filePath.stem().string();
 			if (ImGui::Button(itemName.c_str()))
 			{
-				Ref<Mesh> mesh = Mesh::load(filePath);
-				m_onFileLoadCallback(mesh);
+				m_onFileLoadCallback(filePath);
 			}
 
 			if (i > m_fileOffset + m_maxDisplayedFile)

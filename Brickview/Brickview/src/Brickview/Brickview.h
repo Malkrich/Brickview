@@ -22,14 +22,15 @@
 #include "Renderer/CameraController.h"
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
+#include "Renderer/Mesh.h"
 
 // Scene
 #include "Scene/Scene.h"
 #include "Scene/Entity.h"
 #include "Scene/Components.h"
 
-// Meshes
-#include "Mesh/Mesh.h"
+// Lego
+#include "Lego/LegoPart.h"
 
 // Metric
 #include "Metric/World.h"

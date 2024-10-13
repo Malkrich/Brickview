@@ -3,6 +3,7 @@
 #include <Brickview.h>
 
 #include "Panels/LegoPartsExplorerPanel.h"
+#include "Panels/LegoPartsCollectionPanel.h"
 
 namespace Brickview
 {
@@ -43,6 +44,7 @@ namespace Brickview
 
 		// Panels
 		Scope<LegoPartsExplorerPanel> m_legoPartsExplorerPanel;
+		Scope<LegoPartsCollectionPanel> m_legoPartsCollectionPanel;
 	};
 
 }

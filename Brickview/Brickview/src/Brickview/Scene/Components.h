@@ -2,7 +2,9 @@
 
 #include "Renderer/Camera.h"
 #include "Renderer/Light.h"
-#include "Mesh/Mesh.h"
+#include "Renderer/Mesh.h"
+#include "Lego/LegoPart.h"
+#include "Lego/LegoMeshRegistry.h"
 
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -36,16 +38,18 @@ namespace Brickview
 
 	struct LegoPartComponent
 	{
-		// TODO:
-		//LegoPartID ID;
+		LegoPartID ID;
 		//LegoColor Color;
 
-		// TODO: move mesh object to Mesh collection
-		Ref<Mesh> Geometry;
+		// TODO: think about this
+		LegoMeshRegistry* PartRegistry;
 
-		LegoPartComponent(Ref<Mesh> geometry)
-			: Geometry(geometry)
-		{}
+		LegoPartComponent(LegoPartID id, LegoMeshRegistry* registry, Ref<Mesh> mesh)
+			: ID(id)
+			, PartRegistry(registry)
+		{
+			registry->addPart(id, mesh);
+		}
 		LegoPartComponent(const LegoPartComponent&) = default;
 	};
 

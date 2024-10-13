@@ -30,11 +30,13 @@ namespace Brickview
 
 		// Panels
 		m_legoPartsExplorerPanel = createScope<LegoPartsExplorerPanel>("./data/LDraw/parts/");
-		m_legoPartsExplorerPanel->setOnLoadCallback([&](Ref<Mesh> mesh)
+		m_legoPartsExplorerPanel->setOnLoadCallbackFunction([&](const std::filesystem::path& filePath)
 		{
-			Entity e = m_scene->createEntity();
-			e.addComponent<LegoPartComponent>(mesh);
+			LegoPartID partID = filePath.stem().string();
+			Ref<Mesh> mesh = Mesh::load(filePath);
+			m_scene->createLegoPartEntity(partID, mesh);
 		});
+		m_legoPartsCollectionPanel = createScope<LegoPartsCollectionPanel>(m_scene);
 	}
 
 	void ApplicationLayer::onDetach()
@@ -134,7 +136,8 @@ namespace Brickview
 
 		ImGui::End();
 
-		m_legoPartsExplorerPanel->onImGuiRender();
+		m_legoPartsExplorerPanel->onGuiRender();
+		m_legoPartsCollectionPanel->onGuiRender();
 
 		endDockspace();
 	}

@@ -1,9 +1,9 @@
 #include "Pch.h"
 #include "SolidRenderSystem.h"
+#include "Renderer/Renderer/RenderCommand.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Buffer/Layout.h"
-
-#include "Renderer/Renderer/RenderCommand.h"
+#include "Lego/LegoMeshRegistry.h"
 
 namespace Brickview
 {
@@ -23,8 +23,25 @@ namespace Brickview
 		m_uniforms["u_cameraPosition"] = m_cameraPosition;
 	}
 
-	void SolidRenderSystem::drawMesh(const Ref<GpuMesh>& mesh, const Material& material, const glm::mat4& transform)
+	void SolidRenderSystem::drawLegoPart(const LegoPartComponent& legoPart, const glm::mat4& transform)
 	{
+		bool exists = m_instanceRegistry.contains(legoPart.ID);
+		auto& instanceData = m_instanceRegistry[legoPart.ID];
+
+		if (!exists)
+		{
+			const LegoPartMeshData& meshData = legoPart.PartRegistry->getPart(legoPart.ID);
+			instanceData.Mesh = meshData.Mesh;
+		}
+
+		instanceData.InstanceTransforms[instanceData.InstanceCount] = transform;
+		instanceData.InstanceCount++;
+
+		if (instanceData.InstanceCount == instanceData.InstanceTransforms.size())
+		{
+			flush(instanceData);
+			instanceData.InstanceCount = 0;
+		}
 	}
 
 	void SolidRenderSystem::flush(const InstanceData& instanceData)
@@ -42,7 +59,8 @@ namespace Brickview
 		meshTransformBuffer->setBufferLayout(meshTransformLayout);
 
 		Ref<VertexArray> vao = createRef<VertexArray>();
-		vao->addGeometry(instanceData.Mesh);
+		vao->addVertexBuffer(instanceData.Mesh->getGeometryVertexBuffer());
+		vao->setIndexBuffer(instanceData.Mesh->getGeometryIndexBuffer());
 		vao->addVertexBuffer(meshTransformBuffer);
 
 		m_solidShader->bind();
@@ -58,8 +76,11 @@ namespace Brickview
 		for (const auto& element : m_instanceRegistry)
 		{
 			const InstanceData& instanceData = element.second;
-			flush(instanceData);
+			if (instanceData.InstanceCount != 0)
+				flush(instanceData);
 		}
+
+		m_instanceRegistry.clear();
 	}
 
 }

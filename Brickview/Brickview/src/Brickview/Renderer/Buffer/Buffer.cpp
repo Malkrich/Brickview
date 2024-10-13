@@ -218,12 +218,6 @@ namespace Brickview
 		m_vertexBuffers.push_back(vertexBuffer);
 	}
 
-	void VertexArray::addGeometry(const Ref<GpuMesh>& gpuMesh)
-	{
-		addVertexBuffer(gpuMesh->getGeometryVertexBuffer());
-		setIndexBuffer(gpuMesh->getGeometryIndexBuffer());
-	}
-
 	void VertexArray::setIndexBuffer(const Ref<IndexBuffer>& indexBuffer)
 	{
 		bind();

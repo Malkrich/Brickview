@@ -6,8 +6,8 @@
 #include "Renderer/Camera.h"
 #include "Renderer/Mesh.h"
 #include "Renderer/GpuMesh.h"
-
 #include "Renderer/Material.h"
+#include "Lego/LegoPart.h"
 
 #include <glm/glm.hpp>
 
@@ -18,9 +18,9 @@ namespace Brickview
 
 	struct InstanceData
 	{
-		Ref<GpuMesh> Mesh;
+		Ref<GpuMesh> Mesh = nullptr;
 		TransformBuffer InstanceTransforms;
-		uint32_t InstanceCount = 0;
+		size_t InstanceCount = 0;
 	};
 
 	class SolidRenderSystem : public RenderSystem
@@ -32,7 +32,7 @@ namespace Brickview
 		virtual void begin(const Camera& camera, const Light& light) override;
 		virtual void end() override;
 
-		virtual void drawMesh(const Ref<Mesh>& mesh, const Material& material, const glm::mat4& transform) override;
+		virtual void drawLegoPart(const LegoPartComponent& legoPart, const glm::mat4& transform) override;
 
 	private:
 		void flush(const InstanceData& instanceData);
@@ -46,7 +46,7 @@ namespace Brickview
 		glm::vec3 m_cameraPosition;
 
 		// Instance manager
-		std::unordered_map<std::string, InstanceData> m_instanceRegistry;
+		std::unordered_map<LegoPartID, InstanceData> m_instanceRegistry;
 	};
 
 }

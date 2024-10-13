@@ -22,6 +22,12 @@ namespace Brickview
 		return entity;
 	}
 
+	void Scene::createLegoPartEntity(LegoPartID partID, Ref<Mesh> mesh)
+	{
+		Entity e = createEntity();
+		e.addComponent<LegoPartComponent>(partID, &m_legoMeshRegistry, mesh);
+	}
+
 	void Scene::onUpdate(DeltaTime dt, const Camera& camera)
 	{
 		// Rendering
@@ -34,12 +40,9 @@ namespace Brickview
 		{
 			Entity entity = { e, this };
 
-			glm::mat4 transform = entity.getComponent<TransformComponent>().getTransform();
-			const Ref<Mesh>& legoMesh = entity.getComponent<LegoPartComponent>().Geometry;
-			// TEMP: add material to ECS
-			Material material = Material();
-
-			Lego3DRenderer::drawMesh(legoMesh, material, transform);
+			auto transform       = entity.getComponent<TransformComponent>().getTransform();
+			const auto& legoPart = entity.getComponent<LegoPartComponent>();
+			Lego3DRenderer::drawLegoPart(legoPart, transform);
 		}
 
 		Lego3DRenderer::end();

@@ -11,14 +11,14 @@ namespace Brickview
 	class LegoPartsExplorerPanel
 	{
 	public:
-		typedef std::function<void(Ref<Mesh>)> OnFileLoadCallbackFn;
+		typedef std::function<void(const std::filesystem::path&)> OnFileLoadCallbackFn;
 
 	public:
 		LegoPartsExplorerPanel(const std::filesystem::path& partsDirectory);
 
-		void setOnLoadCallback(OnFileLoadCallbackFn fn) { m_onFileLoadCallback = fn; }
+		void setOnLoadCallbackFunction(OnFileLoadCallbackFn fn) { m_onFileLoadCallback = fn; }
 
-		void onImGuiRender();
+		void onGuiRender();
 
 	private:
 		uint32_t m_fileOffset = 1000;
