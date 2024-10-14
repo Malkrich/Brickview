@@ -28,6 +28,8 @@ namespace Brickview
 		OnFileLoadCallbackFn m_onFileLoadCallback;
 
 		Ref<Texture2D> m_defaultLegoPartIcon;
+		uint32_t m_iconWidth = 120;
+		uint32_t m_iconPadding = 10;
 	};
 
 }

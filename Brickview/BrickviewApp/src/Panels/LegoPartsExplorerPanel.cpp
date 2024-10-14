@@ -15,34 +15,37 @@ namespace Brickview
 	{
 		ImGui::Begin("Lego Part Explorer");
 
-		//if (ImGui::BeginPopupContextWindow(0))
-		//{
-		//	if (ImGui::MenuItem("Load file"))
-		//		m_onFileLoadCallback(m_legoPartsDirectory / "1.dat");
+		float windowWidth = ImGui::GetContentRegionAvail().x;
+		uint32_t columnCount = (uint32_t)(windowWidth / (m_iconWidth + m_iconPadding));
+		ImGui::Columns(columnCount, 0, false);
 
-		//	ImGui::EndPopup();
-		//}
-
-		uint32_t i = 0;
+		uint32_t fileIndex = 0;
 		for (const auto& dirEntry : std::filesystem::directory_iterator(m_legoPartsDirectory))
 		{
-			if (i < m_fileOffset)
+			if (fileIndex < m_fileOffset)
 			{
-				i++;
+				fileIndex++;
 				continue;
 			}
 
 			const auto& filePath = dirEntry.path();
 			std::string itemName = filePath.stem().string();
-			if (ImGui::Button(itemName.c_str()))
+
+			ImGui::PushID(itemName.c_str());
+
+			auto textureID = m_defaultLegoPartIcon->getTextureID();
+			if (ImGui::ImageButton((ImTextureID)textureID, { (float)m_iconWidth, (float)m_iconWidth }))
 			{
 				m_onFileLoadCallback(filePath);
 			}
+			ImGui::PopID();
 
-			if (i > m_fileOffset + m_maxDisplayedFile)
+			ImGui::NextColumn();
+
+			if (fileIndex > m_fileOffset + m_maxDisplayedFile)
 				break;
 
-			i++;
+			fileIndex++;
 		}
 
 		ImGui::End();

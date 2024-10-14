@@ -7,18 +7,6 @@
 namespace Brickview
 {
 
-	Ref<Texture2D> Texture2D::create(const TextureSpecifications& specs)
-	{
-		switch (RendererAPI::getAPI())
-		{
-			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;
-			case RendererAPI::API::OpenGL: return createRef<OpenGLTexture2D>(specs);
-		}
-
-		BV_ASSERT(false, "Unknown API!");
-		return nullptr;
-	}
-
 	Ref<Texture2D> Texture2D::create(const std::filesystem::path& filePath)
 	{
 		switch (RendererAPI::getAPI())
