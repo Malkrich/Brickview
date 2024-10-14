@@ -16,7 +16,7 @@ workspace "Brickview"
 outputDir = "%{cfg.buildcfg}-%{cfg.system}"
 
 group "Application"
-    include "Brickview/BrickviewApp"
+    include "BrickviewApp"
 
 group "Core"
     include "Brickview/Brickview"

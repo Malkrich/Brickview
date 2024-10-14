@@ -10,11 +10,11 @@ project "BrickviewApp"
     includedirs
     {
         "src/",
-        "../Brickview/src/Brickview/",
-        "../vendors/glm/",
-        "../vendors/imgui/",
-        "../vendors/spdlog/include",
-        "../vendors/entt/include/"
+        "../Brickview/Brickview/src/Brickview/",
+        "../Brickview/Vendors/glm/",
+        "../Brickview/Vendors/imgui/",
+        "../Brickview/Vendors/spdlog/include",
+        "../Brickview/Vendors/entt/include/"
     }
 
     files

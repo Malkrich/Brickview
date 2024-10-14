@@ -22,6 +22,9 @@ namespace Brickview
 		uint32_t fileIndex = 0;
 		for (const auto& dirEntry : std::filesystem::directory_iterator(m_legoPartsDirectory))
 		{
+			if (dirEntry.is_directory())
+				continue;
+
 			if (fileIndex < m_fileOffset)
 			{
 				fileIndex++;
@@ -38,8 +41,8 @@ namespace Brickview
 			{
 				m_onFileLoadCallback(filePath);
 			}
+			ImGui::TextWrapped(itemName.c_str());
 			ImGui::PopID();
-
 			ImGui::NextColumn();
 
 			if (fileIndex > m_fileOffset + m_maxDisplayedFile)

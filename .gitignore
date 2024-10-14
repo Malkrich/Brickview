@@ -13,4 +13,4 @@ bin-int/
 Brickview/BrickviewApp/imgui.ini
 
 # Large size data
-Brickview/BrickviewApp/data/LDraw*
+BrickviewApp/data/LDraw*
