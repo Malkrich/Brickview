@@ -1,18 +1,18 @@
 #include "Pch.h"
-#include "Shader.h"
+#include "FrameBuffer.h"
 
-#include "Renderer/RendererAPI.h"
-#include "Vendors/OpenGL/OpenGLShader.h"
+#include "RendererAPI.h"
+#include "Vendors/OpenGL/OpenGLFrameBuffer.h"
 
 namespace Brickview
 {
 
-	Ref<Shader> Shader::create(const std::filesystem::path& filePath)
+	Ref<FrameBuffer> FrameBuffer::create(const FrameBufferSpecifications& specs)
 	{
 		switch (RendererAPI::getAPI())
 		{
 			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;
-			case RendererAPI::API::OpenGL: return createRef<OpenGLShader>(filePath);
+			case RendererAPI::API::OpenGL: return createRef<OpenGLFrameBuffer>(specs);
 		}
 
 		BV_ASSERT(false, "Unknown API!");

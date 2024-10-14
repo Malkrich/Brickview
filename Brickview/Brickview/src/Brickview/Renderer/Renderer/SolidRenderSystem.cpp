@@ -1,10 +1,10 @@
 #include "Pch.h"
 #include "SolidRenderSystem.h"
 
-#include "Renderer/Buffer/Buffer.h"
+#include "Renderer/Buffer.h"
 #include "Renderer/RenderCommand.h"
 #include "Renderer/Shader/ShaderLibrary.h"
-#include "Renderer/Buffer/Layout.h"
+#include "Renderer/Layout.h"
 #include "Lego/LegoMeshRegistry.h"
 
 namespace Brickview
@@ -71,7 +71,7 @@ namespace Brickview
 		const TransformBuffer& instanceTransforms = instanceData.InstanceTransforms;
 		uint32_t transformBufferSize = instanceData.InstanceCount * sizeof(glm::mat4);
 
-		Ref<VertexBuffer> meshTransformBuffer = createRef<VertexBuffer>(
+		Ref<VertexBuffer> meshTransformBuffer = VertexBuffer::create(
 			transformBufferSize,
 			(void*)instanceTransforms.data());
 		Layout meshTransformLayout = {
@@ -79,7 +79,7 @@ namespace Brickview
 		};
 		meshTransformBuffer->setBufferLayout(meshTransformLayout);
 
-		Ref<VertexArray> vao = createRef<VertexArray>();
+		Ref<VertexArray> vao = VertexArray::create();
 		vao->addVertexBuffer(instanceData.Mesh->getGeometryVertexBuffer());
 		vao->setIndexBuffer(instanceData.Mesh->getGeometryIndexBuffer());
 		vao->addVertexBuffer(meshTransformBuffer);

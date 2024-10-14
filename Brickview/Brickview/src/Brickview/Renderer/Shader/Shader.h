@@ -9,6 +9,7 @@
 
 namespace Brickview
 {
+
 	struct UniformData
 	{
 		BasicTypes Type;
@@ -37,27 +38,18 @@ namespace Brickview
 	class Shader
 	{
 	public:
-		Shader(const std::filesystem::path& filePath);
-		~Shader();
+		static Ref<Shader> create(const std::filesystem::path& filePath);
 
-		const std::string& getName() const { return m_name; }
+		virtual ~Shader() = default;
 
-		void bind() const;
-		void unbind() const;
+		virtual const std::string& getName() const = 0;
 
-		void reload(const std::filesystem::path& filePath) { invalidate(filePath); }
+		virtual void bind() const = 0;
+		virtual void unbind() const = 0;
 
-		void setUniforms(const UniformMap& uniforms);
+		virtual void reload(const std::filesystem::path& filePath) = 0;
 
-	private:
-		void invalidate(const std::filesystem::path& filePath);
-
-		void setBool(const std::string& name, const void* data);
-		void setFloat3(const std::string& name, const void* data);
-		void setMat4(const std::string& name, const void* data);
-
-	private:
-		std::string m_name;
-		uint32_t m_shaderProgramID = 0;
+		virtual void setUniforms(const UniformMap& uniforms) = 0;
 	};
+
 }

@@ -8,10 +8,10 @@ namespace Brickview
 
 	Viewport::Viewport(uint32_t width, uint32_t height)
 	{
-		FrameBufferSpecifications fbSpec;
-		fbSpec.Width = width;
-		fbSpec.Height = height;
-		m_frameBuffer = createScope<FrameBuffer>(fbSpec);
+		FrameBufferSpecifications specs;
+		specs.Width   = width;
+		specs.Height  = height;
+		m_frameBuffer = FrameBuffer::create(specs);
 	}
 
 	void Viewport::onGuiRender()

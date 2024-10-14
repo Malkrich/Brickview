@@ -1,18 +1,21 @@
 #include "Pch.h"
 #include "RendererAPI.h"
 
-#include <glad/glad.h>
+#include "Vendors/OpenGL/OpenGLRendererAPI.h"
 
 namespace Brickview
 {
 
-	void RendererAPI::init()
+	Scope<RendererAPI> RendererAPI::create()
 	{
-		glEnable(GL_DEPTH_TEST);
-	}
+		switch (s_api)
+		{
+			case API::None: BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;;
+			case API::OpenGL: return createScope<OpenGLRendererAPI>();
+		}
 
-	void RendererAPI::shutdown()
-	{
+		BV_ASSERT(false, "Unknown Renderer API!");
+		return nullptr;
 	}
 
 }

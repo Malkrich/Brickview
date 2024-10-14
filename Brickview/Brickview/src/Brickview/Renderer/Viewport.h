@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Buffer/FrameBuffer.h"
+#include "FrameBuffer.h"
 
 namespace Brickview
 {
@@ -21,7 +21,7 @@ namespace Brickview
 		void onGuiRender();
 
 	private:
-		Scope<FrameBuffer> m_frameBuffer = nullptr;
+		Ref<FrameBuffer> m_frameBuffer = nullptr;
 
 		bool m_hasSizeChanged = false;
 		bool m_hovered = true;

@@ -22,7 +22,7 @@ namespace Brickview
 	void ShaderLibrary::load(const std::filesystem::path& filePath)
 	{
 		ShaderData shaderData;
-		shaderData.Shader = createRef<Shader>(filePath);
+		shaderData.Shader = Shader::create(filePath);
 		shaderData.FilePath = filePath;
 		add(shaderData);
 	}
@@ -32,7 +32,7 @@ namespace Brickview
 		BV_ASSERT(m_shaderRegistry.find(shaderName) != m_shaderRegistry.end(), "Shader not found !");
 
 		ShaderData& sData = m_shaderRegistry.at(shaderName);
-		sData.Shader = createRef<Shader>(sData.FilePath);
+		sData.Shader = Shader::create(sData.FilePath);
 	}
 
 }

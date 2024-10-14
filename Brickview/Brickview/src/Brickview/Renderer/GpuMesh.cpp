@@ -1,8 +1,6 @@
 #include "Pch.h"
 #include "GpuMesh.h"
 
-#include "Buffer/Layout.h"
-
 namespace Brickview
 {
 
@@ -15,12 +13,12 @@ namespace Brickview
 			{ "a_position", BufferElementType::Float3 },
 			{ "a_normal", BufferElementType::Float3 } };
 
-		m_geometryVbo = createRef<VertexBuffer>(
+		m_geometryVbo = VertexBuffer::create(
 			meshData.size() * sizeof(Vertex),
 			(void*)meshData.data());
 		m_geometryVbo->setBufferLayout(meshGeoLayout);
 
-		m_geometryEbo = createRef<IndexBuffer>(
+		m_geometryEbo = IndexBuffer::create(
 			meshConnectivities.size() * sizeof(TriangleFace),
 			(void*)meshConnectivities.data());
 	}

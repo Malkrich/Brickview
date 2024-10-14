@@ -1,14 +1,25 @@
 #include "Pch.h"
 #include "RenderCommand.h"
 
-#include <glad/glad.h>
-
 namespace Brickview
 {
 
+	Scope<RendererAPI> RenderCommand::s_rendererAPI = nullptr;
+
+	void RenderCommand::init()
+	{
+		s_rendererAPI = RendererAPI::create();
+		s_rendererAPI->init();
+	}
+
+	void RenderCommand::shutdown()
+	{
+		s_rendererAPI->shutdown();
+	}
+
 	void RenderCommand::setClearColor(float r, float g, float b, float a)
 	{
-		glClearColor(r, g, b, a);
+		s_rendererAPI->setClearColor(r, g, b, a);
 	}
 	void RenderCommand::setClearColor(float r, float g, float b)
 	{
@@ -27,24 +38,22 @@ namespace Brickview
 
 	void RenderCommand::clear()
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		s_rendererAPI->clear();
 	}
 
 	void RenderCommand::setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
 	{
-		glViewport(x, y, width, height);
+		s_rendererAPI->setViewportDimension(x, y, width, height);
 	}
 
 	void RenderCommand::drawIndices(const Ref<VertexArray>& vertexArray)
 	{
-		vertexArray->bind();
-		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
+		s_rendererAPI->drawIndices(vertexArray);
 	}
 
 	void RenderCommand::drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount)
 	{
-		vertexArray->bind();
-		glDrawElementsInstanced(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, 0, instanceCount);
+		s_rendererAPI->drawInstances(vertexArray, instanceCount);
 	}
 
 }

@@ -8,7 +8,7 @@ namespace Brickview
 	LegoPartsExplorerPanel::LegoPartsExplorerPanel(const std::filesystem::path& partsDirectory)
 		: m_legoPartsDirectory(partsDirectory)
 	{
-		m_defaultLegoPartIcon = createRef<Texture2D>("./data/Icons/legoPartIcon.png");
+		m_defaultLegoPartIcon = Texture2D::create("./data/Icons/legoPartIcon.png");
 	}
 
 	void LegoPartsExplorerPanel::onGuiRender()

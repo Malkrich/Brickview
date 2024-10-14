@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Renderer/Buffer/Buffer.h"
+#include "Buffer.h"
+#include "RendererAPI.h"
 
 #include <glm/glm.hpp>
 
@@ -10,6 +11,9 @@ namespace Brickview
 	class RenderCommand
 	{
 	public:
+		static void init();
+		static void shutdown();
+
 		static void setClearColor(float r, float g, float b, float a);
 		static void setClearColor(float r, float g, float b);
 		static void setClearColor(const glm::vec3& clearColor);
@@ -20,6 +24,9 @@ namespace Brickview
 
 		static void drawIndices(const Ref<VertexArray>& vertexArray);
 		static void drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount);
+
+	private:
+		static Scope<RendererAPI> s_rendererAPI;
 	};
 
 }
