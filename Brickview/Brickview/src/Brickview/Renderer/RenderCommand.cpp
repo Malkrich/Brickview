@@ -6,11 +6,6 @@
 namespace Brickview
 {
 
-	void RenderCommand::init()
-	{
-		glEnable(GL_DEPTH_TEST);
-	}
-
 	void RenderCommand::setClearColor(float r, float g, float b, float a)
 	{
 		glClearColor(r, g, b, a);

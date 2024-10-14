@@ -1,6 +1,6 @@
 #include "Pch.h"
 #include "Lego3DRenderer.h"
-#include "RenderCommand.h"
+
 #include "SolidRenderSystem.h"
 
 namespace Brickview
@@ -16,8 +16,6 @@ namespace Brickview
 
 	void Lego3DRenderer::init()
 	{
-		RenderCommand::init();
-
 		s_lego3DRendererData = new Lego3DRendererData();
 
 		s_lego3DRendererData->ShaderLibrary = createRef<ShaderLibrary>();
@@ -45,20 +43,12 @@ namespace Brickview
 
 	void Lego3DRenderer::begin(const Camera& camera, const Light& light)
 	{
-		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
-		RenderCommand::clear();
-
 		s_lego3DRendererData->RenderSystem->begin(camera, light);
 	}
 
 	void Lego3DRenderer::end()
 	{
 		s_lego3DRendererData->RenderSystem->end();
-	}
-
-	void Lego3DRenderer::drawMesh(const Ref<GpuMesh>& mesh, const Material& material, const glm::mat4& transform)
-	{
-		s_lego3DRendererData->RenderSystem->drawMesh(mesh, material, transform);
 	}
 
 	void Lego3DRenderer::drawLegoPart(const LegoPartComponent& legoPart, const glm::mat4& transform)

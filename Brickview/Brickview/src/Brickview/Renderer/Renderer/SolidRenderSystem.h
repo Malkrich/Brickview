@@ -1,11 +1,7 @@
 #pragma once
 
 #include "RenderSystem.h"
-#include "Renderer/Buffer/Buffer.h"
 #include "Renderer/Shader/ShaderLibrary.h"
-#include "Renderer/Camera.h"
-#include "Renderer/GpuMesh.h"
-#include "Renderer/Material.h"
 #include "Lego/LegoPart.h"
 
 #include <glm/glm.hpp>
@@ -24,7 +20,7 @@ namespace Brickview
 		virtual void begin(const Camera& camera, const Light& light) override;
 		virtual void end() override;
 
-		virtual const RenderStatistics& getRenderStatistics() const { return m_renderStatistics; }
+		virtual const RenderStatistics& getRenderStatistics() const override { return m_renderStatistics; }
 
 		virtual void drawLegoPart(const LegoPartComponent& legoPart, const glm::mat4& transform) override;
 

@@ -1,6 +1,8 @@
 #include "Pch.h"
 #include "SolidRenderSystem.h"
-#include "Renderer/Renderer/RenderCommand.h"
+
+#include "Renderer/Buffer/Buffer.h"
+#include "Renderer/RenderCommand.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Buffer/Layout.h"
 #include "Lego/LegoMeshRegistry.h"
@@ -30,6 +32,9 @@ namespace Brickview
 
 		m_uniforms["u_viewProjection"] = m_viewProjectionMatrix;
 		m_uniforms["u_cameraPosition"] = m_cameraPosition;
+
+		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
+		RenderCommand::clear();
 
 		resetStats();
 	}

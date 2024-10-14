@@ -10,8 +10,6 @@ namespace Brickview
 	class RenderCommand
 	{
 	public:
-		static void init();
-
 		static void setClearColor(float r, float g, float b, float a);
 		static void setClearColor(float r, float g, float b);
 		static void setClearColor(const glm::vec3& clearColor);
