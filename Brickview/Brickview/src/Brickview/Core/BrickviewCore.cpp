@@ -3,7 +3,7 @@
 
 #include "Renderer/RenderCommand.h"
 #include "Renderer/Renderer/Lego3DRenderer.h"
-#include "Vendors/Mesh/LDrawCore.h"
+#include "Vendors/LDraw/LDrawCore.h"
 
 namespace Brickview::BrickviewCore
 {

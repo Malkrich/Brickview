@@ -4,7 +4,7 @@
 namespace Brickview
 {
 
-	struct LdrawFileManagerData
+	struct LDrawFileManagerData
 	{
 		std::filesystem::path BaseDirectory;
 		std::filesystem::path PartsDirectory;
@@ -18,13 +18,13 @@ namespace Brickview
 		std::unordered_map<std::filesystem::path, LDrawFileData> ExistingFiles;
 	};
 
-	static LdrawFileManagerData* s_ldrawFileManagerData = nullptr;
+	static LDrawFileManagerData* s_ldrawFileManagerData = nullptr;
 
 	void LDrawFileManager::init()
 	{
 		BV_ASSERT(!s_ldrawFileManagerData, "LDrawReader engine already initialized!");
 
-		s_ldrawFileManagerData = new LdrawFileManagerData();
+		s_ldrawFileManagerData = new LDrawFileManagerData();
 		s_ldrawFileManagerData->BaseDirectory                = "./data/LDraw/";
 		s_ldrawFileManagerData->PartsDirectory               = "parts";
 		s_ldrawFileManagerData->SubPartsDirectory            = "s";
