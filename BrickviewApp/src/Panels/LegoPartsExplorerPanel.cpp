@@ -17,6 +17,7 @@ namespace Brickview
 
 		float windowWidth = ImGui::GetContentRegionAvail().x;
 		uint32_t columnCount = (uint32_t)(windowWidth / (m_iconWidth + m_iconPadding));
+		columnCount = std::max<int>(1, columnCount);
 		ImGui::Columns(columnCount, 0, false);
 
 		uint32_t fileIndex = 0;

@@ -7,6 +7,7 @@
 #include <memory>
 #include <functional>
 #include <cmath>
+#include <algorithm>
 
 // containers
 #include <vector>
