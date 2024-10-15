@@ -11,7 +11,8 @@ namespace Brickview
 
 		Layout meshGeoLayout = {
 			{ "a_position", BufferElementType::Float3 },
-			{ "a_normal", BufferElementType::Float3 } };
+			{ "a_normal", BufferElementType::Float3 }
+		};
 
 		m_geometryVbo = VertexBuffer::create(
 			meshData.size() * sizeof(Vertex),

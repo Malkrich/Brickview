@@ -4,6 +4,7 @@
 #include "OpenGLError.h"
 
 #include <glad/glad.h>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Brickview
 {
@@ -164,25 +165,31 @@ namespace Brickview
         glUseProgram(0);
     }
 
-    void OpenGLShader::setUniforms(const UniformMap& uniforms)
+    void OpenGLShader::setBool(const std::string& name, bool data)
     {
-        for (const auto& [name, uniform] : uniforms)
-        {
-            switch (uniform.Type)
-            {
-                case BasicTypes::Bool:
-                    setBool(name, uniform.Data);
-                    continue;
-                case BasicTypes::Float3:
-                    setFloat3(name, uniform.Data);
-                    continue;
-                case BasicTypes::Mat4:
-                    setMat4(name, uniform.Data);
-                    continue;
-            }
+        uint32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
+        glUniform1i(loc, data);
+    }
 
-            BV_ASSERT(false, "Uniform type not implemented");
-        }
+    void OpenGLShader::setFloat3(const std::string& name, const glm::vec3& data)
+    {
+        int32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
+        glUniform3fv(loc, 1, glm::value_ptr(data));
+    }
+
+    void OpenGLShader::setMat4(const std::string& name, const glm::mat4& data)
+    {
+        int32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(data));
+    }
+
+    void OpenGLShader::setUniformBuffer(Ref<UniformBuffer> uniformBuffer)
+    {
+        const std::string& blockName = uniformBuffer->getSpecifications().BlockName;
+        uint32_t bindingIndex = uniformBuffer->getSpecifications().BindingPoint;
+
+        uint32_t uniformBlockIndex = glGetUniformBlockIndex(m_shaderProgramID, blockName.c_str());
+        glUniformBlockBinding(m_shaderProgramID, uniformBlockIndex, bindingIndex);
     }
 
     void OpenGLShader::invalidate(const std::filesystem::path& filePath)
@@ -204,24 +211,4 @@ namespace Brickview
         m_name = path.substr(lastSlash, count);
     }
 
-    void OpenGLShader::setBool(const std::string& name, const void* data)
-    {
-        uint32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
-        CHECK_GL_ERROR();
-        bool value = *((bool*)data);
-        glUniform1i(loc, value);
-    }
-
-    void OpenGLShader::setFloat3(const std::string& name, const void* data)
-    {
-        // set uniform color
-        int32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
-        glUniform3fv(loc, 1, (float*)data);
-    }
-
-    void OpenGLShader::setMat4(const std::string& name, const void* data)
-    {
-        int32_t loc = glGetUniformLocation(m_shaderProgramID, name.c_str());
-        glUniformMatrix4fv(loc, 1, GL_FALSE, (float*)data);
-    }
 }

@@ -27,7 +27,7 @@ namespace Brickview
 		TransformComponent(const glm::vec3& translation)
 			: Translation(translation) {}
 
-		glm::mat4 getTransform()
+		glm::mat4 getTransform() const
 		{
 			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
 			return glm::translate(glm::mat4(1.0f), Translation)
@@ -39,16 +39,12 @@ namespace Brickview
 	struct LegoPartComponent
 	{
 		LegoPartID ID;
-		//LegoColor Color;
+		// TODO: LegoColor Color;
 
-		// TODO: think about this
-		LegoMeshRegistry* PartRegistry;
-
-		LegoPartComponent(LegoPartID id, LegoMeshRegistry* registry, Ref<Mesh> mesh)
+		LegoPartComponent(LegoPartID id, LegoMeshRegistry& legoMeshRegistry, Ref<Mesh> mesh)
 			: ID(id)
-			, PartRegistry(registry)
 		{
-			registry->addPart(id, mesh);
+			legoMeshRegistry.addPart(id, mesh);
 		}
 		LegoPartComponent(const LegoPartComponent&) = default;
 	};

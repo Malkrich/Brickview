@@ -113,7 +113,7 @@ namespace Brickview
 		// Shader lib
 		ImGui::Begin("Shaders");
 
-		const Ref<ShaderLibrary> shaderLibrary = Lego3DRenderer::getShaderLibrary();
+		const Ref<ShaderLibrary>& shaderLibrary = Renderer::getShaderLibrary();
 		for (const auto& [name, shaderData] : *shaderLibrary)
 		{
 			ImGui::Text("%s", name.c_str());
@@ -134,9 +134,11 @@ namespace Brickview
 		ImGui::Text("ts: %.3f ms", m_dt.getMilliseconds());
 		ImGui::Text("Fps: %.3f", m_dt.getSeconds() == 0.0f ? 0.0f : 1.0f / m_dt.getSeconds());
 		
+#if 0
 		const RenderStatistics& renderStats = Lego3DRenderer::getRenderStatistics();
 		ImGui::Text("Draw calls: %i", renderStats.DrawCalls);
 		ImGui::Text("Max Instance count: %i", renderStats.MaxInstanceCount);
+#endif
 
 		ImGui::End();
 

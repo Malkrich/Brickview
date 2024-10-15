@@ -2,7 +2,8 @@
 #include "BrickviewCore.h"
 
 #include "Renderer/RenderCommand.h"
-#include "Renderer/Renderer/Lego3DRenderer.h"
+#include "Renderer/Renderer.h"
+
 #include "Vendors/LDraw/LDrawCore.h"
 
 namespace Brickview::BrickviewCore
@@ -11,14 +12,14 @@ namespace Brickview::BrickviewCore
 	void init()
 	{
 		RenderCommand::init();
-		Lego3DRenderer::init();
+		Renderer::init();
 		LDrawCore::init();
 	}
 
 	void shutdown()
 	{
 		RenderCommand::shutdown();
-		Lego3DRenderer::shutdown();
+		Renderer::shutdown();
 		LDrawCore::shutdown();
 	}
 

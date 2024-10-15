@@ -6,9 +6,6 @@
 #include "Core/Event/KeyEvent.h"
 
 #include <glad/glad.h>
-#include <imgui.h>
-#include <backends/imgui_impl_glfw.h>
-#include <backends/imgui_impl_opengl3.h>
 #include <GLFW/glfw3.h>
 
 namespace Brickview
@@ -70,7 +67,7 @@ namespace Brickview
 		glfwSetWindowUserPointer(m_window, &m_settings);
 
 		// VSync
-		glfwSwapInterval(m_settings.VSync ? 1 : 0);
+		setVSync(windowSettings.VSync);
 
 		glfwSetWindowCloseCallback(m_window, [](GLFWwindow* window)
 		{

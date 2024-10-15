@@ -19,14 +19,14 @@ namespace Brickview
 
 		virtual void reload(const std::filesystem::path& filePath) override { invalidate(filePath); }
 
-		virtual void setUniforms(const UniformMap& uniforms) override;
+		virtual void setBool(const std::string& name, bool data) override;
+		virtual void setFloat3(const std::string& name, const glm::vec3& data) override;
+		virtual void setMat4(const std::string& name, const glm::mat4& data) override;
+		virtual void setUniformBuffer(Ref<UniformBuffer> uniformBuffer) override;
 
 	private:
 		void invalidate(const std::filesystem::path& filePath);
 
-		void setBool(const std::string& name, const void* data);
-		void setFloat3(const std::string& name, const void* data);
-		void setMat4(const std::string& name, const void* data);
 
 	private:
 		std::string m_name;
