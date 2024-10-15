@@ -118,12 +118,13 @@ namespace Brickview
 		{
 			ImGui::Text("%s", name.c_str());
 			ImGui::SameLine();
-			std::string buttonName = std::format("Reload##{}", name);
-			if (ImGui::Button(buttonName.c_str()))
+			ImGui::PushID(name.c_str());
+			if (ImGui::Button("Reload"))
 			{
 				std::filesystem::path shaderFilePath = shaderData.FilePath;
 				shaderData.Shader->reload(shaderFilePath);
 			}
+			ImGui::PopID();
 		}
 
 		ImGui::End();
