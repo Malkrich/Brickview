@@ -1,13 +1,13 @@
 #type vertex
-#version 330 core
+#version 450 core
 
-// Per vertices
+// Per vertices1
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
 // Per instances
 layout (location = 2) in mat4 a_transform;
 
-layout (std140) uniform CameraData
+layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
     vec3 Position;
@@ -27,14 +27,14 @@ void main()
 
 
 #type fragment
-#version 330 core
+#version 450 core
 
 in vec3 f_currentPosition;
 in vec3 f_normal;
 
 out vec4 color;
 
-layout (std140) uniform CameraData
+layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
     vec3 Position;
