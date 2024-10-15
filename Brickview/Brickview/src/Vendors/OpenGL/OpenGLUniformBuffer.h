@@ -12,9 +12,6 @@ namespace Brickview
 
 		virtual ~OpenGLUniformBuffer();
 
-		virtual void bind() const override;
-		virtual void unbind() const override;
-
 		virtual void setElement(uint32_t elementIndex, const void* data) override;
 
 		virtual const UniformBufferSpecifications& getSpecifications() const override { return m_specs; }

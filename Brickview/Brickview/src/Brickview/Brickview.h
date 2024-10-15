@@ -17,12 +17,14 @@
 // Render
 #include "Renderer/Renderer.h"
 #include "Renderer/Texture2D.h"
-#include "Renderer/Viewport.h"
+#include "Renderer/Shader/Shader.h"
+#include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Camera.h"
 #include "Renderer/CameraController.h"
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
 #include "Renderer/Mesh.h"
+#include "Renderer/Viewport.h"
 
 // Scene
 #include "Scene/Scene.h"
@@ -31,6 +33,7 @@
 
 // Lego
 #include "Lego/LegoPart.h"
+#include "Lego/LegoMeshRegistry.h"
 
 // Metric
 #include "Metric/World.h"

@@ -8,14 +8,13 @@ namespace Brickview
 {
 	SceneRenderer::SceneRenderer()
 	{
-		UniformBufferSpecifications m_cameraDataUboSpecs;
-		m_cameraDataUboSpecs.BlockName = "CameraData";
-		m_cameraDataUboSpecs.BindingPoint = 0;
-		m_cameraDataUboSpecs.Layout = {
+		UniformBufferSpecifications cameraDataUboSpecs;
+		cameraDataUboSpecs.BindingPoint = 0;
+		cameraDataUboSpecs.Layout = {
 			UniformBufferElementType::Mat4,
 			UniformBufferElementType::Float3
 		};
-		m_cameraDataUbo = UniformBuffer::create(m_cameraDataUboSpecs);
+		m_cameraDataUbo = UniformBuffer::create(cameraDataUboSpecs);
 	}
 
 	void SceneRenderer::begin(const Camera& camera)
@@ -59,7 +58,6 @@ namespace Brickview
 		m_cameraDataUbo->setElement(1, &m_cameraData.Position);
 		
 		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("Solid");
-		solidShader->setUniformBuffer(m_cameraDataUbo);
 
 		for (const InstanceBuffer& buffer : m_instanceBuffers)
 		{

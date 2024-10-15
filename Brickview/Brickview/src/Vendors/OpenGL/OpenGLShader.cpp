@@ -183,15 +183,6 @@ namespace Brickview
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(data));
     }
 
-    void OpenGLShader::setUniformBuffer(Ref<UniformBuffer> uniformBuffer)
-    {
-        const std::string& blockName = uniformBuffer->getSpecifications().BlockName;
-        uint32_t bindingIndex = uniformBuffer->getSpecifications().BindingPoint;
-
-        uint32_t uniformBlockIndex = glGetUniformBlockIndex(m_shaderProgramID, blockName.c_str());
-        glUniformBlockBinding(m_shaderProgramID, uniformBlockIndex, bindingIndex);
-    }
-
     void OpenGLShader::invalidate(const std::filesystem::path& filePath)
     {
         if (m_shaderProgramID)

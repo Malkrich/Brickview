@@ -35,19 +35,23 @@ namespace Brickview
 		uint32_t getBufferSize() const { return m_bufferSize; }
 
 		uint32_t getElementCount() const { return m_elements.size(); }
-		const UniformBufferElement& getBufferElement(uint32_t index) const { return m_elements[index]; }
+
+		const UniformBufferElement& getBufferElement(uint32_t index) const
+		{
+			BV_ASSERT(index < m_elements.size(), "Index {} is out of bound!", index);
+			return m_elements[index];
+		}
 
 	private:
 		void calculateSizeAndElementOffsets();
 
 	private:
-		std::vector<UniformBufferElement> m_elements;
+		std::vector<UniformBufferElement> m_elements = {};
 		uint32_t m_bufferSize = 0;
 	};
 
 	struct UniformBufferSpecifications
 	{
-		std::string BlockName = "<UnknownBlockName>";
 		uint32_t BindingPoint = 0;
 		UniformBufferLayout Layout;
 
@@ -60,9 +64,6 @@ namespace Brickview
 		static Ref<UniformBuffer> create(const UniformBufferSpecifications& specs);
 
 		virtual ~UniformBuffer() = default;
-
-		virtual void bind() const = 0;
-		virtual void unbind() const = 0;
 
 		virtual void setElement(uint32_t elementIndex, const void* data) = 0;
 

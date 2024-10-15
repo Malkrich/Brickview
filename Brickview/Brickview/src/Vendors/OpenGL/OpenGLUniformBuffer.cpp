@@ -13,7 +13,7 @@ namespace Brickview
 	{
 		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
-		glBufferData(GL_UNIFORM_BUFFER, specs.Layout.getBufferSize(), nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_UNIFORM_BUFFER, m_specs.Layout.getBufferSize(), nullptr, GL_DYNAMIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, m_specs.BindingPoint, m_bufferID);
 
 		CHECK_GL_ERROR();
@@ -24,22 +24,11 @@ namespace Brickview
 		glDeleteBuffers(1, &m_bufferID);
 	}
 
-	void OpenGLUniformBuffer::bind() const
-	{
-		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
-	}
-
-	void OpenGLUniformBuffer::unbind() const
-	{
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-	}
-
 	void OpenGLUniformBuffer::setElement(uint32_t elementIndex, const void* data)
 	{
-		BV_ASSERT(elementIndex < m_specs.Layout.getElementCount(), "Buffer element index out of bound!");
-
-		uint32_t size = m_specs.Layout.getBufferElement(elementIndex).Size;
-		uint32_t offset = m_specs.Layout.getBufferElement(elementIndex).Offset;
+		const UniformBufferElement& bufferElement = m_specs.Layout.getBufferElement(elementIndex);
+		uint32_t size   = bufferElement.Size;
+		uint32_t offset = bufferElement.Offset;
 
 		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
 		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);

@@ -16,7 +16,7 @@ namespace Brickview
 		{
 			switch (type)
 			{
-				case UniformBufferElementType::None: BV_ASSERT(false, "Unknown elemnent type!");
+				case UniformBufferElementType::None:   BV_ASSERT(false, "Unknown elemnent type!");
 				case UniformBufferElementType::Float3: return sizeof(glm::vec3);
 				case UniformBufferElementType::Mat4:   return sizeof(glm::mat4);
 			}
@@ -36,15 +36,15 @@ namespace Brickview
 	void UniformBufferLayout::calculateSizeAndElementOffsets()
 	{
 		uint32_t offset = 0;
-		for (size_t i = 0; i < m_elements.size(); i++)
+		for (UniformBufferElement& element : m_elements)
 		{
-			uint32_t elementSize = Utils::getElementSizeFromType(m_elements[i].Type);
-			m_bufferSize += elementSize;
+			uint32_t elementSize = Utils::getElementSizeFromType(element.Type);
+			m_bufferSize         += elementSize;
 
-			m_elements[i].Size = elementSize;
-			m_elements[i].Offset = offset;
+			element.Size         = elementSize;
+			element.Offset       = offset;
 
-			offset += elementSize;
+			offset               += elementSize;
 		}
 	}
 
