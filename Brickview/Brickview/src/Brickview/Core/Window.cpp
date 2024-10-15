@@ -5,7 +5,6 @@
 #include "Core/Event/MouseEvent.h"
 #include "Core/Event/KeyEvent.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace Brickview
@@ -22,8 +21,7 @@ namespace Brickview
 
 	void Window::onUpdate()
 	{
-		/* Swap front and back buffers */
-		glfwSwapBuffers(m_window);
+		m_context->swapBuffers();
 
 		/* Poll for and process events */
 		glfwPollEvents();
@@ -52,16 +50,8 @@ namespace Brickview
 			return;
 		}
 
-		/* Make the window's context current */
-		glfwMakeContextCurrent(m_window);
-
-		// init window
-		int version = gladLoadGL();
-		if (version == 0)
-		{
-			BV_LOG_ERROR("Failed to initialize OpenGL context !");
-			return;
-		}
+		m_context = GraphicsContext::create(m_window);
+		m_context->init();
 
 		// set window settings as user pointer
 		glfwSetWindowUserPointer(m_window, &m_settings);

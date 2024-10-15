@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Event/Event.h"
+#include "Renderer/GraphicsContext.h"
 
 struct GLFWwindow;
 
@@ -62,8 +63,10 @@ namespace Brickview
 		void initialize(const WindowSettings& windowSettings);
 
 	private:
-		WindowSettings m_settings;
-
 		GLFWwindow* m_window;
+
+		Scope<GraphicsContext> m_context;
+
+		WindowSettings m_settings;
 	};
 }
