@@ -125,9 +125,28 @@ namespace Brickview
 		ImGui::Begin("Viewport");
 		// Updates
 		m_cameraControl.setViewportHovered(ImGui::IsWindowHovered());
+		ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		ImVec2 viewportDim = ImGui::GetContentRegionAvail();
-		m_viewportWidth    = (uint32_t)viewportDim.x;
-		m_viewportHeight   = (uint32_t)viewportDim.y;
+		ImVec2 viewportPos = ImGui::GetWindowPos();
+		ImVec2 mousePosition = ImGui::GetMousePos();
+		// viewportMinRegion essentially gives the tab bar dimensions if open 
+		// (otherwise viewportMinRegion = (0, 0))
+		mousePosition.x -= viewportPos.x + viewportMinRegion.x;
+		mousePosition.y -= viewportPos.y + viewportMinRegion.y;
+		// Flipping Y coordinate to make the bottom left corner (0, 0)
+		mousePosition.y = viewportDim.y - mousePosition.y;
+
+		if (mousePosition.x > 0 && mousePosition.x < viewportDim.x
+			&& mousePosition.y > 0 && mousePosition.y < viewportDim.y)
+		{
+
+			int32_t pixelData = m_renderer->getEntityIDAt((uint32_t)mousePosition.x, (uint32_t)mousePosition.y);
+
+			BV_LOG_INFO("Mouse pos: {}, {}, pixel data: {}", mousePosition.x, mousePosition.y, pixelData);
+		}
+
+		m_viewportWidth = (uint32_t)viewportDim.x;
+		m_viewportHeight = (uint32_t)viewportDim.y;
 		// Render
 		ImGui::Image((void*)m_renderer->getSceneRenderAttachment(), viewportDim, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 

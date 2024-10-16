@@ -24,7 +24,7 @@ namespace Brickview
 
 		FrameBufferAttachmentSpecs() = default;
 		FrameBufferAttachmentSpecs(FrameBufferAttachment attachment)
-			: Attachment(attachment)
+			: Format(attachment)
 		{}
 	};
 
@@ -51,7 +51,10 @@ namespace Brickview
 
 		virtual const FrameBufferSpecifications& getSpecifications() const = 0;
 
+		virtual int32_t readPixel(uint32_t attachmentIndex, uint32_t mouseX, uint32_t mouseY) const = 0;
+
 		virtual uint32_t getColorAttachment(uint32_t index) const = 0;
+		virtual void clearAttachment(uint32_t attachmentIndex, int value) = 0;
 	};
 
 }

@@ -30,7 +30,7 @@ namespace Brickview
 	{
 	public:
 		UniformBufferLayout() = default;
-		UniformBufferLayout(std::initializer_list<UniformBufferElement> elements);
+		UniformBufferLayout(const std::initializer_list<UniformBufferElement>& elements);
 
 		uint32_t getBufferSize() const { return m_bufferSize; }
 

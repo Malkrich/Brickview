@@ -27,7 +27,7 @@ namespace Brickview
 
 	}
 
-	UniformBufferLayout::UniformBufferLayout(std::initializer_list<UniformBufferElement> elements)
+	UniformBufferLayout::UniformBufferLayout(const std::initializer_list<UniformBufferElement>& elements)
 		: m_elements(elements)
 	{
 		calculateSizeAndElementOffsets();

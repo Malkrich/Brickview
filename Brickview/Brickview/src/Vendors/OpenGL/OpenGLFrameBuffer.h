@@ -19,18 +19,21 @@ namespace Brickview
 
 		virtual const FrameBufferSpecifications& getSpecifications() const override { return m_specs; }
 
+		virtual int32_t readPixel(uint32_t attachmentIndex, uint32_t mouseX, uint32_t mouseY) const override;
+
 		virtual uint32_t getColorAttachment(uint32_t index) const override;
+		virtual void clearAttachment(uint32_t attachmentIndex, int value) override;
 
 	private:
 		void invalidate();
 
 	private:
-		uint32_t m_bufferID;
+		uint32_t m_bufferID = 0;
 
 		FrameBufferSpecifications m_specs;
 
 		std::vector<FrameBufferAttachmentSpecs> m_colorAttachmentsSpecs = {};
-		FrameBufferAttachmentSpecs m_depthAttachmentSpecs;
+		FrameBufferAttachmentSpecs m_depthAttachmentSpecs = FrameBufferAttachment::None;
 
 		std::vector<uint32_t> m_colorAttachments = {};
 		uint32_t m_depthAttachment = 0;

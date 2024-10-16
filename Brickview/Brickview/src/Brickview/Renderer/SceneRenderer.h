@@ -32,6 +32,7 @@ namespace Brickview
 		SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight);
 
 		uint32_t getSceneRenderAttachment() const;
+		int32_t getEntityIDAt(uint32_t mouseX, uint32_t mouseY) const;
 		void resizeViewport(uint32_t width, uint32_t height);
 
 		void begin(const Camera& camera);

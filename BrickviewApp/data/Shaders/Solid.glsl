@@ -13,10 +13,10 @@ layout (std140, binding = 0) uniform CameraData
     mat4 ViewProjectionMatrix;
     vec3 Position;
 } cameraData;
-//uniform mat4 u_viewProjection;
 
 out vec3 f_currentPosition;
 out vec3 f_normal;
+out flat int f_entityID;
 
 void main()
 {
@@ -31,19 +31,18 @@ void main()
 #type fragment
 #version 450 core
 
+layout (location = 0) out vec4 o_color;
+layout (location = 1) out int o_entityID;
+
 in vec3 f_currentPosition;
 in vec3 f_normal;
-in int f_entityID;
-
-out vec4 o_color;
-out int o_entityID;
+in flat int f_entityID;
 
 layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
     vec3 Position;
 } cameraData;
-
 //uniform bool u_showNormals;
 
 void main()
@@ -61,5 +60,5 @@ void main()
 
     o_color = vec4(renderedColor, 1.0);
     //color = vec4(u_showNormals ? normalColor * renderedColor: renderedColor, 1.0);
-    o_entityID = f_entityID;
+    o_entityID = 22;
 }
