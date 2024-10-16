@@ -24,7 +24,6 @@
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"
 #include "Renderer/Mesh.h"
-#include "Renderer/Viewport.h"
 
 // Scene
 #include "Scene/Scene.h"
