@@ -2,6 +2,8 @@
 
 #include "UniformBuffer.h"
 #include "Shader/Shader.h"
+#include "Texture2D.h"
+#include "FrameBuffer.h"
 #include "Camera.h"
 #include "Scene/Components.h"
 #include "Lego/LegoMeshRegistry.h"
@@ -26,7 +28,10 @@ namespace Brickview
 	class SceneRenderer
 	{
 	public:
-		SceneRenderer();
+		SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight);
+
+		uint32_t getSceneRenderAttachment() const;
+		void resizeViewport(uint32_t width, uint32_t height);
 
 		void begin(const Camera& camera);
 
@@ -47,6 +52,7 @@ namespace Brickview
 	private:
 		CameraData m_cameraData;
 		Ref<UniformBuffer> m_cameraDataUbo;
+		Ref<FrameBuffer> m_viewportFrameBuffer;
 
 		// Lego parts
 		std::vector<InstanceBuffer> m_instanceBuffers;

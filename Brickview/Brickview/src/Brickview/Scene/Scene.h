@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Core/Time.h"
+#include "Renderer/SceneRenderer.h"
+#include "Renderer/Texture2D.h"
 #include "Renderer/Mesh.h"
 #include "Lego/LegoPart.h"
 #include "Lego/LegoMeshRegistry.h"
-#include "Renderer/SceneRenderer.h"
 
 #include <entt.hpp>
 
@@ -16,18 +17,16 @@ namespace Brickview
 	class Scene
 	{
 	public:
-		Scene() = default;
+		Scene();
 
 		Entity createEntity();
 		void createLegoPartEntity(LegoPartID partID, Ref<Mesh> mesh);
 
-		void onUpdate(DeltaTime dt, const Camera& camera);
+		void onUpdate(DeltaTime dt, const Camera& camera, Ref<SceneRenderer> renderer);
 
 	private:
 		entt::registry m_registry;
 		LegoMeshRegistry m_legoMeshRegistry;
-
-		SceneRenderer m_renderer;
 
 		friend class Entity;
 		friend class LegoPartsCollectionPanel;

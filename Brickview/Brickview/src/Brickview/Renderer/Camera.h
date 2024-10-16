@@ -10,7 +10,7 @@ namespace Brickview
 	class Camera
 	{
 	public:
-		Camera(const glm::vec3& position = glm::vec3(0.0f), float pitch = 0.0f, float yaw = 0.0f);
+		Camera(const glm::vec2& dimensions, const glm::vec3 & position = glm::vec3(0.0f), float pitch = 0.0f, float yaw = 0.0f);
 
 		void setViewportDimension(uint32_t width, uint32_t height);
 
@@ -36,8 +36,8 @@ namespace Brickview
 
 	private:
 		float m_fov = 45.0f, m_nearClip = 0.01f, m_farClip = 100.0f;
-		float m_viewportWidth = 1280.0f, m_viewportHeight = 720.0f;
-		float m_aspectRatio = m_viewportWidth / m_viewportHeight;
+		float m_viewportWidth , m_viewportHeight;
+		float m_aspectRatio;
 
 		glm::mat4 m_viewMatrix;
 		glm::mat4 m_projectionMatrix;

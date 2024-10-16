@@ -13,13 +13,14 @@ namespace Brickview
 	{}
 
 	CameraController::CameraController(const CameraControllerSpecifications& spec)
-		: m_currentMousePosition(-1)
+		: m_camera({ (float)m_width, (float)m_height }, { 0.0f, 0.0f, spec.DistanceFromObject } )
+		, m_currentMousePosition(-1)
 		, m_targetPoint(spec.TargetPosition)
 		, m_distanceFromObject(spec.DistanceFromObject)
 		, m_laptopMode(spec.LaptopMode)
+		, m_width(spec.Width)
+		, m_height(spec.Height)
 	{
-		glm::vec3 initPosition = { 0.0f, 0.0f, m_distanceFromObject };
-		m_camera = Camera(initPosition);
 	}
 
 	glm::vec3 CameraController::computeTranslationOffset(const glm::ivec2& mouseOffset) const
@@ -42,6 +43,16 @@ namespace Brickview
 		newPosition          += m_targetPoint;
 
 		return { newPosition, newRotation };
+	}
+
+	void CameraController::resize(uint32_t width, uint32_t height)
+	{
+		if (width != m_width || height != m_height)
+		{
+			m_camera.setViewportDimension(width, height);
+			m_width  = width;
+			m_height = height;
+		}
 	}
 
 	void CameraController::onEvent(Event& e)

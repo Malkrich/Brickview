@@ -11,8 +11,8 @@ namespace Brickview
 	class ApplicationLayer : public Layer
 	{
 	public:
-		ApplicationLayer() {}
-		virtual ~ApplicationLayer() {}
+		ApplicationLayer();
+		virtual ~ApplicationLayer();
 
 		virtual void onAttach() override;
 		virtual void onDetach() override;
@@ -32,10 +32,12 @@ namespace Brickview
 		void endDockspace();
 
 	private:
-		Scope<Viewport> m_viewport = nullptr;
-
 		// Scene
-		Ref<Scene> m_scene;
+		Ref<Scene> m_scene = nullptr;
+
+		// Render
+		Ref<SceneRenderer> m_renderer = nullptr;
+		uint32_t m_viewportWidth, m_viewportHeight;
 
 		CameraController m_cameraControl;
 		bool m_laptopMode = false;

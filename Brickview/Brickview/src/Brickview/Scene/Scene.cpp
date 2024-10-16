@@ -11,6 +11,10 @@
 namespace Brickview
 {
 
+	Scene::Scene()
+	{
+	}
+
 	Entity Scene::createEntity()
 	{
 		entt::entity enttEntity = m_registry.create();
@@ -27,11 +31,11 @@ namespace Brickview
 		e.addComponent<LegoPartComponent>(partID, m_legoMeshRegistry, mesh);
 	}
 
-	void Scene::onUpdate(DeltaTime dt, const Camera& camera)
+	void Scene::onUpdate(DeltaTime dt, const Camera& camera, Ref<SceneRenderer> renderer)
 	{
 		// Rendering
 		// TODO: add lights to ECS and rendering
-		m_renderer.begin(camera);
+		renderer->begin(camera);
 		auto meshEntities = m_registry.view<TransformComponent, LegoPartComponent>();
 		for (auto e : meshEntities)
 		{
@@ -39,10 +43,8 @@ namespace Brickview
 
 			const TransformComponent& transform = entity.getComponent<TransformComponent>();
 			const LegoPartComponent& legoPart   = entity.getComponent<LegoPartComponent>();
-			m_renderer.submitLegoPart(legoPart, m_legoMeshRegistry, transform);
+			renderer->submitLegoPart(legoPart, m_legoMeshRegistry, transform);
 		}
-
-		m_renderer.render();
 	}
 
 }

@@ -12,19 +12,30 @@
 namespace Brickview
 {
 
+	ApplicationLayer::ApplicationLayer()
+		: m_viewportWidth(Input::getWindowSize().x)
+		, m_viewportHeight(Input::getWindowSize().y)
+	{
+	}
+
+	ApplicationLayer::~ApplicationLayer()
+	{
+	}
+
 	void ApplicationLayer::onAttach()
 	{
 		// Scene
 		m_scene = createRef<Scene>();
-
-		// Viewport
-		uint32_t width = Input::getWindowSize().x;
-		uint32_t height = Input::getWindowSize().y;
-		m_viewport = createScope<Viewport>(width, height);
-
+		// Note: think about the dimensions, this is the window size,
+		// not the actual ImGui viewport size
+	
+		// Renderer
+		m_renderer = createRef<SceneRenderer>(m_viewportWidth, m_viewportHeight);
 		// Editor camera
 		CameraControllerSpecifications cameraControlSpec;
 		cameraControlSpec.DistanceFromObject = 0.2f;
+		cameraControlSpec.Width  = m_viewportWidth;
+		cameraControlSpec.Height = m_viewportHeight;
 		m_cameraControl = CameraController(cameraControlSpec);
 		m_cameraControl.setLaptopMode(m_laptopMode);
 
@@ -79,10 +90,12 @@ namespace Brickview
 	{
 		m_dt = dt;
 
-		m_viewport->beginFrame();
+		m_renderer->resizeViewport(m_viewportWidth, m_viewportHeight);
+		m_cameraControl.resize(m_viewportWidth, m_viewportHeight);
+
 		const Camera& camera = m_cameraControl.getCamera();
-		m_scene->onUpdate(dt, camera);
-		m_viewport->endFrame();
+		m_scene->onUpdate(dt, camera, m_renderer);
+		m_renderer->render();
 	}
 
 	void ApplicationLayer::onGuiRender()
@@ -105,10 +118,21 @@ namespace Brickview
 		}
 
 		// Viewport
-		m_viewport->onGuiRender();
-		if (m_viewport->hasSizeChanged())
-			m_cameraControl.resize(m_viewport->getWidth(), m_viewport->getHeight());
-		m_cameraControl.setViewportHovered(m_viewport->isHovered());
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+
+		ImGui::Begin("Viewport");
+		// Updates
+		m_cameraControl.setViewportHovered(ImGui::IsWindowHovered());
+		ImVec2 viewportDim = ImGui::GetContentRegionAvail();
+		m_viewportWidth    = (uint32_t)viewportDim.x;
+		m_viewportHeight   = (uint32_t)viewportDim.y;
+		// Render
+		ImGui::Image((void*)m_renderer->getSceneRenderAttachment(), viewportDim, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+
+		ImGui::End();
+		ImGui::PopStyleVar(3);
 
 		// Shader lib
 		ImGui::Begin("Shaders");

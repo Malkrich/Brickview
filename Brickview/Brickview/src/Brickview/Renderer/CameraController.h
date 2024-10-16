@@ -15,6 +15,7 @@ namespace Brickview
 		glm::vec3 TargetPosition = { 0.0f, 0.0f, 0.0f };
 		float DistanceFromObject = 2.0f;
 		bool LaptopMode = false;
+		uint32_t Width = 1280, Height = 1080;
 	};
 
 	class CameraController
@@ -25,7 +26,7 @@ namespace Brickview
 
 		const Camera& getCamera() const { return m_camera; }
 
-		void resize(uint32_t width, uint32_t height) { m_camera.setViewportDimension(width, height); }
+		void resize(uint32_t width, uint32_t height);
 
 		// TODO: update position
 		void setTargetPoint(const glm::vec3& targetPoint) { m_targetPoint = targetPoint; }
@@ -64,6 +65,7 @@ namespace Brickview
 		Camera m_camera;
 		glm::vec3 m_targetPoint;
 		float m_distanceFromObject;
+		uint32_t m_width, m_height;
 
 		// Control variables
 		glm::ivec2 m_currentMousePosition = { 0, 0 };

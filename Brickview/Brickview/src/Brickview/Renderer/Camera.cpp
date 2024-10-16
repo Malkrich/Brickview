@@ -8,11 +8,14 @@
 namespace Brickview
 {
 
-	Camera::Camera(const glm::vec3& position, float pitch, float yaw)
+	Camera::Camera(const glm::vec2& dimensions, const glm::vec3& position, float pitch, float yaw)
 		: m_position(position)
 		, m_pitch(pitch)
 		, m_yaw(yaw)
 		, m_projectionMatrix(glm::perspective(glm::radians(m_fov), m_aspectRatio, m_nearClip, m_farClip))
+		, m_viewportWidth(dimensions.x)
+		, m_viewportHeight(dimensions.y)
+		, m_aspectRatio(m_viewportWidth / m_viewportHeight)
 	{
 		updateViewMatrix();
 	}

@@ -6,7 +6,7 @@
 
 namespace Brickview
 {
-	SceneRenderer::SceneRenderer()
+	SceneRenderer::SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
 		UniformBufferSpecifications cameraDataUboSpecs;
 		cameraDataUboSpecs.BindingPoint = 0;
@@ -15,6 +15,25 @@ namespace Brickview
 			UniformBufferElementType::Float3
 		};
 		m_cameraDataUbo = UniformBuffer::create(cameraDataUboSpecs);
+
+		FrameBufferSpecifications viewportFrameBufferSpecs;
+		viewportFrameBufferSpecs.Width  = viewportWidth;
+		viewportFrameBufferSpecs.Height = viewportHeight;
+		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
+	}
+
+	uint32_t SceneRenderer::getSceneRenderAttachment() const
+	{
+		return m_viewportFrameBuffer->getColorAttachment();
+	}
+
+	void SceneRenderer::resizeViewport(uint32_t width, uint32_t height)
+	{
+		uint32_t currentWidth = m_viewportFrameBuffer->getSpecifications().Width;
+		uint32_t currentHeight = m_viewportFrameBuffer->getSpecifications().Height;
+
+		if (width != currentWidth || height != currentHeight)
+			m_viewportFrameBuffer->resize(width, height);
 	}
 
 	void SceneRenderer::begin(const Camera& camera)
@@ -50,6 +69,7 @@ namespace Brickview
 
 	void SceneRenderer::render()
 	{
+		m_viewportFrameBuffer->bind();
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
 
@@ -63,6 +83,7 @@ namespace Brickview
 		{
 			Renderer::renderMeshInstances(solidShader, buffer.Mesh, buffer.Transforms.data(), buffer.InstanceCount);
 		}
+		m_viewportFrameBuffer->unbind();
 
 		m_currentBufferIndex.clear();
 		m_instanceBuffers.clear();
