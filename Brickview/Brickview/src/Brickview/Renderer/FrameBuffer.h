@@ -5,16 +5,36 @@
 namespace Brickview
 {
 
+	enum class FrameBufferAttachment
+	{
+		None = 0,
+
+		RedInt,
+		RGBA8,
+
+		Depth24Sentil8,
+
+		Depth = Depth24Sentil8
+	};
+
+	struct FrameBufferAttachmentSpecs
+	{
+		FrameBufferAttachment Format = FrameBufferAttachment::None;
+		bool Clear = true;
+
+		FrameBufferAttachmentSpecs() = default;
+		FrameBufferAttachmentSpecs(FrameBufferAttachment attachment)
+			: Attachment(attachment)
+		{}
+	};
+
 	struct FrameBufferSpecifications
 	{
-		uint32_t Width;
-		uint32_t Height;
+		uint32_t Width = 0;
+		uint32_t Height = 0;
+		std::vector<FrameBufferAttachmentSpecs> Attachments = {};
 
 		FrameBufferSpecifications() = default;
-		FrameBufferSpecifications(uint32_t width, uint32_t height)
-			: Width(width)
-			, Height(height)
-		{}
 	};
 
 	class FrameBuffer
@@ -31,7 +51,7 @@ namespace Brickview
 
 		virtual const FrameBufferSpecifications& getSpecifications() const = 0;
 
-		virtual uint32_t getColorAttachment() const = 0;
+		virtual uint32_t getColorAttachment(uint32_t index) const = 0;
 	};
 
 }

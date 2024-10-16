@@ -6,6 +6,7 @@ layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
 // Per instances
 layout (location = 2) in mat4 a_transform;
+layout (location = 3) in int a_entityID;
 
 layout (std140, binding = 0) uniform CameraData
 {
@@ -22,6 +23,7 @@ void main()
     vec4 worldPosition = a_transform * vec4(a_position, 1.0);
     f_currentPosition = vec3(worldPosition);
     f_normal = a_normal;
+    f_entityID = a_entityID;
     gl_Position = cameraData.ViewProjectionMatrix * worldPosition;
 }
 
@@ -31,8 +33,10 @@ void main()
 
 in vec3 f_currentPosition;
 in vec3 f_normal;
+in int f_entityID;
 
-out vec4 color;
+out vec4 o_color;
+out int o_entityID;
 
 layout (std140, binding = 0) uniform CameraData
 {
@@ -55,6 +59,7 @@ void main()
     renderedColor *= diffuse;
     renderedColor += ambient;
 
-    color = vec4(renderedColor, 1.0);
+    o_color = vec4(renderedColor, 1.0);
     //color = vec4(u_showNormals ? normalColor * renderedColor: renderedColor, 1.0);
+    o_entityID = f_entityID;
 }

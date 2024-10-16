@@ -18,8 +18,9 @@ namespace Brickview
 		using TransformBuffer = std::array<glm::mat4, 10>;
 
 		LegoPartID DebugID;
+
 		Ref<GpuMesh> Mesh = nullptr;
-		TransformBuffer Transforms;
+		TransformBuffer Transforms = TransformBuffer();
 		size_t InstanceCount = 0;
 
 		InstanceBuffer() = default;

@@ -17,8 +17,9 @@ namespace Brickview
 		m_cameraDataUbo = UniformBuffer::create(cameraDataUboSpecs);
 
 		FrameBufferSpecifications viewportFrameBufferSpecs;
-		viewportFrameBufferSpecs.Width  = viewportWidth;
+		viewportFrameBufferSpecs.Width = viewportWidth;
 		viewportFrameBufferSpecs.Height = viewportHeight;
+		viewportFrameBufferSpecs.Attachments = { FrameBufferAttachment::RGBA8, FrameBufferAttachment::RedInt, FrameBufferAttachment::Depth };
 		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
 	}
 
