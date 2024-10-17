@@ -7,6 +7,51 @@
 namespace Brickview
 {
 
+	namespace Utils
+	{
+		using BufferElementType = Brickview::BufferElementType;
+
+		static uint32_t getElementSize(BufferElementType type)
+		{
+			switch (type)
+			{
+			case BufferElementType::Bool:	return 1;
+			case BufferElementType::Int:	return 1 * sizeof(int);
+			case BufferElementType::Int2:	return 2 * sizeof(int);
+			case BufferElementType::Int3:	return 3 * sizeof(int);
+			case BufferElementType::Int4:	return 4 * sizeof(int);
+			case BufferElementType::Float:	return 1 * sizeof(float);
+			case BufferElementType::Float2: return 2 * sizeof(float);
+			case BufferElementType::Float3: return 3 * sizeof(float);
+			case BufferElementType::Float4: return 4 * sizeof(float);
+			case BufferElementType::Mat2:	return 2 * 2 * sizeof(float);
+			case BufferElementType::Mat3:	return 3 * 3 * sizeof(float);
+			case BufferElementType::Mat4:	return 4 * 4 * sizeof(float);
+			}
+
+			BV_ASSERT(false, "Buffer element type unknown !");
+			return 0;
+		}
+	}
+
+	Layout::Layout(const std::initializer_list<BufferElement>& elements)
+		: m_elements(elements)
+	{
+		computeOffsetAndStride();
+	}
+
+	void Layout::computeOffsetAndStride()
+	{
+		uint32_t offset = 0;
+		for (auto& element : m_elements)
+		{
+			element.Offset = offset;
+			uint32_t elementSize = Utils::getElementSize(element.Type);
+			m_stride += elementSize;
+			offset += elementSize;
+		}
+	}
+
 	/*********************************************************/
 	/*************   VERTEX BUFFER   *************************/
 	/*********************************************************/

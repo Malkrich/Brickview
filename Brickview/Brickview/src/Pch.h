@@ -10,6 +10,7 @@
 #include <algorithm>
 
 // containers
+#include <array>
 #include <vector>
 #include <set>
 #include <unordered_map>

@@ -41,27 +41,22 @@ namespace Brickview
 		return s_rendererData->ShaderLibrary;
 	}
 
-	void Renderer::renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh, const glm::mat4* transformData, size_t instanceCount)
+	void Renderer::renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh, 
+		const void* instanceBufferData, const Layout& instanceBufferLayout, uint32_t instanceBufferSize, size_t instanceCount)
 	{
-		// Transform buffer
-		uint32_t transformBufferSize = instanceCount * sizeof(glm::mat4);
+		Ref<VertexBuffer> instanceElementsBuffer = VertexBuffer::create(instanceCount * instanceBufferSize, instanceBufferData);
+		instanceElementsBuffer->setBufferLayout(instanceBufferLayout);
 
-		Ref<VertexBuffer> meshTransformBuffer = VertexBuffer::create(transformBufferSize, transformData);
-		// Note: as a GpuMesh is passed, we assume that the transform buffer will be at the 3rd position (bind = 2)
-		// Maybe needs to be revisited
-		Layout meshTransformLayout = {
-			{ 2, "a_transform", BufferElementType::Mat4 }
-		};
-		meshTransformBuffer->setBufferLayout(meshTransformLayout);
-
-		Ref<VertexArray> vao = VertexArray::create();
-		vao->addVertexBuffer(mesh->getGeometryVertexBuffer());
-		vao->setIndexBuffer(mesh->getGeometryIndexBuffer());
-		vao->addVertexBuffer(meshTransformBuffer);
+		Ref<VertexArray> vertexArray = VertexArray::create();
+		vertexArray->addVertexBuffer(mesh->getGeometryVertexBuffer());
+		vertexArray->addVertexBuffer(instanceElementsBuffer);
+		vertexArray->setIndexBuffer(mesh->getGeometryIndexBuffer());
 
 		shader->bind();
 
-		RenderCommand::drawInstances(vao, instanceCount);
+		RenderCommand::drawInstances(vertexArray, instanceCount);
+
+		vertexArray->unbind();
 	}
 
 }

@@ -5,8 +5,8 @@
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
 // Per instances
-layout (location = 2) in mat4 a_transform;
-layout (location = 3) in int a_entityID;
+layout (location = 2) in int a_entityID;
+layout (location = 3) in mat4 a_transform;
 
 layout (std140, binding = 0) uniform CameraData
 {
@@ -60,5 +60,5 @@ void main()
 
     o_color = vec4(renderedColor, 1.0);
     //color = vec4(u_showNormals ? normalColor * renderedColor: renderedColor, 1.0);
-    o_entityID = 22;
+    o_entityID = f_entityID;
 }

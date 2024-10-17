@@ -21,6 +21,11 @@ namespace Brickview
 		viewportFrameBufferSpecs.Height = viewportHeight;
 		viewportFrameBufferSpecs.Attachments = { FrameBufferAttachment::RGBA8, FrameBufferAttachment::RedInt, FrameBufferAttachment::Depth };
 		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
+
+		m_instanceBufferLayout = {
+			{ 2, "a_entityID", BufferElementType::Int, 1 },
+			{ 3, "a_transform", BufferElementType::Mat4, 1 }
+		};
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
@@ -51,28 +56,28 @@ namespace Brickview
 		m_cameraData.Position = camera.getPosition();
 	}
 
-	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform)
+	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID)
 	{
 		LegoPartID id = legoPart.ID;
 		glm::mat4 transformMat = transform.getTransform();
 
 		if (!m_currentBufferIndex.contains(id))
 		{
-			insertNewBuffer(id, legoPartMeshRegistry, transformMat);
+			insertNewBuffer(id, legoPartMeshRegistry, InstanceElement(transformMat, (int)entityID));
 			return;
 		}
 
 		uint32_t instanceBufferIndex = m_currentBufferIndex.at(id);
 		InstanceBuffer& buffer = m_instanceBuffers[instanceBufferIndex];
 
-		if (buffer.InstanceCount < buffer.Transforms.size())
+		if (buffer.InstanceCount < buffer.InstanceElements.size())
 		{
-			buffer.Transforms[buffer.InstanceCount] = transformMat;
+			buffer.InstanceElements[buffer.InstanceCount] = InstanceElement(transformMat, (int)entityID);
 			buffer.InstanceCount++;
 		}
 		else
 		{
-			insertNewBuffer(id, legoPartMeshRegistry, transformMat);
+			insertNewBuffer(id, legoPartMeshRegistry, InstanceElement(transformMat, (int)entityID));
 		}
 	}
 
@@ -91,7 +96,8 @@ namespace Brickview
 
 		for (const InstanceBuffer& buffer : m_instanceBuffers)
 		{
-			Renderer::renderMeshInstances(solidShader, buffer.Mesh, buffer.Transforms.data(), buffer.InstanceCount);
+			Renderer::renderMeshInstances(solidShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(), 
+				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
 		}
 
 		m_viewportFrameBuffer->unbind();
@@ -101,13 +107,13 @@ namespace Brickview
 	}
 
 
-	void SceneRenderer::insertNewBuffer(LegoPartID id, const LegoMeshRegistry& legoMeshRegistry, const glm::mat4& transform)
+	void SceneRenderer::insertNewBuffer(LegoPartID id, const LegoMeshRegistry& legoMeshRegistry, const InstanceElement& instanceElement)
 	{
 		// Creates new buffer with geometry
 		InstanceBuffer instanceBuffer;
 		instanceBuffer.DebugID = id;
 		instanceBuffer.Mesh = legoMeshRegistry.getPart(id).Mesh;
-		instanceBuffer.Transforms[0] = transform;
+		instanceBuffer.InstanceElements[0] = instanceElement;
 		instanceBuffer.InstanceCount++;
 
 		m_instanceBuffers.push_back(instanceBuffer);

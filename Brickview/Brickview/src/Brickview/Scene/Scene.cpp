@@ -43,7 +43,7 @@ namespace Brickview
 
 			const TransformComponent& transform = entity.getComponent<TransformComponent>();
 			const LegoPartComponent& legoPart   = entity.getComponent<LegoPartComponent>();
-			renderer->submitLegoPart(legoPart, m_legoMeshRegistry, transform);
+			renderer->submitLegoPart(legoPart, m_legoMeshRegistry, transform, (uint32_t)e);
 		}
 	}
 

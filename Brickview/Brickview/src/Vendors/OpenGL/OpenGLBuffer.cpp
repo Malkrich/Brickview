@@ -34,28 +34,55 @@ namespace Brickview
 			return 0;
 		}
 
-		static GLenum getOpenGLElementType(BufferElementType type)
+		static void enableFloatAttribute(const BufferElement& element, uint32_t stride)
 		{
-			switch (type)
-			{
-			case BufferElementType::Bool:	return GL_BOOL;
-			case BufferElementType::Int:	return GL_INT;
-			case BufferElementType::Int2:	return GL_INT;
-			case BufferElementType::Int3:	return GL_INT;
-			case BufferElementType::Int4:	return GL_INT;
-			case BufferElementType::Float:	return GL_FLOAT;
-			case BufferElementType::Float2: return GL_FLOAT;
-			case BufferElementType::Float3: return GL_FLOAT;
-			case BufferElementType::Float4: return GL_FLOAT;
-			case BufferElementType::Mat2:	return GL_FLOAT;
-			case BufferElementType::Mat3:	return GL_FLOAT;
-			case BufferElementType::Mat4:	return GL_FLOAT;
-			}
+			uint32_t elementCount = Utils::getElementCount(element.Type);
+			glVertexAttribPointer(element.Index, elementCount, GL_FLOAT, element.Normalized ? GL_TRUE : GL_FALSE, stride, (const void*)element.Offset);
+			glEnableVertexAttribArray(element.Index);
 
-			BV_ASSERT(false, "Buffer element type unknown !");
-			return 0;
+			// For instance rendering
+			if (element.AttributeDivisor > 0)
+			{
+				glVertexAttribDivisor(element.Index, element.AttributeDivisor);
+			}
 		}
 
+		static void enableIntegerAttribute(const BufferElement& element, uint32_t stride)
+		{
+			uint32_t elementCount = Utils::getElementCount(element.Type);
+			glVertexAttribIPointer(element.Index, elementCount, GL_INT, stride, (const void*)element.Offset);
+			glEnableVertexAttribArray(element.Index);
+
+			// For instance rendering
+			if (element.AttributeDivisor > 0)
+			{
+				glVertexAttribDivisor(element.Index, element.AttributeDivisor);
+			}
+		}
+
+		static void enableMat4Attribute(const BufferElement& element, uint32_t stride)
+		{
+			glVertexAttribPointer(element.Index + 0, 4, GL_FLOAT, element.Normalized ? GL_TRUE : GL_FALSE, stride, (void*)(element.Offset + 0 * sizeof(glm::vec4)));
+			glEnableVertexAttribArray(element.Index + 0);
+
+			glVertexAttribPointer(element.Index + 1, 4, GL_FLOAT, element.Normalized ? GL_TRUE : GL_FALSE, stride, (void*)(element.Offset + 1 * sizeof(glm::vec4)));
+			glEnableVertexAttribArray(element.Index + 1);
+
+			glVertexAttribPointer(element.Index + 2, 4, GL_FLOAT, element.Normalized ? GL_TRUE : GL_FALSE, stride, (void*)(element.Offset + 2 * sizeof(glm::vec4)));
+			glEnableVertexAttribArray(element.Index + 2);
+
+			glVertexAttribPointer(element.Index + 3, 4, GL_FLOAT, element.Normalized ? GL_TRUE : GL_FALSE, stride, (void*)(element.Offset + 3 * sizeof(glm::vec4)));
+			glEnableVertexAttribArray(element.Index + 3);
+
+			// For instance rendering
+			if (element.AttributeDivisor > 0)
+			{
+				glVertexAttribDivisor(element.Index + 0, element.AttributeDivisor);
+				glVertexAttribDivisor(element.Index + 1, element.AttributeDivisor);
+				glVertexAttribDivisor(element.Index + 2, element.AttributeDivisor);
+				glVertexAttribDivisor(element.Index + 3, element.AttributeDivisor);
+			}
+		}
 	}
 
 	/*********************************************************/
@@ -179,39 +206,29 @@ namespace Brickview
 		vertexBuffer->bind();
 
 		const Layout& layout = vertexBuffer->getLayout();
-		unsigned int stride = layout.getStride();
-		for(const auto& element : layout)
+		uint32_t stride = layout.getStride();
+
+		for(const BufferElement& element : layout)
 		{
-			unsigned int elementCount = Utils::getElementCount(element.Type);
-			GLenum elementType = Utils::getOpenGLElementType(element.Type);
 			switch (element.Type)
 			{
-			case BufferElementType::Mat4:
-				// /!\: This implementation is for instance rendering only
-				glVertexAttribPointer(element.Index + 0, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(0 * sizeof(glm::vec4)));
-				glEnableVertexAttribArray(element.Index + 0);
-				glVertexAttribPointer(element.Index + 1, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(1 * sizeof(glm::vec4)));
-				glEnableVertexAttribArray(element.Index + 1);
-				glVertexAttribPointer(element.Index + 2, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(2 * sizeof(glm::vec4)));
-				glEnableVertexAttribArray(element.Index + 2);
-				glVertexAttribPointer(element.Index + 3, 4, elementType, element.Normalized ? GL_TRUE : GL_FALSE, 4 * sizeof(glm::vec4), (void*)(3 * sizeof(glm::vec4)));
-				glEnableVertexAttribArray(element.Index + 3);
-
-				// Move this because it depends whether it is instance rendering or not
-				glVertexAttribDivisor(element.Index + 0, 1);
-				glVertexAttribDivisor(element.Index + 1, 1);
-				glVertexAttribDivisor(element.Index + 2, 1);
-				glVertexAttribDivisor(element.Index + 3, 1);
-				break;
-			default:
-				glVertexAttribPointer(element.Index,
-									  elementCount,
-									  elementType,
-									  element.Normalized ? GL_TRUE : GL_FALSE,
-									  stride,
-									  (const void*)element.Offset);
-				glEnableVertexAttribArray(element.Index);
-				break;
+				case BufferElementType::Mat4:
+					Utils::enableMat4Attribute(element, stride);
+					break;
+				case BufferElementType::Int:
+				case BufferElementType::Int2:
+				case BufferElementType::Int3:
+				case BufferElementType::Int4:
+					Utils::enableIntegerAttribute(element, stride);
+					break;
+				case BufferElementType::Float:
+				case BufferElementType::Float2:
+				case BufferElementType::Float3:
+				case BufferElementType::Float4:
+					Utils::enableFloatAttribute(element, stride);
+					break;
+				default:
+					BV_ASSERT(false, "Buffer layout element not implemented yet!");
 			}
 		}
 

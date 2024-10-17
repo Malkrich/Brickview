@@ -10,8 +10,8 @@ namespace Brickview
 		const std::vector<TriangleFace>& meshConnectivities = mesh->getConnectivities();
 
 		Layout meshGeoLayout = {
-			{ "a_position", BufferElementType::Float3 },
-			{ "a_normal", BufferElementType::Float3 }
+			{ 0, "a_position", BufferElementType::Float3 },
+			{ 1, "a_normal", BufferElementType::Float3 }
 		};
 
 		m_geometryVbo = VertexBuffer::create(

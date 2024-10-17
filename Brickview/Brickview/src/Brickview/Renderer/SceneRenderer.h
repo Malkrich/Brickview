@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Buffer.h"
 #include "UniformBuffer.h"
 #include "Shader/Shader.h"
 #include "Texture2D.h"
@@ -13,14 +14,25 @@
 namespace Brickview
 {
 
+	struct InstanceElement
+	{
+		int EntityID = -1;
+		glm::mat4 Transform = glm::mat4(1.0f);
+
+		InstanceElement() = default;
+		InstanceElement(const InstanceElement&) = default;
+		InstanceElement(const glm::mat4& transform, int entityID)
+			: Transform(transform), EntityID(entityID) {}
+	};
+
 	struct InstanceBuffer
 	{
-		using TransformBuffer = std::array<glm::mat4, 10>;
 
-		LegoPartID DebugID;
+		// TODO: switch to uint32_t type
+		LegoPartID DebugID = "";
 
 		Ref<GpuMesh> Mesh = nullptr;
-		TransformBuffer Transforms = TransformBuffer();
+		std::array<InstanceElement, 10> InstanceElements;
 		size_t InstanceCount = 0;
 
 		InstanceBuffer() = default;
@@ -37,12 +49,12 @@ namespace Brickview
 
 		void begin(const Camera& camera);
 
-		void submitLegoPart(const LegoPartComponent& legoPart, const LegoMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform);
+		void submitLegoPart(const LegoPartComponent& legoPart, const LegoMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID);
 
 		void render();
 
 	private:
-		void insertNewBuffer(LegoPartID id, const LegoMeshRegistry& legoMeshRegistry, const glm::mat4& transform);
+		void insertNewBuffer(LegoPartID id, const LegoMeshRegistry& legoMeshRegistry, const InstanceElement& instanceElement);
 
 	private:
 		struct CameraData
@@ -59,6 +71,7 @@ namespace Brickview
 		// Lego parts
 		std::vector<InstanceBuffer> m_instanceBuffers;
 		std::unordered_map<LegoPartID, uint32_t> m_currentBufferIndex;
+		Layout m_instanceBufferLayout;
 	};
 
 }
