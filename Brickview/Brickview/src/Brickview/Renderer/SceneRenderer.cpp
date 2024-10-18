@@ -26,6 +26,18 @@ namespace Brickview
 			{ 2, "a_entityID", BufferElementType::Int, 1 },
 			{ 3, "a_transform", BufferElementType::Mat4, 1 }
 		};
+
+		BV_ASSERT(m_originLines.size() == m_originLineColors.size(), "OriginLines and OriginLineColors must be the same length!");
+		m_originLines = {
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.1f, 0.0f, 0.0f }),
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.1f, 0.0f }),
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.1f })
+		};
+		m_originLineColors = {
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f)
+		};
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
@@ -94,11 +106,15 @@ namespace Brickview
 		
 		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("Solid");
 
+		// Lego parts
 		for (const InstanceBuffer& buffer : m_instanceBuffers)
 		{
 			Renderer::renderMeshInstances(solidShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(), 
 				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
 		}
+
+		// Origin
+		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
 
 		m_viewportFrameBuffer->unbind();
 

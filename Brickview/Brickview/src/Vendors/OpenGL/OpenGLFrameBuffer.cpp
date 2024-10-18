@@ -96,6 +96,7 @@ namespace Brickview
 	void OpenGLFrameBuffer::unbind() const
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		CHECK_GL_ERROR();
 	}
 
 	void OpenGLFrameBuffer::resize(uint32_t width, uint32_t height)

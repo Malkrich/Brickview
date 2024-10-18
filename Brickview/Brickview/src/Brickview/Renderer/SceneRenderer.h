@@ -6,6 +6,7 @@
 #include "Texture2D.h"
 #include "FrameBuffer.h"
 #include "Camera.h"
+#include "Primitives.h"
 #include "Scene/Components.h"
 #include "Lego/LegoMeshRegistry.h"
 
@@ -37,6 +38,8 @@ namespace Brickview
 
 		InstanceBuffer() = default;
 	};
+
+	struct Line;
 
 	class SceneRenderer
 	{
@@ -72,6 +75,11 @@ namespace Brickview
 		std::vector<InstanceBuffer> m_instanceBuffers;
 		std::unordered_map<LegoPartID, uint32_t> m_currentBufferIndex;
 		Layout m_instanceBufferLayout;
+
+		// Grid
+		std::vector<Line> m_originLines;
+		std::vector<glm::vec3> m_originLineColors;
+		//std::vector<Line> m_gridLines;
 	};
 
 }

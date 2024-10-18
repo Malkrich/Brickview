@@ -1,6 +1,8 @@
 #include "Pch.h"
 #include "OpenGLRendererAPI.h"
 
+#include "OpenGLError.h"
+
 #include <glad/glad.h>
 
 namespace Brickview
@@ -32,14 +34,22 @@ namespace Brickview
 
 	void OpenGLRendererAPI::drawIndices(const Ref<VertexArray>& vertexArray)
 	{
-		vertexArray->bind();
 		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRendererAPI::drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount)
 	{
-		vertexArray->bind();
 		glDrawElementsInstanced(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr, instanceCount);
+	}
+
+	void OpenGLRendererAPI::setLineWidth(float lineWidth)
+	{
+		glLineWidth(lineWidth);
+	}
+
+	void OpenGLRendererAPI::drawLines(const Ref<VertexArray>& vertexAray, uint32_t vertexCount)
+	{
+		glDrawArrays(GL_LINES, 0, vertexCount);
 	}
 
 }

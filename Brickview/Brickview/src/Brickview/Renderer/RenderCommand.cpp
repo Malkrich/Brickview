@@ -56,4 +56,14 @@ namespace Brickview
 		s_rendererAPI->drawInstances(vertexArray, instanceCount);
 	}
 
+	void RenderCommand::setLineWidth(float lineWidth)
+	{
+		s_rendererAPI->setLineWidth(lineWidth);
+	}
+
+	void RenderCommand::drawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
+	{
+		s_rendererAPI->drawLines(vertexArray, vertexCount);
+	}
+
 }

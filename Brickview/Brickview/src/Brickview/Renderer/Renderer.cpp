@@ -9,6 +9,16 @@
 namespace Brickview
 {
 
+	struct LineVertex
+	{
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+
+		LineVertex() = default;
+		LineVertex(const glm::vec3& position, const glm::vec3 color)
+			: Position(position), Color(color) {}
+	};
+
 	struct RendererData
 	{
 		Ref<ShaderLibrary> ShaderLibrary = nullptr;
@@ -27,6 +37,7 @@ namespace Brickview
 		// For rendered renderer
 		s_rendererData->ShaderLibrary->load("data/Shaders/LegoPiece.glsl");
 		s_rendererData->ShaderLibrary->load("data/Shaders/Light.glsl");
+		s_rendererData->ShaderLibrary->load("data/Shaders/Line.glsl");
 	}
 
 	void Renderer::shutdown()
@@ -47,16 +58,55 @@ namespace Brickview
 		Ref<VertexBuffer> instanceElementsBuffer = VertexBuffer::create(instanceCount * instanceBufferSize, instanceBufferData);
 		instanceElementsBuffer->setBufferLayout(instanceBufferLayout);
 
-		Ref<VertexArray> vertexArray = VertexArray::create();
-		vertexArray->addVertexBuffer(mesh->getGeometryVertexBuffer());
-		vertexArray->addVertexBuffer(instanceElementsBuffer);
-		vertexArray->setIndexBuffer(mesh->getGeometryIndexBuffer());
+		Ref<VertexArray> instanceDrawCallVertexArray = VertexArray::create();
+		instanceDrawCallVertexArray->addVertexBuffer(mesh->getGeometryVertexBuffer());
+		instanceDrawCallVertexArray->addVertexBuffer(instanceElementsBuffer);
+		instanceDrawCallVertexArray->setIndexBuffer(mesh->getGeometryIndexBuffer());
 
 		shader->bind();
+		instanceDrawCallVertexArray->bind();
+		RenderCommand::drawInstances(instanceDrawCallVertexArray, instanceCount);
+		instanceDrawCallVertexArray->unbind();
+	}
 
-		RenderCommand::drawInstances(vertexArray, instanceCount);
+	void Renderer::renderLines(const std::vector<Line>& lines, const glm::vec3& color, float lineWidth)
+	{
+		std::vector<glm::vec3> colors(lines.size());
+		std::fill(colors.begin(), colors.end(), color);
+		renderLines(lines, colors, lineWidth);
+	}
 
-		vertexArray->unbind();
+	void Renderer::renderLines(const std::vector<Line>& lines, const std::vector<glm::vec3>& colors, float lineWidth)
+	{
+		BV_ASSERT(lines.size() == colors.size(), "Lines and color data must be the same length!");
+
+		std::vector<LineVertex> lineVertices(lines.size() * 2);
+		for (uint32_t i = 0; i < lines.size(); i++)
+		{
+			const Line& line = lines[i];
+			const glm::vec3& color = colors[i];
+			lineVertices[2 * i + 0] = LineVertex(line.P0, color);
+			lineVertices[2 * i + 1] = LineVertex(line.P1, color);
+		}
+
+		uint32_t vertexCount = lineVertices.size();
+		Ref<VertexBuffer> linesVertexBuffer = VertexBuffer::create(vertexCount * sizeof(LineVertex), lineVertices.data());
+		Layout lineVertexLayout = {
+			{ 0, "a_position", BufferElementType::Float3 },
+			{ 1, "a_color", BufferElementType::Float3 }
+		};
+		linesVertexBuffer->setBufferLayout(lineVertexLayout);
+
+		Ref<VertexArray> linesVertexArray = VertexArray::create();
+		linesVertexArray->addVertexBuffer(linesVertexBuffer);
+
+		Ref<Shader> lineShader = s_rendererData->ShaderLibrary->get("Line");
+		lineShader->bind();
+
+		linesVertexArray->bind();
+		RenderCommand::setLineWidth(lineWidth);
+		RenderCommand::drawLines(linesVertexArray, vertexCount);
+		linesVertexArray->unbind();
 	}
 
 }
