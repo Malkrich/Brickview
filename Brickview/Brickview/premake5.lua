@@ -12,13 +12,14 @@ project "Brickview"
         "src/",
         "src/Brickview/",
         "src/Vendors/",
-        "../vendors/glm/",
-        "../vendors/GLFW/glfw-3.3.8/include",
-        "../vendors/glad/include",
-        "../vendors/spdlog/include",
-        "../vendors/imgui/",
-        "../vendors/entt/include/",
-        "../vendors/stb_image/"
+        "../Vendors/glm/",
+        "../Vendors/GLFW/glfw-3.3.8/include",
+        "../Vendors/glad/include",
+        "../Vendors/spdlog/include",
+        "../Vendors/imgui/",
+        "../Vendors/ImGuizmo/",
+        "../Vendors/entt/include/",
+        "../Vendors/stb_image/"
     }
 
     files
@@ -42,7 +43,8 @@ project "Brickview"
         "GLFW",
         "glad",
         "spdlog",
-        "imgui"
+        "imgui",
+        "ImGuizmo"
     }
 
     filter "system:windows"
