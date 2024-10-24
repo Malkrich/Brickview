@@ -3,7 +3,7 @@
 #include "Core/Event/MouseEvent.h"
 #include "Core/Event/ApplicationEvent.h"
 #include "Core/KeyCodes.h"
-#include "Camera.h"
+#include "PerspectiveCamera.h"
 
 #include <tuple>
 
@@ -12,23 +12,27 @@ namespace Brickview
 
 	struct CameraControllerSpecifications
 	{
+		// Control parameters
 		glm::vec3 TargetPosition = { 0.0f, 0.0f, 0.0f };
 		float DistanceFromObject = 2.0f;
 		bool LaptopMode = false;
-		uint32_t Width = 1280, Height = 1080;
+
+		// Camera parameters
+		float Width, Height;
+		glm::vec3 CameraPosition = { 0.0f, 0.0f, 1.0f };
+		float Pitch = 0.0f, Yaw = 0.0f;
+
 	};
 
 	class CameraController
 	{
 	public:
-		CameraController();
-		CameraController(const CameraControllerSpecifications& spec);
+		CameraController(const CameraControllerSpecifications& specs);
 
-		const Camera& getCamera() const { return m_camera; }
+		const PerspectiveCamera& getCamera() const { return m_camera; }
 
-		void resize(uint32_t width, uint32_t height);
+		void resize(float width, float height);
 
-		// TODO: update position
 		void setTargetPoint(const glm::vec3& targetPoint) { m_targetPoint = targetPoint; }
 
 		void setViewportHovered(bool hovered) { m_isViewportHovered = hovered; }
@@ -37,7 +41,7 @@ namespace Brickview
 		void onEvent(Event& e);
 
 	private:
-		typedef glm::vec3 EulerRotation;
+		using EulerRotation = glm::vec3;
 
 	private:
 		void updateCameraPositionAndRotation(const glm::vec3& newPosition, const EulerRotation& rotation)
@@ -62,10 +66,10 @@ namespace Brickview
 
 	private:
 		// Camera description
-		Camera m_camera;
+		PerspectiveCamera m_camera;
 		glm::vec3 m_targetPoint;
 		float m_distanceFromObject;
-		uint32_t m_width, m_height;
+		float m_width, m_height;
 
 		// Control variables
 		glm::ivec2 m_currentMousePosition = { 0, 0 };

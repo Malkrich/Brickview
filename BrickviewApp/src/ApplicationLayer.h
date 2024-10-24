@@ -39,8 +39,11 @@ namespace Brickview
 		Ref<SceneRenderer> m_renderer = nullptr;
 		uint32_t m_viewportWidth, m_viewportHeight;
 
-		CameraController m_cameraControl;
+		Scope<CameraController> m_cameraControl = nullptr;
 		bool m_laptopMode = false;
+
+		// Guizmo tests
+		Entity m_selectedEntity = {};
 
 		DeltaTime m_dt = 0.0f;
 

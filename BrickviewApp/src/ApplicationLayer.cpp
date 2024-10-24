@@ -1,6 +1,7 @@
 #include "ApplicationLayer.h"
 
 #include <imgui.h>
+#include <ImGuizmo/ImGuizmo.h>
 #include <imgui_internal.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -26,18 +27,20 @@ namespace Brickview
 	{
 		// Scene
 		m_scene = createRef<Scene>();
+		m_selectedEntity = m_scene->createEntity();
 		// Note: think about the dimensions, this is the window size,
 		// not the actual ImGui viewport size
 	
 		// Renderer
 		m_renderer = createRef<SceneRenderer>(m_viewportWidth, m_viewportHeight);
 		// Editor camera
-		CameraControllerSpecifications cameraControlSpec;
-		cameraControlSpec.DistanceFromObject = 0.2f;
-		cameraControlSpec.Width  = m_viewportWidth;
-		cameraControlSpec.Height = m_viewportHeight;
-		m_cameraControl = CameraController(cameraControlSpec);
-		m_cameraControl.setLaptopMode(m_laptopMode);
+		CameraControllerSpecifications cameraControlSpecs;
+		cameraControlSpecs.Width = (float)m_viewportWidth;
+		cameraControlSpecs.Height = (float)m_viewportHeight;
+		cameraControlSpecs.DistanceFromObject = 0.2f;
+		cameraControlSpecs.CameraPosition = { 0.0f, 0.0f, cameraControlSpecs.DistanceFromObject };
+		cameraControlSpecs.LaptopMode = m_laptopMode;
+		m_cameraControl = createScope<CameraController>(cameraControlSpecs);
 
 		// Panels
 		m_legoPartsExplorerPanel = createScope<LegoPartsExplorerPanel>("./data/LDraw/parts/");
@@ -56,7 +59,7 @@ namespace Brickview
 
 	void ApplicationLayer::onEvent(Event& e)
 	{
-		m_cameraControl.onEvent(e);
+		m_cameraControl->onEvent(e);
 
 		EventDispatcher dispatcher(e);
 
@@ -79,10 +82,12 @@ namespace Brickview
 
 	bool ApplicationLayer::onKeyPressed(const KeyPressedEvent& e)
 	{
+#if 0
 		if (e.getKeyCode() == BV_KEY_KP_0)
 		{
-			m_cameraControl.setTargetPoint({ 0.0f, 0.0f, 0.0f });
+			m_cameraControl->setTargetPoint({ 0.0f, 0.0f, 0.0f });
 		}
+#endif
 		return true;
 	}
 
@@ -91,10 +96,11 @@ namespace Brickview
 		m_dt = dt;
 
 		m_renderer->resizeViewport(m_viewportWidth, m_viewportHeight);
-		m_cameraControl.resize(m_viewportWidth, m_viewportHeight);
+		m_cameraControl->resize((float)m_viewportWidth, (float)m_viewportHeight);
 
-		const Camera& camera = m_cameraControl.getCamera();
-		m_scene->onUpdate(dt, camera, m_renderer);
+		const PerspectiveCamera& camera = m_cameraControl->getCamera();
+		m_renderer->begin(camera);
+		m_scene->onUpdate(dt, m_renderer);
 		m_renderer->render();
 	}
 
@@ -110,7 +116,7 @@ namespace Brickview
 				if (ImGui::MenuItem("Laptop mode", nullptr, m_laptopMode))
 				{
 					m_laptopMode = !m_laptopMode;
-					m_cameraControl.setLaptopMode(m_laptopMode);
+					m_cameraControl->setLaptopMode(m_laptopMode);
 				}
 				ImGui::EndMenu();
 			}
@@ -124,7 +130,7 @@ namespace Brickview
 
 		ImGui::Begin("Viewport");
 		// Updates
-		m_cameraControl.setViewportHovered(ImGui::IsWindowHovered());
+		m_cameraControl->setViewportHovered(ImGui::IsWindowHovered());
 		ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		ImVec2 viewportDim = ImGui::GetContentRegionAvail();
 		ImVec2 viewportPos = ImGui::GetWindowPos();
@@ -139,10 +145,21 @@ namespace Brickview
 		if (mousePosition.x > 0 && mousePosition.x < viewportDim.x
 			&& mousePosition.y > 0 && mousePosition.y < viewportDim.y)
 		{
-
 			int32_t pixelData = m_renderer->getEntityIDAt((uint32_t)mousePosition.x, (uint32_t)mousePosition.y);
 
-			BV_LOG_INFO("Mouse pos: {}, {}, pixel data: {}", mousePosition.x, mousePosition.y, pixelData);
+			//BV_LOG_INFO("Mouse pos: {}, {}, pixel data: {}", mousePosition.x, mousePosition.y, pixelData);
+		}
+
+		// Guizmo
+		if (m_selectedEntity)
+		{
+			const PerspectiveCamera& camera = m_cameraControl->getCamera();
+			glm::mat4 objectTransform = m_selectedEntity.getComponent<TransformComponent>().getTransform();
+			ImGuizmo::BeginFrame();
+			ImGuizmo::SetRect(viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y, viewportDim.x, viewportDim.y);
+			ImGuizmo::Manipulate(glm::value_ptr(camera.getViewMatrix()), glm::value_ptr(camera.getProjectionMatrix()),
+				ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
+				glm::value_ptr(objectTransform));
 		}
 
 		m_viewportWidth = (uint32_t)viewportDim.x;
@@ -150,7 +167,7 @@ namespace Brickview
 		// Render
 		ImGui::Image((void*)m_renderer->getSceneRenderAttachment(), viewportDim, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
-		ImGui::End();
+		ImGui::End(); // Viewport
 		ImGui::PopStyleVar(3);
 
 		// Shader lib

@@ -8,18 +8,14 @@
 namespace Brickview
 {
 
-	CameraController::CameraController()
-		: CameraController(CameraControllerSpecifications())
-	{}
-
-	CameraController::CameraController(const CameraControllerSpecifications& spec)
-		: m_camera({ (float)m_width, (float)m_height }, { 0.0f, 0.0f, spec.DistanceFromObject } )
+	CameraController::CameraController(const CameraControllerSpecifications& specs)
+		: m_camera(specs.Width, specs.Height, specs.CameraPosition, specs.Pitch, specs.Yaw)
 		, m_currentMousePosition(-1)
-		, m_targetPoint(spec.TargetPosition)
-		, m_distanceFromObject(spec.DistanceFromObject)
-		, m_laptopMode(spec.LaptopMode)
-		, m_width(spec.Width)
-		, m_height(spec.Height)
+		, m_targetPoint(specs.TargetPosition)
+		, m_distanceFromObject(specs.DistanceFromObject)
+		, m_laptopMode(specs.LaptopMode)
+		, m_width(specs.Width)
+		, m_height(specs.Height)
 	{
 	}
 
@@ -45,11 +41,11 @@ namespace Brickview
 		return { newPosition, newRotation };
 	}
 
-	void CameraController::resize(uint32_t width, uint32_t height)
+	void CameraController::resize(float width, float height)
 	{
 		if (width != m_width || height != m_height)
 		{
-			m_camera.setViewportDimension(width, height);
+			m_camera.setViewportDimensions(width, height);
 			m_width  = width;
 			m_height = height;
 		}

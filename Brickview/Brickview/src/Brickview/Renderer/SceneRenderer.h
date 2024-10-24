@@ -5,7 +5,7 @@
 #include "Shader/Shader.h"
 #include "Texture2D.h"
 #include "FrameBuffer.h"
-#include "Camera.h"
+#include "PerspectiveCamera.h"
 #include "Primitives.h"
 #include "Scene/Components.h"
 #include "Lego/LegoMeshRegistry.h"
@@ -50,7 +50,7 @@ namespace Brickview
 		int32_t getEntityIDAt(uint32_t mouseX, uint32_t mouseY) const;
 		void resizeViewport(uint32_t width, uint32_t height);
 
-		void begin(const Camera& camera);
+		void begin(const PerspectiveCamera& camera);
 
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID);
 

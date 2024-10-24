@@ -20,6 +20,7 @@
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Camera.h"
+#include "Renderer/PerspectiveCamera.h"
 #include "Renderer/CameraController.h"
 #include "Renderer/Light.h"
 #include "Renderer/Material.h"

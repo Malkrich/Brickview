@@ -10,6 +10,7 @@ namespace Brickview
 	class Entity
 	{
 	public:
+		Entity() = default;
 		Entity(entt::entity handle, Scene* scene);
 
 		template<typename T, typename... Args>
@@ -33,11 +34,11 @@ namespace Brickview
 		}
 
 		operator uint32_t() const { return (uint32_t)m_entityHandle; }
-		operator bool() const { return m_entityHandle != entt::null; }
+		operator bool() const { return m_entityHandle != entt::null && m_scene != nullptr; }
 
 	private:
-		entt::entity m_entityHandle;
-		Scene* m_scene;
+		entt::entity m_entityHandle = entt::null;
+		Scene* m_scene = nullptr;
 	};
 
 }

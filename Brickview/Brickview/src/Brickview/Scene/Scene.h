@@ -22,7 +22,7 @@ namespace Brickview
 		Entity createEntity();
 		void createLegoPartEntity(LegoPartID partID, Ref<Mesh> mesh);
 
-		void onUpdate(DeltaTime dt, const Camera& camera, Ref<SceneRenderer> renderer);
+		void onUpdate(DeltaTime dt, Ref<SceneRenderer> renderer);
 
 	private:
 		entt::registry m_registry;

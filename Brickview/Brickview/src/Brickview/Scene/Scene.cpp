@@ -31,11 +31,10 @@ namespace Brickview
 		e.addComponent<LegoPartComponent>(partID, m_legoMeshRegistry, mesh);
 	}
 
-	void Scene::onUpdate(DeltaTime dt, const Camera& camera, Ref<SceneRenderer> renderer)
+	void Scene::onUpdate(DeltaTime dt, Ref<SceneRenderer> renderer)
 	{
 		// Rendering
 		// TODO: add lights to ECS and rendering
-		renderer->begin(camera);
 		auto meshEntities = m_registry.view<TransformComponent, LegoPartComponent>();
 		for (auto e : meshEntities)
 		{

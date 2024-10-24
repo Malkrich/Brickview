@@ -62,7 +62,7 @@ namespace Brickview
 			m_viewportFrameBuffer->resize(width, height);
 	}
 
-	void SceneRenderer::begin(const Camera& camera)
+	void SceneRenderer::begin(const PerspectiveCamera& camera)
 	{
 		m_cameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
 		m_cameraData.Position = camera.getPosition();
