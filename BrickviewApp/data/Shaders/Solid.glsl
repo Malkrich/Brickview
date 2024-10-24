@@ -22,7 +22,8 @@ void main()
 {
     vec4 worldPosition = a_transform * vec4(a_position, 1.0);
     f_currentPosition = vec3(worldPosition);
-    f_normal = a_normal;
+    mat3 normalTransform = mat3(transpose(inverse(a_transform)));
+    f_normal = normalTransform * a_normal;
     f_entityID = a_entityID;
     gl_Position = cameraData.ViewProjectionMatrix * worldPosition;
 }

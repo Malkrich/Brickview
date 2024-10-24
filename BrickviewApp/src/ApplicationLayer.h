@@ -3,13 +3,23 @@
 #include <Brickview.h>
 
 #include "Panels/LegoPartsExplorerPanel.h"
-#include "Panels/LegoPartsCollectionPanel.h"
+#include "Panels/LegoPartsSetPanel.h"
+
+#include <imgui.h>
+#include <ImGuizmo/ImGuizmo.h>
 
 namespace Brickview
 {
-
+	
 	class ApplicationLayer : public Layer
 	{
+	public:
+		enum class EditorManipulationType
+		{
+			None = 0,
+			Translate, Rotate
+		};
+
 	public:
 		ApplicationLayer();
 		virtual ~ApplicationLayer();
@@ -23,8 +33,7 @@ namespace Brickview
 
 	private:
 		// Events
-		bool onWindowResize(const WindowResizeEvent& e);
-		bool onMouseMoved(const MouseMovedEvent& e);
+		bool onMousePressed(const MousePressedEvent& e);
 		bool onKeyPressed(const KeyPressedEvent& e);
 
 		// Gui
@@ -41,15 +50,19 @@ namespace Brickview
 
 		Scope<CameraController> m_cameraControl = nullptr;
 		bool m_laptopMode = false;
-
-		// Guizmo tests
-		Entity m_selectedEntity = {};
+		bool m_guizmoHovered = false;
+		EditorManipulationType m_currentManipulationType = EditorManipulationType::Translate;
+		
+		// Mouse
+		ImVec2 m_mousePosition;
+		ImVec2 m_viewportMinBound;
+		ImVec2 m_viewportMaxBound;
 
 		DeltaTime m_dt = 0.0f;
 
 		// Panels
 		Scope<LegoPartsExplorerPanel> m_legoPartsExplorerPanel;
-		Scope<LegoPartsCollectionPanel> m_legoPartsCollectionPanel;
+		Scope<LegoPartsSetPanel> m_legoPartsSetPanel;
 	};
 
 }

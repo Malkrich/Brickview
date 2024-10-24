@@ -29,7 +29,7 @@ namespace Brickview
 		LegoMeshRegistry m_legoMeshRegistry;
 
 		friend class Entity;
-		friend class LegoPartsCollectionPanel;
+		friend class LegoPartsSetPanel;
 	};
 
 }

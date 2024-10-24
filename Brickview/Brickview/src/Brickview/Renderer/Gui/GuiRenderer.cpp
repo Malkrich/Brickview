@@ -6,7 +6,7 @@
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
-
+#include <ImGuizmo/ImGuizmo.h>
 
 namespace Brickview
 {
@@ -47,6 +47,7 @@ namespace Brickview
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 
 		ImGuiIO& io = ImGui::GetIO();
 		const Application* app = Application::get();

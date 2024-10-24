@@ -1,15 +1,15 @@
-#include "LegoPartsCollectionPanel.h"
+#include "LegoPartsSetPanel.h"
 
 #include <imgui.h>
 
 namespace Brickview
 {
 
-	LegoPartsCollectionPanel::LegoPartsCollectionPanel(Ref<Scene> context)
+	LegoPartsSetPanel::LegoPartsSetPanel(Ref<Scene> context)
 		: m_sceneContext(context)
 	{}
 
-	void LegoPartsCollectionPanel::onGuiRender()
+	void LegoPartsSetPanel::onGuiRender()
 	{
 		ImGui::Begin("Lego Parts Collection");
 
@@ -36,6 +36,17 @@ namespace Brickview
 		}
 
 		ImGui::End();
+	}
+
+	void LegoPartsSetPanel::setSelectedEntity(int32_t entityID)
+	{
+		if (entityID == -1)
+		{
+			m_selectedEntity = {};
+			return;
+		}
+
+		m_selectedEntity = Entity((entt::entity)entityID, m_sceneContext.get());
 	}
 
 }

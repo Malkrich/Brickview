@@ -1,6 +1,5 @@
 #include "ApplicationLayer.h"
 
-#include <imgui.h>
 #include <ImGuizmo/ImGuizmo.h>
 #include <imgui_internal.h>
 #include <glm/glm.hpp>
@@ -27,11 +26,9 @@ namespace Brickview
 	{
 		// Scene
 		m_scene = createRef<Scene>();
-		m_selectedEntity = m_scene->createEntity();
-		// Note: think about the dimensions, this is the window size,
-		// not the actual ImGui viewport size
-	
 		// Renderer
+		// Note: think about the dimensions, this is the native window size
+		// not the actual ImGui viewport size
 		m_renderer = createRef<SceneRenderer>(m_viewportWidth, m_viewportHeight);
 		// Editor camera
 		CameraControllerSpecifications cameraControlSpecs;
@@ -50,7 +47,7 @@ namespace Brickview
 			Ref<Mesh> mesh = Mesh::load(filePath);
 			m_scene->createLegoPartEntity(partID, mesh);
 		});
-		m_legoPartsCollectionPanel = createScope<LegoPartsCollectionPanel>(m_scene);
+		m_legoPartsSetPanel = createScope<LegoPartsSetPanel>(m_scene);
 	}
 
 	void ApplicationLayer::onDetach()
@@ -63,20 +60,31 @@ namespace Brickview
 
 		EventDispatcher dispatcher(e);
 
-		dispatcher.dispatch<WindowResizeEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onWindowResize));
-		dispatcher.dispatch<MouseMovedEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onMouseMoved));
+		dispatcher.dispatch<MousePressedEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onMousePressed));
 		dispatcher.dispatch<KeyPressedEvent>(BV_BIND_EVENT_FUNCTION(ApplicationLayer::onKeyPressed));
 	}
 
-	bool ApplicationLayer::onWindowResize(const WindowResizeEvent& e)
+	bool ApplicationLayer::onMousePressed(const MousePressedEvent& e)
 	{
-		//RenderCommand::setViewportDimension(0, 0, e.getWidth(), e.getHeight());
-		return true;
-	}
+		if (e.getMouseButton() == BV_MOUSE_BUTTON_LEFT && !m_guizmoHovered)
+		{
+			if (m_mousePosition.x > m_viewportMinBound.x && m_mousePosition.x < m_viewportMaxBound.x
+				&& m_mousePosition.y > m_viewportMinBound.y && m_mousePosition.y < m_viewportMaxBound.y)
+			{
+				ImVec2 screenPosition = {
+					m_mousePosition.x - m_viewportMinBound.x,
+					m_mousePosition.y - m_viewportMinBound.y
+				};
+				// Flipping Y coordinate to make the bottom left corner (0, 0)
+				float viewportHeight = m_viewportMaxBound.y - m_viewportMinBound.y;
+				screenPosition.y = viewportHeight - screenPosition.y;
 
-	bool ApplicationLayer::onMouseMoved(const MouseMovedEvent& e)
-	{
-		//BV_LOG_INFO("Mouse move event : {0},{1}", e.getPosX(), e.getPosY());
+				int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
+
+				m_legoPartsSetPanel->setSelectedEntity(entityID);
+			}
+		}
+
 		return true;
 	}
 
@@ -88,6 +96,20 @@ namespace Brickview
 			m_cameraControl->setTargetPoint({ 0.0f, 0.0f, 0.0f });
 		}
 #endif
+
+		switch (e.getKeyCode())
+		{
+			case BV_KEY_ESCAPE:
+				m_currentManipulationType = EditorManipulationType::None;
+				break;
+			case BV_KEY_T:
+				m_currentManipulationType = EditorManipulationType::Translate;
+				break;
+			case BV_KEY_R:
+				m_currentManipulationType = EditorManipulationType::Rotate;
+				break;
+		}
+
 		return true;
 	}
 
@@ -97,6 +119,9 @@ namespace Brickview
 
 		m_renderer->resizeViewport(m_viewportWidth, m_viewportHeight);
 		m_cameraControl->resize((float)m_viewportWidth, (float)m_viewportHeight);
+
+		// TODO: control the camera every frame instead of waiting for events
+		//m_cameraControl->onUpdate();
 
 		const PerspectiveCamera& camera = m_cameraControl->getCamera();
 		m_renderer->begin(camera);
@@ -129,37 +154,50 @@ namespace Brickview
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
 		ImGui::Begin("Viewport");
+		// Guizmo setup
+		ImGuizmo::SetAlternativeWindow(ImGui::GetCurrentWindow());
+		m_guizmoHovered = ImGuizmo::IsOver();
 		// Updates
 		m_cameraControl->setViewportHovered(ImGui::IsWindowHovered());
 		ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		ImVec2 viewportDim = ImGui::GetContentRegionAvail();
 		ImVec2 viewportPos = ImGui::GetWindowPos();
-		ImVec2 mousePosition = ImGui::GetMousePos();
+		m_mousePosition = ImGui::GetMousePos();
 		// viewportMinRegion essentially gives the tab bar dimensions if open 
 		// (otherwise viewportMinRegion = (0, 0))
-		mousePosition.x -= viewportPos.x + viewportMinRegion.x;
-		mousePosition.y -= viewportPos.y + viewportMinRegion.y;
-		// Flipping Y coordinate to make the bottom left corner (0, 0)
-		mousePosition.y = viewportDim.y - mousePosition.y;
-
-		if (mousePosition.x > 0 && mousePosition.x < viewportDim.x
-			&& mousePosition.y > 0 && mousePosition.y < viewportDim.y)
-		{
-			int32_t pixelData = m_renderer->getEntityIDAt((uint32_t)mousePosition.x, (uint32_t)mousePosition.y);
-
-			//BV_LOG_INFO("Mouse pos: {}, {}, pixel data: {}", mousePosition.x, mousePosition.y, pixelData);
-		}
+		m_viewportMinBound = { viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y };
+		m_viewportMaxBound = { m_viewportMinBound.x + viewportDim.x, m_viewportMinBound.y + viewportDim.y };
 
 		// Guizmo
-		if (m_selectedEntity)
+		Entity selectedEntity = m_legoPartsSetPanel->getSelectedEntity();
+		if (selectedEntity && m_currentManipulationType != EditorManipulationType::None)
 		{
 			const PerspectiveCamera& camera = m_cameraControl->getCamera();
-			glm::mat4 objectTransform = m_selectedEntity.getComponent<TransformComponent>().getTransform();
-			ImGuizmo::BeginFrame();
+			TransformComponent& transform = selectedEntity.getComponent<TransformComponent>();
+			glm::mat4 transformMatrix = transform.getTransform();
+
 			ImGuizmo::SetRect(viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y, viewportDim.x, viewportDim.y);
+
+			ImGuizmo::OPERATION guizmoManip;
+			switch (m_currentManipulationType)
+			{
+				case EditorManipulationType::Translate: guizmoManip = ImGuizmo::TRANSLATE; break;
+				case EditorManipulationType::Rotate:    guizmoManip = ImGuizmo::ROTATE; break;
+				default: BV_ASSERT(false, "Unknown manip type!"); break;
+			}
 			ImGuizmo::Manipulate(glm::value_ptr(camera.getViewMatrix()), glm::value_ptr(camera.getProjectionMatrix()),
-				ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
-				glm::value_ptr(objectTransform));
+				guizmoManip, ImGuizmo::WORLD,
+				glm::value_ptr(transformMatrix));
+
+			glm::vec3 translation, rotation, scale;
+			ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transformMatrix),
+				glm::value_ptr(translation),
+				glm::value_ptr(rotation),
+				glm::value_ptr(scale));
+			transform.Translation = translation;
+			transform.Rotation = glm::radians(rotation);
+
+			BV_LOG_INFO("Rotation: {}, {}, {}", rotation.x, rotation.y, rotation.z);
 		}
 
 		m_viewportWidth = (uint32_t)viewportDim.x;
@@ -204,7 +242,7 @@ namespace Brickview
 		ImGui::End();
 
 		m_legoPartsExplorerPanel->onGuiRender();
-		m_legoPartsCollectionPanel->onGuiRender();
+		m_legoPartsSetPanel->onGuiRender();
 
 		endDockspace();
 	}
@@ -267,4 +305,5 @@ namespace Brickview
 	{
 		ImGui::End();
 	}
+
 }
