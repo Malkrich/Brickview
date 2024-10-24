@@ -90,13 +90,6 @@ namespace Brickview
 
 	bool ApplicationLayer::onKeyPressed(const KeyPressedEvent& e)
 	{
-#if 0
-		if (e.getKeyCode() == BV_KEY_KP_0)
-		{
-			m_cameraControl->setTargetPoint({ 0.0f, 0.0f, 0.0f });
-		}
-#endif
-
 		switch (e.getKeyCode())
 		{
 			case BV_KEY_ESCAPE:
@@ -107,6 +100,11 @@ namespace Brickview
 				break;
 			case BV_KEY_R:
 				m_currentManipulationType = EditorManipulationType::Rotate;
+				break;
+			case BV_KEY_F:
+				Entity selectedEntity = m_legoPartsSetPanel->getSelectedEntity();
+				if (selectedEntity)
+					onFocusEntity(selectedEntity);
 				break;
 		}
 
@@ -196,8 +194,6 @@ namespace Brickview
 				glm::value_ptr(scale));
 			transform.Translation = translation;
 			transform.Rotation = glm::radians(rotation);
-
-			BV_LOG_INFO("Rotation: {}, {}, {}", rotation.x, rotation.y, rotation.z);
 		}
 
 		m_viewportWidth = (uint32_t)viewportDim.x;
@@ -304,6 +300,12 @@ namespace Brickview
 	void ApplicationLayer::endDockspace()
 	{
 		ImGui::End();
+	}
+
+	void ApplicationLayer::onFocusEntity(Entity entity)
+	{
+		TransformComponent& transform = entity.getComponent<TransformComponent>();
+		m_cameraControl->setTargetPoint(transform.Translation);
 	}
 
 }

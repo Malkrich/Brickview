@@ -40,6 +40,8 @@ namespace Brickview
 		void beginDockspace();
 		void endDockspace();
 
+		void onFocusEntity(Entity entity);
+
 	private:
 		// Scene
 		Ref<Scene> m_scene = nullptr;
