@@ -17,7 +17,6 @@ project "Brickview"
         "../Vendors/glad/include",
         "../Vendors/spdlog/include",
         "../Vendors/imgui/",
-        "../Vendors/ImGuizmo/",
         "../Vendors/entt/include/",
         "../Vendors/stb_image/"
     }
@@ -44,7 +43,6 @@ project "Brickview"
         "glad",
         "spdlog",
         "imgui",
-        "ImGuizmo"
     }
 
     filter "system:windows"
