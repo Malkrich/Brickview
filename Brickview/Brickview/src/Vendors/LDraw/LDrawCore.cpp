@@ -1,7 +1,7 @@
 #include "Pch.h"
 #include "LDrawCore.h"
 
-#include "LegoMeshLoader.h"
+#include "Brickview/Lego/LegoMeshLoader.h"
 #include "LDrawFileManager.h"
 #include "LDrawCommandManager.h"
 
