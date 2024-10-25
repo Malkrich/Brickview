@@ -32,6 +32,9 @@ namespace Brickview
 		GLFWwindow* window = (GLFWwindow*)Application::get()->getWindow()->getLibWindow();
 		ImGui_ImplGlfw_InitForOpenGL(window, true);
 		ImGui_ImplOpenGL3_Init("#version 330");
+
+		// ImGuizmo
+		ImGuizmo::AllowAxisFlip(false);
 	}
 
 	GuiRenderer::~GuiRenderer()

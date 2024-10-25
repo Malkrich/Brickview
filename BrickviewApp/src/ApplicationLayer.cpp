@@ -47,7 +47,7 @@ namespace Brickview
 			Ref<Mesh> mesh = Mesh::load(filePath);
 			m_scene->createLegoPartEntity(partID, mesh);
 		});
-		m_legoPartsSetPanel = createScope<LegoPartsSetPanel>(m_scene);
+		m_scenePartsListPanel = createScope<ScenePartsListPanel>(m_scene);
 	}
 
 	void ApplicationLayer::onDetach()
@@ -66,7 +66,9 @@ namespace Brickview
 
 	bool ApplicationLayer::onMousePressed(const MousePressedEvent& e)
 	{
-		if (e.getMouseButton() == BV_MOUSE_BUTTON_LEFT && !m_guizmoHovered)
+		BV_LOG_INFO("Gizmo hovered: {}, Gizmo visible: {}", ImGuizmo::IsOver(), m_gizmoVisible);
+
+		if (e.getMouseButton() == BV_MOUSE_BUTTON_LEFT && !(ImGuizmo::IsOver() && m_gizmoVisible))
 		{
 			if (m_mousePosition.x > m_viewportMinBound.x && m_mousePosition.x < m_viewportMaxBound.x
 				&& m_mousePosition.y > m_viewportMinBound.y && m_mousePosition.y < m_viewportMaxBound.y)
@@ -81,7 +83,9 @@ namespace Brickview
 
 				int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
 
-				m_legoPartsSetPanel->setSelectedEntity(entityID);
+				BV_LOG_INFO("Entity ID: {}", entityID);
+
+				m_scenePartsListPanel->setSelectedEntity(entityID);
 			}
 		}
 
@@ -102,7 +106,7 @@ namespace Brickview
 				m_currentManipulationType = EditorManipulationType::Rotate;
 				break;
 			case BV_KEY_F:
-				Entity selectedEntity = m_legoPartsSetPanel->getSelectedEntity();
+				Entity selectedEntity = m_scenePartsListPanel->getSelectedEntity();
 				if (selectedEntity)
 					onFocusEntity(selectedEntity);
 				break;
@@ -152,9 +156,6 @@ namespace Brickview
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
 		ImGui::Begin("Viewport");
-		// Guizmo setup
-		ImGuizmo::SetAlternativeWindow(ImGui::GetCurrentWindow());
-		m_guizmoHovered = ImGuizmo::IsOver();
 		// Updates
 		m_cameraControl->setViewportHovered(ImGui::IsWindowHovered());
 		ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
@@ -166,15 +167,23 @@ namespace Brickview
 		m_viewportMinBound = { viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y };
 		m_viewportMaxBound = { m_viewportMinBound.x + viewportDim.x, m_viewportMinBound.y + viewportDim.y };
 
-		// Guizmo
-		Entity selectedEntity = m_legoPartsSetPanel->getSelectedEntity();
+		// Gizmo
+		m_gizmoVisible = false;
+		Entity selectedEntity = m_scenePartsListPanel->getSelectedEntity();
 		if (selectedEntity && m_currentManipulationType != EditorManipulationType::None)
 		{
+			m_gizmoVisible = true;
+			// Window setup
+			ImGuizmo::SetAlternativeWindow(ImGui::GetCurrentWindow());
+			ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
+			ImGuizmo::SetOrthographic(false);
+
 			const PerspectiveCamera& camera = m_cameraControl->getCamera();
 			TransformComponent& transform = selectedEntity.getComponent<TransformComponent>();
 			glm::mat4 transformMatrix = transform.getTransform();
 
-			ImGuizmo::SetRect(viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y, viewportDim.x, viewportDim.y);
+			ImGuizmo::SetRect(m_viewportMinBound.x, m_viewportMinBound.y, 
+				m_viewportMaxBound.x - m_viewportMinBound.x, m_viewportMaxBound.y - m_viewportMinBound.y);
 
 			ImGuizmo::OPERATION guizmoManip;
 			switch (m_currentManipulationType)
@@ -184,7 +193,7 @@ namespace Brickview
 				default: BV_ASSERT(false, "Unknown manip type!"); break;
 			}
 			ImGuizmo::Manipulate(glm::value_ptr(camera.getViewMatrix()), glm::value_ptr(camera.getProjectionMatrix()),
-				guizmoManip, ImGuizmo::WORLD,
+				guizmoManip, ImGuizmo::LOCAL,
 				glm::value_ptr(transformMatrix));
 
 			glm::vec3 translation, rotation, scale;
@@ -238,7 +247,7 @@ namespace Brickview
 		ImGui::End();
 
 		m_legoPartsExplorerPanel->onGuiRender();
-		m_legoPartsSetPanel->onGuiRender();
+		m_scenePartsListPanel->onGuiRender();
 
 		endDockspace();
 	}

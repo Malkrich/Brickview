@@ -3,7 +3,7 @@
 #include <Brickview.h>
 
 #include "Panels/LegoPartsExplorerPanel.h"
-#include "Panels/LegoPartsSetPanel.h"
+#include "Panels/ScenePartsListPanel.h"
 
 #include <imgui.h>
 #include <ImGuizmo/ImGuizmo.h>
@@ -52,8 +52,8 @@ namespace Brickview
 
 		Scope<CameraController> m_cameraControl = nullptr;
 		bool m_laptopMode = false;
-		bool m_guizmoHovered = false;
 		EditorManipulationType m_currentManipulationType = EditorManipulationType::Translate;
+		bool m_gizmoVisible = false;
 		
 		// Mouse
 		ImVec2 m_mousePosition;
@@ -64,7 +64,7 @@ namespace Brickview
 
 		// Panels
 		Scope<LegoPartsExplorerPanel> m_legoPartsExplorerPanel;
-		Scope<LegoPartsSetPanel> m_legoPartsSetPanel;
+		Scope<ScenePartsListPanel> m_scenePartsListPanel;
 	};
 
 }

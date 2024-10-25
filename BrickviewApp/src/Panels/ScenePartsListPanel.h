@@ -5,10 +5,10 @@
 namespace Brickview
 {
 
-	class LegoPartsSetPanel
+	class ScenePartsListPanel
 	{
 	public:
-		LegoPartsSetPanel(Ref<Scene> context);
+		ScenePartsListPanel(Ref<Scene> context);
 
 		Entity getSelectedEntity() const { return m_selectedEntity; }
 		void setSelectedEntity(int32_t entityID);
