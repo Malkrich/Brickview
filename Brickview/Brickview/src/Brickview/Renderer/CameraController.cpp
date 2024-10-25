@@ -19,28 +19,6 @@ namespace Brickview
 	{
 	}
 
-	glm::vec3 CameraController::computeTranslationOffset(const glm::ivec2& mouseOffset) const
-	{
-		glm::vec3 translation(0.0f);
-		translation -= m_camera.getRightVector() * (float)mouseOffset.x * s_translationSensitivity;
-		translation += m_camera.getUpVector() * (float)mouseOffset.y * s_translationSensitivity;
-		return translation;
-	}
-
-	std::tuple<glm::vec3, CameraController::EulerRotation> CameraController::computeNewRotationAndTranslation(const glm::ivec2& mouseOffset) const
-	{
-		// The dot product gives a negative value when the camera is looking below the object
-		float yawOffsetSense = glm::dot(World::getUpVector(), m_camera.getUpVector()) > 0.0f ? 1.0f : -1.0f;
-
-		EulerRotation newRotation(0.0f);
-		newRotation.x         = m_camera.getPitch() - s_angleSensitivity * mouseOffset.y;
-		newRotation.y         = m_camera.getYaw() - s_angleSensitivity * mouseOffset.x * yawOffsetSense;
-		glm::vec3 newPosition = MathUtils::SphericalToCartesian(newRotation.x, newRotation.y, m_distanceFromObject);
-		newPosition          += m_targetPoint;
-
-		return { newPosition, newRotation };
-	}
-
 	void CameraController::resize(float width, float height)
 	{
 		if (width != m_width || height != m_height)
@@ -49,6 +27,17 @@ namespace Brickview
 			m_width  = width;
 			m_height = height;
 		}
+	}
+
+	void CameraController::setTargetPoint(const glm::vec3& targetPoint)
+	{
+		// Update camera position
+		glm::vec3 translation = targetPoint - m_targetPoint;
+		glm::vec3 newCameraPosition = m_camera.getPosition() + translation;
+		m_camera.setPosition(newCameraPosition);
+
+		// Set new target point
+		m_targetPoint = targetPoint;
 	}
 
 	void CameraController::onEvent(Event& e)
@@ -66,30 +55,15 @@ namespace Brickview
 		if (!m_isCameraControlled)
 			return false;
 
-		glm::ivec2 mouseOffset(0);
-		mouseOffset.x = e.getPosX() - m_currentMousePosition.x;
-		mouseOffset.y = e.getPosY() - m_currentMousePosition.y;
-		m_currentMousePosition.x = e.getPosX();
-		m_currentMousePosition.y = e.getPosY();
-
-		glm::vec3 newPosition     = m_camera.getPosition();
-		EulerRotation newRotation = { m_camera.getPitch(), m_camera.getYaw(), 0.0f };
+		glm::ivec2 newMousePosition = glm::ivec2(e.getPosX(), e.getPosY());
+		glm::ivec2 mouseOffset = newMousePosition - m_currentMousePosition;
+		m_currentMousePosition = newMousePosition;
 
 		if (Input::isKeyPressed(BV_KEY_LEFT_SHIFT) || Input::isKeyPressed(BV_KEY_RIGHT_SHIFT))
-		{
-			glm::vec3 translationOffset = computeTranslationOffset(mouseOffset);
-			newPosition   += translationOffset;
-			m_targetPoint += translationOffset;
-		}
+			panCamera(mouseOffset);
 		else
-		{
-			auto [position, rotation] = computeNewRotationAndTranslation(mouseOffset);
-			newPosition = position;
-			newRotation = rotation;
-		}
+			orbitCamera(mouseOffset);
 	
-		updateCameraPositionAndRotation(newPosition, newRotation);
-
 		return false;
 	}
 
@@ -125,8 +99,35 @@ namespace Brickview
 		glm::vec3 newPosition  = MathUtils::SphericalToCartesian(m_camera.getPitch(), m_camera.getYaw(), m_distanceFromObject);
 		newPosition           += m_targetPoint;
 
-		updateCameraPosition(newPosition);
+		m_camera.setPosition(newPosition);
 
 		return false;
 	}
+
+	void CameraController::orbitCamera(const glm::ivec2& mouseOffset)
+	{
+		// The dot product gives a negative value when the camera is looking below the object
+		float yawOffsetSense = glm::dot(World::getUpVector(), m_camera.getUpVector()) > 0.0f ? 1.0f : -1.0f;
+		float newPitch = m_camera.getPitch() - s_angleSensitivity * mouseOffset.y;
+		float newYaw = m_camera.getYaw() - s_angleSensitivity * mouseOffset.x * yawOffsetSense;
+
+		glm::vec3 newPosition = MathUtils::SphericalToCartesian(newPitch, newYaw, m_distanceFromObject);
+		newPosition += m_targetPoint;
+
+		m_camera.setPosition(newPosition);
+		m_camera.setRotation(newPitch, newYaw);
+	}
+
+	void CameraController::panCamera(const glm::ivec2& mouseOffset)
+	{
+		glm::vec3 translation = glm::vec3(0.0f);
+		translation -= m_camera.getRightVector() * (float)mouseOffset.x * s_translationSensitivity;
+		translation += m_camera.getUpVector() * (float)mouseOffset.y * s_translationSensitivity;
+
+		glm::vec3 newPosition = m_camera.getPosition() + translation;
+		m_targetPoint += translation;
+
+		m_camera.setPosition(newPosition);
+	}
+
 }

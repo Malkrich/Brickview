@@ -5,8 +5,6 @@
 #include "Core/KeyCodes.h"
 #include "PerspectiveCamera.h"
 
-#include <tuple>
-
 namespace Brickview
 {
 
@@ -33,7 +31,7 @@ namespace Brickview
 
 		void resize(float width, float height);
 
-		void setTargetPoint(const glm::vec3& targetPoint) { m_targetPoint = targetPoint; }
+		void setTargetPoint(const glm::vec3& targetPoint);
 
 		void setViewportHovered(bool hovered) { m_isViewportHovered = hovered; }
 		void setLaptopMode(bool laptopMode) { m_laptopMode = laptopMode; }
@@ -41,28 +39,15 @@ namespace Brickview
 		void onEvent(Event& e);
 
 	private:
-		using EulerRotation = glm::vec3;
-
-	private:
-		void updateCameraPositionAndRotation(const glm::vec3& newPosition, const EulerRotation& rotation)
-		{
-			m_camera.setPosition(newPosition);
-			m_camera.setRotation(rotation.x, rotation.y);
-		}
-		void updateCameraPosition(const glm::vec3& newPosition)
-		{
-			m_camera.setPosition(newPosition);
-		}
-
-		glm::vec3 computeTranslationOffset(const glm::ivec2& mouseOffset) const;
-		std::tuple<glm::vec3, EulerRotation> computeNewRotationAndTranslation(const glm::ivec2& mouseOffset) const;
+		uint32_t getMovingButton() const { return m_laptopMode ? BV_MOUSE_BUTTON_LEFT : BV_MOUSE_BUTTON_MIDDLE; }
 
 		bool onMouseMoved(const MouseMovedEvent& e);
 		bool onMousePressed(const MousePressedEvent& e);
 		bool onMouseReleased(const MouseReleasedEvent& e);
 		bool onMouseScrolled(const MouseScrolledEvent& e);
 
-		uint32_t getMovingButton() const { return m_laptopMode ? BV_MOUSE_BUTTON_LEFT : BV_MOUSE_BUTTON_MIDDLE; }
+		void panCamera(const glm::ivec2& mouseOffset);
+		void orbitCamera(const glm::ivec2& mouseOffset);
 
 	private:
 		// Camera description
