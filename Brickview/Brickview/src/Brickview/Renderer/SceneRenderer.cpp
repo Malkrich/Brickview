@@ -38,6 +38,8 @@ namespace Brickview
 			glm::vec3(0.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f)
 		};
+
+		m_gridLines = generateGrid(m_gridSettings.Bound, m_gridSettings.Step);
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
@@ -106,6 +108,9 @@ namespace Brickview
 		
 		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("Solid");
 
+		// TEMP: move this to render pass
+		RenderCommand::enableDepthTesting(true);
+
 		// Lego parts
 		for (const InstanceBuffer& buffer : m_instanceBuffers)
 		{
@@ -115,6 +120,10 @@ namespace Brickview
 
 		// Origin
 		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
+
+		// Grid
+		RenderCommand::enableDepthTesting(m_gridSettings.DepthTestingEnable);
+		Renderer::renderLines(m_gridLines, m_gridSettings.Color, 1.0f);
 
 		m_viewportFrameBuffer->unbind();
 
@@ -134,5 +143,27 @@ namespace Brickview
 
 		m_instanceBuffers.push_back(instanceBuffer);
 		m_currentBufferIndex[id] = m_instanceBuffers.size() - 1;
+	}
+
+	std::vector<Line> SceneRenderer::generateGrid(float gridBound, float gridStep)
+	{
+		uint32_t lineCount = (uint32_t)(gridBound / gridStep) + 1;
+		std::vector<Line> gridLines;
+		gridLines.resize(4 * lineCount);
+		for (uint32_t lineIdx = 0; lineIdx < lineCount; lineIdx++)
+		{
+			// From -X to X
+			float lineAxisPosition = (float)lineIdx * gridStep;
+			Line lineXPos = { { -gridBound, 0.0f, lineAxisPosition }, { gridBound, 0.0f, lineAxisPosition } };
+			Line lineYPos = { { lineAxisPosition, 0.0f, -gridBound }, { lineAxisPosition, 0.0f, gridBound } };
+			Line lineXNeg = { { -gridBound, 0.0f, -lineAxisPosition }, { gridBound, 0.0f, -lineAxisPosition } };
+			Line lineYNeg = { { -lineAxisPosition, 0.0f, -gridBound }, { -lineAxisPosition, 0.0f, gridBound } };
+			gridLines[4 * lineIdx + 0] = lineXPos;
+			gridLines[4 * lineIdx + 1] = lineYPos;
+			gridLines[4 * lineIdx + 2] = lineXNeg;
+			gridLines[4 * lineIdx + 3] = lineYNeg;
+		}
+
+		return gridLines;
 	}
 }

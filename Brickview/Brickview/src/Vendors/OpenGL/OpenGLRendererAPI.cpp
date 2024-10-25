@@ -10,7 +10,7 @@ namespace Brickview
 
 	void OpenGLRendererAPI::init()
 	{
-		glEnable(GL_DEPTH_TEST);
+		enableDepthTesting(true);
 	}
 
 	void OpenGLRendererAPI::shutdown()
@@ -32,13 +32,23 @@ namespace Brickview
 		glViewport(x, y, width, height);
 	}
 
+	void OpenGLRendererAPI::enableDepthTesting(bool enable)
+	{
+		if (enable)
+			glEnable(GL_DEPTH_TEST);
+		else
+			glDisable(GL_DEPTH_TEST);
+	}
+
 	void OpenGLRendererAPI::drawIndices(const Ref<VertexArray>& vertexArray)
 	{
+		vertexArray->bind();
 		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 	void OpenGLRendererAPI::drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount)
 	{
+		vertexArray->bind();
 		glDrawElementsInstanced(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr, instanceCount);
 	}
 
@@ -47,8 +57,9 @@ namespace Brickview
 		glLineWidth(lineWidth);
 	}
 
-	void OpenGLRendererAPI::drawLines(const Ref<VertexArray>& vertexAray, uint32_t vertexCount)
+	void OpenGLRendererAPI::drawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
 	{
+		vertexArray->bind();
 		glDrawArrays(GL_LINES, 0, vertexCount);
 	}
 

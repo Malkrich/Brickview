@@ -46,6 +46,11 @@ namespace Brickview
 		s_rendererAPI->setViewportDimension(x, y, width, height);
 	}
 
+	void RenderCommand::enableDepthTesting(bool enable)
+	{
+		s_rendererAPI->enableDepthTesting(enable);
+	}
+
 	void RenderCommand::drawIndices(const Ref<VertexArray>& vertexArray)
 	{
 		s_rendererAPI->drawIndices(vertexArray);

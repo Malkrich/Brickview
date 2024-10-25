@@ -21,7 +21,9 @@ namespace Brickview
 		static void setClearColor(const glm::vec4& clearColor);
 		static void clear();
 
+		// Pipeline
 		static void setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+		static void enableDepthTesting(bool enable);
 
 		// Elements drawing
 		static void drawIndices(const Ref<VertexArray>& vertexArray);

@@ -64,7 +64,6 @@ namespace Brickview
 		instanceDrawCallVertexArray->setIndexBuffer(mesh->getGeometryIndexBuffer());
 
 		shader->bind();
-		instanceDrawCallVertexArray->bind();
 		RenderCommand::drawInstances(instanceDrawCallVertexArray, instanceCount);
 		instanceDrawCallVertexArray->unbind();
 	}
@@ -103,7 +102,6 @@ namespace Brickview
 		Ref<Shader> lineShader = s_rendererData->ShaderLibrary->get("Line");
 		lineShader->bind();
 
-		linesVertexArray->bind();
 		RenderCommand::setLineWidth(lineWidth);
 		RenderCommand::drawLines(linesVertexArray, vertexCount);
 		linesVertexArray->unbind();

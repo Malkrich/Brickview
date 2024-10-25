@@ -14,6 +14,15 @@
 
 namespace Brickview
 {
+	struct EditorGridSettings
+	{
+		float Bound = 1.0f;
+		float Step = 0.1f;
+		bool DepthTestingEnable = true;
+		glm::vec3 Color = glm::vec3(0.0f, 0.0f, 0.0f);
+
+		EditorGridSettings() = default;
+	};
 
 	struct InstanceElement
 	{
@@ -28,7 +37,6 @@ namespace Brickview
 
 	struct InstanceBuffer
 	{
-
 		// TODO: switch to uint32_t type
 		LegoPartID DebugID = "";
 
@@ -46,18 +54,24 @@ namespace Brickview
 	public:
 		SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight);
 
+		// Viewport and entities
 		uint32_t getSceneRenderAttachment() const;
 		int32_t getEntityIDAt(uint32_t mouseX, uint32_t mouseY) const;
 		void resizeViewport(uint32_t width, uint32_t height);
 
+		// Submission
 		void begin(const PerspectiveCamera& camera);
-
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID);
-
 		void render();
+
+		// Grid
+		bool isGridDepthTestEnable() const { return m_gridSettings.DepthTestingEnable; }
+		void setGridDepthTesting(bool enable) { m_gridSettings.DepthTestingEnable = enable; }
 
 	private:
 		void insertNewBuffer(LegoPartID id, const LegoMeshRegistry& legoMeshRegistry, const InstanceElement& instanceElement);
+
+		std::vector<Line> generateGrid(float gridBound, float gridStep);
 
 	private:
 		struct CameraData
@@ -76,10 +90,12 @@ namespace Brickview
 		std::unordered_map<LegoPartID, uint32_t> m_currentBufferIndex;
 		Layout m_instanceBufferLayout;
 
-		// Grid
+		// Origin helper
 		std::vector<Line> m_originLines;
 		std::vector<glm::vec3> m_originLineColors;
-		//std::vector<Line> m_gridLines;
+		// Grid
+		EditorGridSettings m_gridSettings;
+		std::vector<Line> m_gridLines;
 	};
 
 }

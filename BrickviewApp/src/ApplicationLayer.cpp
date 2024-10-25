@@ -66,8 +66,6 @@ namespace Brickview
 
 	bool ApplicationLayer::onMousePressed(const MousePressedEvent& e)
 	{
-		BV_LOG_INFO("Gizmo hovered: {}, Gizmo visible: {}", ImGuizmo::IsOver(), m_gizmoVisible);
-
 		if (e.getMouseButton() == BV_MOUSE_BUTTON_LEFT && !(ImGuizmo::IsOver() && m_gizmoVisible))
 		{
 			if (m_mousePosition.x > m_viewportMinBound.x && m_mousePosition.x < m_viewportMaxBound.x
@@ -82,8 +80,6 @@ namespace Brickview
 				screenPosition.y = viewportHeight - screenPosition.y;
 
 				int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
-
-				BV_LOG_INFO("Entity ID: {}", entityID);
 
 				m_scenePartsListPanel->setSelectedEntity(entityID);
 			}
@@ -243,6 +239,13 @@ namespace Brickview
 		ImGui::Text("Draw calls: %i", renderStats.DrawCalls);
 		ImGui::Text("Max Instance count: %i", renderStats.MaxInstanceCount);
 #endif
+
+		ImGui::SeparatorText("Renderer Settings:");
+		ImGui::Text("Grid depth testing");
+		ImGui::SameLine();
+		bool depthTestingEnable = m_renderer->isGridDepthTestEnable();
+		if (ImGui::Checkbox("##gridDepthTesting", &depthTestingEnable))
+			m_renderer->setGridDepthTesting(depthTestingEnable);
 
 		ImGui::End();
 

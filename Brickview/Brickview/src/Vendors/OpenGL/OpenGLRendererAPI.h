@@ -14,7 +14,10 @@ namespace Brickview
 		// Clearing
 		virtual void setClearColor(float r, float g, float b, float a) override;
 		virtual void clear() override;
+
+		// Pipeline
 		virtual void setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
+		virtual void enableDepthTesting(bool enable) override;
 
 		// Elements
 		virtual void drawIndices(const Ref<VertexArray>& vertexArray) override;
