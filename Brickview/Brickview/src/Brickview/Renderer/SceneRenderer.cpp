@@ -106,7 +106,7 @@ namespace Brickview
 		m_cameraDataUbo->setElement(0, &m_cameraData.ViewProjectionMatrix);
 		m_cameraDataUbo->setElement(1, &m_cameraData.Position);
 		
-		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("Solid");
+		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("SolidMesh");
 
 		// TEMP: move this to render pass
 		RenderCommand::enableDepthTesting(true);

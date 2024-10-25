@@ -32,11 +32,10 @@ namespace Brickview
 
 		s_rendererData->ShaderLibrary = createRef<ShaderLibrary>();
 		
-		// For solid renderer
-		s_rendererData->ShaderLibrary->load("data/Shaders/Solid.glsl");
-		// For rendered renderer
-		s_rendererData->ShaderLibrary->load("data/Shaders/LegoPiece.glsl");
-		s_rendererData->ShaderLibrary->load("data/Shaders/Light.glsl");
+		// Meshes
+		s_rendererData->ShaderLibrary->load("data/Shaders/SolidMesh.glsl");
+		s_rendererData->ShaderLibrary->load("data/Shaders/LightedMesh.glsl");
+		// Lines
 		s_rendererData->ShaderLibrary->load("data/Shaders/Line.glsl");
 	}
 
