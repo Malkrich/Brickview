@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Brickview/Renderer/Mesh.h"
-#include "LDrawFileManager.h"
 
 #include <tuple>
 #include <filesystem>
+
+enum class LDrawFileType;
 
 namespace Brickview
 {
@@ -12,7 +13,7 @@ namespace Brickview
 	struct LoadingQueueFileData
 	{
 		LoadingQueueFileData() = default;
-		LoadingQueueFileData(const std::filesystem::path& filePath, LDrawFileType type, const glm::mat4& transform);
+		LoadingQueueFileData(const std::filesystem::path& filePath, const glm::mat4& transform);
 
 		std::filesystem::path FilePath = "";
 		glm::mat4 Transform = glm::mat4(1.0f);

@@ -2,8 +2,9 @@
 #include "LegoMeshLoader.h"
 
 #include "Utils/StringUtils.h"
-#include "LDrawReader.h"
-#include "LDrawCommandManager.h"
+#include "Vendors/LDraw/LDrawReader.h"
+#include "Vendors/LDraw/LDrawCommandManager.h"
+#include "Vendors/LDraw/LDrawFileManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,7 +12,7 @@
 namespace Brickview
 {
 
-	LoadingQueueFileData::LoadingQueueFileData(const std::filesystem::path& filePath, LDrawFileType type, const glm::mat4& transform)
+	LoadingQueueFileData::LoadingQueueFileData(const std::filesystem::path& filePath, const glm::mat4& transform)
 		: FilePath(filePath)
 		, Transform(transform)
 	{}
@@ -54,7 +55,7 @@ namespace Brickview
 		}
 
 		std::queue<LoadingQueueFileData> loadingQueue;
-		LoadingQueueFileData initialFile(filePath, LDrawFileType::Part, glm::mat4(1.0f));
+		LoadingQueueFileData initialFile(filePath, glm::mat4(1.0f));
 		loadingQueue.push(initialFile);
 
 		while (!loadingQueue.empty())

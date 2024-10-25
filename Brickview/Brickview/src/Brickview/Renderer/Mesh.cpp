@@ -1,7 +1,7 @@
 #include "Pch.h"
 #include "Mesh.h"
 
-#include "Vendors/LDraw/LegoMeshLoader.h"
+#include "Lego/LegoMeshLoader.h"
 #include "Vendors/Obj/ObjLoader.h"
 #include "Utils/MathUtils.h"
 
