@@ -28,6 +28,7 @@ The editor camera can be controlled with the mouse and the keyboard:
 | Middle Mouse Button       | Camera rotation around the center (0, 0, 0)               |
 | Mouse Scroll              | Zoom in/Zoom out                                          |
 | Maj + Middle Mouse Button | Camera translation                                        |
+| F key                     | Focus on selected object                                  |
 
 ## Resources
 
@@ -42,9 +43,6 @@ The architecture of the software as well as well as the code style is highly ins
 
 Here is a list of the things to improve/add in the future:
 
-- Refine instance rendering process, make 2 different render systems
-- Make a __better renderer__, with multiple lights/HDRI.
-- Add an __Entity Component System__ (ECS).
-- Add an editor to __assemble lego parts__.
+- Improve the __renderer__ with multiple lights / HDRI.
 - __Serialize__ and __deserialize__ scenes.
-- Software __documentation__.
+- Add an editor to __assemble lego parts__.
