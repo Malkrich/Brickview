@@ -4,7 +4,6 @@
 #include "Entity.h"
 #include "Components.h"
 #include "Renderer/Light.h"
-#include "Renderer/Material.h"
 
 #include <glm/glm.hpp>
 
@@ -28,7 +27,7 @@ namespace Brickview
 	void Scene::createLegoPartEntity(LegoPartID partID, Ref<Mesh> mesh)
 	{
 		Entity e = createEntity();
-		e.addComponent<LegoPartComponent>(partID, m_legoMeshRegistry, mesh);
+		e.addComponent<LegoPartComponent>(partID, m_legoPartMeshRegistry, mesh);
 	}
 
 	void Scene::onUpdate(DeltaTime dt, Ref<SceneRenderer> renderer)
@@ -42,7 +41,7 @@ namespace Brickview
 
 			const TransformComponent& transform = entity.getComponent<TransformComponent>();
 			const LegoPartComponent& legoPart   = entity.getComponent<LegoPartComponent>();
-			renderer->submitLegoPart(legoPart, m_legoMeshRegistry, transform, (uint32_t)e);
+			renderer->submitLegoPart(legoPart, m_legoPartMeshRegistry, transform, (uint32_t)e);
 		}
 	}
 

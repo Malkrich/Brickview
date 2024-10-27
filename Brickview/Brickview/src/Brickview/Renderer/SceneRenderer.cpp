@@ -16,6 +16,18 @@ namespace Brickview
 		};
 		m_cameraDataUbo = UniformBuffer::create(cameraDataUboSpecs);
 
+		UniformBufferSpecifications lightDataUboSpecs;
+		lightDataUboSpecs.BindingPoint = 1;
+		lightDataUboSpecs.Layout = {
+			UniformBufferElementType::Float3,
+			UniformBufferElementType::Float3
+		};
+		m_lightDataUbo = UniformBuffer::create(lightDataUboSpecs);
+
+		// TEMP
+		m_lightData.Position = glm::vec3(0.0f, 1.0f, 0.0f);
+		m_lightData.Color = glm::vec3(1.0f, 1.0f, 1.0f);
+
 		FrameBufferSpecifications viewportFrameBufferSpecs;
 		viewportFrameBufferSpecs.Width = viewportWidth;
 		viewportFrameBufferSpecs.Height = viewportHeight;
@@ -24,7 +36,8 @@ namespace Brickview
 
 		m_instanceBufferLayout = {
 			{ 2, "a_entityID", BufferElementType::Int, 1 },
-			{ 3, "a_transform", BufferElementType::Mat4, 1 }
+			{ 3, "a_color", BufferElementType::Float3, 1 },
+			{ 4, "a_transform", BufferElementType::Mat4, 1 }
 		};
 
 		BV_ASSERT(m_originLines.size() == m_originLineColors.size(), "OriginLines and OriginLineColors must be the same length!");
@@ -70,29 +83,35 @@ namespace Brickview
 		m_cameraData.Position = camera.getPosition();
 	}
 
-	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID)
+	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, uint32_t entityID)
 	{
 		LegoPartID id = legoPart.ID;
 		glm::mat4 transformMat = transform.getTransform();
 
-		if (!m_currentBufferIndex.contains(id))
+		if (m_currentBufferIndex.contains(id))
 		{
-			insertNewBuffer(id, legoPartMeshRegistry, InstanceElement(transformMat, (int)entityID));
-			return;
+			// Case when the instance buffer is already created
+			uint32_t instanceBufferIndex = m_currentBufferIndex.at(id);
+			InstanceBuffer& buffer = m_instanceBuffers[instanceBufferIndex];
+
+			if (buffer.InstanceCount < buffer.InstanceElements.size())
+			{
+				InstanceElement instanceElement;
+				instanceElement.EntityID = (int)entityID;
+				instanceElement.Color = legoPart.Material.Color;
+				instanceElement.Transform = transformMat;
+				buffer.InstanceElements[buffer.InstanceCount] = instanceElement;
+				buffer.InstanceCount++;
+				return;
+			}
 		}
 
-		uint32_t instanceBufferIndex = m_currentBufferIndex.at(id);
-		InstanceBuffer& buffer = m_instanceBuffers[instanceBufferIndex];
-
-		if (buffer.InstanceCount < buffer.InstanceElements.size())
-		{
-			buffer.InstanceElements[buffer.InstanceCount] = InstanceElement(transformMat, (int)entityID);
-			buffer.InstanceCount++;
-		}
-		else
-		{
-			insertNewBuffer(id, legoPartMeshRegistry, InstanceElement(transformMat, (int)entityID));
-		}
+		Ref<GpuMesh> legoPartMesh = legoPartMeshRegistry.getPart(id);
+		InstanceElement instanceElement;
+		instanceElement.EntityID = (int)entityID;
+		instanceElement.Transform = transformMat;
+		instanceElement.Color = legoPart.Material.Color;
+		insertNewInstanceBuffer(id, legoPartMesh, instanceElement);
 	}
 
 	void SceneRenderer::render()
@@ -105,8 +124,11 @@ namespace Brickview
 		// Camera Uniform buffer
 		m_cameraDataUbo->setElement(0, &m_cameraData.ViewProjectionMatrix);
 		m_cameraDataUbo->setElement(1, &m_cameraData.Position);
+		// Light Uniform buffer
+		m_lightDataUbo->setElement(0, &m_lightData.Position);
+		m_lightDataUbo->setElement(1, &m_lightData.Color);
 		
-		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("SolidMesh");
+		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("LightedMesh");
 
 		// TEMP: move this to render pass
 		RenderCommand::enableDepthTesting(true);
@@ -132,13 +154,13 @@ namespace Brickview
 	}
 
 
-	void SceneRenderer::insertNewBuffer(LegoPartID id, const LegoMeshRegistry& legoMeshRegistry, const InstanceElement& instanceElement)
+	void SceneRenderer::insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement)
 	{
 		// Creates new buffer with geometry
 		InstanceBuffer instanceBuffer;
 		instanceBuffer.DebugID = id;
-		instanceBuffer.Mesh = legoMeshRegistry.getPart(id).Mesh;
-		instanceBuffer.InstanceElements[0] = instanceElement;
+		instanceBuffer.Mesh = mesh;
+		instanceBuffer.InstanceElements[0] = firstInstanceElement;
 		instanceBuffer.InstanceCount++;
 
 		m_instanceBuffers.push_back(instanceBuffer);

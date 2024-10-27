@@ -48,6 +48,7 @@ namespace Brickview
 			m_scene->createLegoPartEntity(partID, mesh);
 		});
 		m_scenePartsListPanel = createScope<ScenePartsListPanel>(m_scene);
+		m_legoPartPropertiesPanel = createScope<LegoPartPropertiesPanel>();
 	}
 
 	void ApplicationLayer::onDetach()
@@ -80,8 +81,8 @@ namespace Brickview
 				screenPosition.y = viewportHeight - screenPosition.y;
 
 				int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
-
-				m_scenePartsListPanel->setSelectedEntity(entityID);
+				Entity selectedEntity = Entity((entt::entity)entityID, m_scenePartsListPanel->getContext().get());
+				m_legoPartPropertiesPanel->setEntityContext(selectedEntity);
 			}
 		}
 
@@ -102,7 +103,7 @@ namespace Brickview
 				m_currentManipulationType = EditorManipulationType::Rotate;
 				break;
 			case BV_KEY_F:
-				Entity selectedEntity = m_scenePartsListPanel->getSelectedEntity();
+				Entity selectedEntity = m_legoPartPropertiesPanel->getEntityContext();
 				if (selectedEntity)
 					onFocusEntity(selectedEntity);
 				break;
@@ -165,7 +166,7 @@ namespace Brickview
 
 		// Gizmo
 		m_gizmoVisible = false;
-		Entity selectedEntity = m_scenePartsListPanel->getSelectedEntity();
+		Entity selectedEntity = m_legoPartPropertiesPanel->getEntityContext();
 		if (selectedEntity && m_currentManipulationType != EditorManipulationType::None)
 		{
 			m_gizmoVisible = true;
@@ -251,6 +252,7 @@ namespace Brickview
 
 		m_legoPartsExplorerPanel->onGuiRender();
 		m_scenePartsListPanel->onGuiRender();
+		m_legoPartPropertiesPanel->onGuiRender();
 
 		endDockspace();
 	}

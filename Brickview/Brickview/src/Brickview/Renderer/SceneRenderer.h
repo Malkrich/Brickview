@@ -8,7 +8,7 @@
 #include "PerspectiveCamera.h"
 #include "Primitives.h"
 #include "Scene/Components.h"
-#include "Lego/LegoMeshRegistry.h"
+#include "Lego/LegoPartMeshRegistry.h"
 
 #include <glm/glm.hpp>
 
@@ -27,12 +27,10 @@ namespace Brickview
 	struct InstanceElement
 	{
 		int EntityID = -1;
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 		glm::mat4 Transform = glm::mat4(1.0f);
 
 		InstanceElement() = default;
-		InstanceElement(const InstanceElement&) = default;
-		InstanceElement(const glm::mat4& transform, int entityID)
-			: Transform(transform), EntityID(entityID) {}
 	};
 
 	struct InstanceBuffer
@@ -47,8 +45,6 @@ namespace Brickview
 		InstanceBuffer() = default;
 	};
 
-	struct Line;
-
 	class SceneRenderer
 	{
 	public:
@@ -61,7 +57,7 @@ namespace Brickview
 
 		// Submission
 		void begin(const PerspectiveCamera& camera);
-		void submitLegoPart(const LegoPartComponent& legoPart, const LegoMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID);
+		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID);
 		void render();
 
 		// Grid
@@ -69,7 +65,7 @@ namespace Brickview
 		void setGridDepthTesting(bool enable) { m_gridSettings.DepthTestingEnable = enable; }
 
 	private:
-		void insertNewBuffer(LegoPartID id, const LegoMeshRegistry& legoMeshRegistry, const InstanceElement& instanceElement);
+		void insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement);
 
 		std::vector<Line> generateGrid(float gridBound, float gridStep);
 
@@ -80,10 +76,21 @@ namespace Brickview
 			glm::vec3 Position;
 		};
 
+		struct LightData
+		{
+			glm::vec3 Position;
+			glm::vec3 Color;
+		};
+
 	private:
+		// Viewport
+		Ref<FrameBuffer> m_viewportFrameBuffer;
+
+		// Ubo data
 		CameraData m_cameraData;
 		Ref<UniformBuffer> m_cameraDataUbo;
-		Ref<FrameBuffer> m_viewportFrameBuffer;
+		LightData m_lightData;
+		Ref<UniformBuffer> m_lightDataUbo;
 
 		// Lego parts
 		std::vector<InstanceBuffer> m_instanceBuffers;

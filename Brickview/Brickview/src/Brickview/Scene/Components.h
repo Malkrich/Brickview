@@ -4,7 +4,8 @@
 #include "Renderer/Light.h"
 #include "Renderer/Mesh.h"
 #include "Lego/LegoPart.h"
-#include "Lego/LegoMeshRegistry.h"
+#include "Lego/LegoMaterial.h"
+#include "Lego/LegoPartMeshRegistry.h"
 
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
@@ -39,10 +40,11 @@ namespace Brickview
 	struct LegoPartComponent
 	{
 		LegoPartID ID;
-		// TODO: LegoColor Color;
+		LegoMaterial Material;
 
-		LegoPartComponent(LegoPartID id, LegoMeshRegistry& legoMeshRegistry, Ref<Mesh> mesh)
+		LegoPartComponent(LegoPartID id, LegoPartMeshRegistry& legoMeshRegistry, Ref<Mesh> mesh)
 			: ID(id)
+			, Material({ 0.0f, 0.2f, 0.0f })
 		{
 			legoMeshRegistry.addPart(id, mesh);
 		}

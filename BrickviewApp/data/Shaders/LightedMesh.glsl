@@ -27,7 +27,7 @@ void main()
     f_normal = normalTransform * a_normal;
     f_color = a_color;
     f_entityID = a_entityID;
-    vec3 worldSpacePosition = a_transform * vec4(f_currentPosition, 1.0);
+    vec4 worldSpacePosition = a_transform * vec4(f_currentPosition, 1.0);
     gl_Position = cameraData.ViewProjectionMatrix * worldSpacePosition;
 }
 

@@ -23,7 +23,6 @@
 #include "Renderer/PerspectiveCamera.h"
 #include "Renderer/CameraController.h"
 #include "Renderer/Light.h"
-#include "Renderer/Material.h"
 #include "Renderer/Mesh.h"
 
 // Scene
@@ -33,7 +32,8 @@
 
 // Lego
 #include "Lego/LegoPart.h"
-#include "Lego/LegoMeshRegistry.h"
+#include "Lego/LegoMaterial.h"
+#include "Lego/LegoPartMeshRegistry.h"
 
 // Metric
 #include "Metric/World.h"

@@ -4,6 +4,7 @@
 
 #include "Panels/LegoPartsExplorerPanel.h"
 #include "Panels/ScenePartsListPanel.h"
+#include "Panels/LegoPartPropertiesPanel.h"
 
 #include <imgui.h>
 #include <ImGuizmo/ImGuizmo.h>
@@ -63,8 +64,9 @@ namespace Brickview
 		DeltaTime m_dt = 0.0f;
 
 		// Panels
-		Scope<LegoPartsExplorerPanel> m_legoPartsExplorerPanel;
-		Scope<ScenePartsListPanel> m_scenePartsListPanel;
+		Scope<LegoPartsExplorerPanel> m_legoPartsExplorerPanel = nullptr;
+		Scope<ScenePartsListPanel> m_scenePartsListPanel = nullptr;
+		Scope<LegoPartPropertiesPanel> m_legoPartPropertiesPanel = nullptr;
 	};
 
 }

@@ -10,14 +10,11 @@ namespace Brickview
 	public:
 		ScenePartsListPanel(Ref<Scene> context);
 
-		Entity getSelectedEntity() const { return m_selectedEntity; }
-		void setSelectedEntity(int32_t entityID);
+		const Ref<Scene>& getContext() const { return m_sceneContext; }
 
 		void onGuiRender();
 
 	private:
-		Entity m_selectedEntity = {};
-
 		Ref<Scene> m_sceneContext;
 	};
 
