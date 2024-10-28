@@ -122,11 +122,9 @@ namespace Brickview
 		m_viewportFrameBuffer->clearAttachment(1, -1);
 
 		// Camera Uniform buffer
-		m_cameraDataUbo->setElement(0, &m_cameraData.ViewProjectionMatrix);
-		m_cameraDataUbo->setElement(1, &m_cameraData.Position);
+		m_cameraDataUbo->setElements(&m_cameraData);
 		// Light Uniform buffer
-		m_lightDataUbo->setElement(0, &m_lightData.Position);
-		m_lightDataUbo->setElement(1, &m_lightData.Color);
+		m_lightDataUbo->setElements(&m_lightData);
 		
 		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("LightedMesh");
 

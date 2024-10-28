@@ -65,6 +65,7 @@ namespace Brickview
 
 		virtual ~UniformBuffer() = default;
 
+		virtual void setElements(const void* data) = 0;
 		virtual void setElement(uint32_t elementIndex, const void* data) = 0;
 
 		virtual const UniformBufferSpecifications& getSpecifications() const = 0;

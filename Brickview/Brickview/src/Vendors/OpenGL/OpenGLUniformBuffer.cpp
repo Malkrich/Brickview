@@ -24,6 +24,17 @@ namespace Brickview
 		glDeleteBuffers(1, &m_bufferID);
 	}
 
+	void OpenGLUniformBuffer::setElements(const void* data)
+	{
+		uint32_t size = m_specs.Layout.getBufferSize();
+
+		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+		CHECK_GL_ERROR();
+	}
+
 	void OpenGLUniformBuffer::setElement(uint32_t elementIndex, const void* data)
 	{
 		const UniformBufferElement& bufferElement = m_specs.Layout.getBufferElement(elementIndex);
