@@ -1,24 +1,48 @@
 #type vertex
 #version 450 core
 
+// Per vertex
 layout (location = 0) in vec3 a_position;
 
-uniform mat4 u_viewProjection;
+layout (std140, binding = 0) uniform CameraData
+{
+    mat4 ViewProjectionMatrix;
+    vec3 Position;
+} cameraData;
+
+layout (std140, binding = 2) uniform LightDrawData
+{
+    vec3 Position;
+    vec3 Color;
+    int EntityID;
+} lightDrawData;
+
+out flat int f_entityID;
 
 void main()
 {
-    gl_Position = u_viewProjection * vec4(a_position, 1.0);
+    f_entityID = lightDrawData.EntityID;
+    vec4 worldPosition = vec4(lightDrawData.Position + a_position, 1.0);
+    gl_Position = cameraData.ViewProjectionMatrix * worldPosition;
 }
-
 
 #type fragment
 #version 450 core
 
-layout(location = 0) out vec4 color;
+layout (location = 0) out vec4 o_color;
+layout (location = 1) out int o_entityID;
 
-uniform vec3 u_lightColor;
+in flat int f_entityID;
+
+layout (std140, binding = 2) uniform LightDrawData
+{
+    vec3 Position;
+    vec3 Color;
+    int EntityID;
+} lightDrawData;
 
 void main()
 {
-    color = vec4(u_lightColor, 1.0);
+    o_color = vec4(lightDrawData.Color, 1.0);
+    o_entityID = f_entityID;
 }

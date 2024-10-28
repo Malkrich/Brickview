@@ -2,6 +2,7 @@
 
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Shader/Shader.h"
+#include "Light.h"
 #include "GpuMesh.h"
 #include "Primitives.h"
 
@@ -22,6 +23,9 @@ namespace Brickview
 		// Meshes
 		static void renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh,
 			const void* instanceBufferData, const Layout& instanceBufferLayout, uint32_t instanceBufferSize, size_t instanceCount);
+
+		// Lights
+		static void renderLight(const Light& light, int entityID = -1);
 
 		// Lines
 		static void renderLines(const std::vector<Line>& lines, const glm::vec3& color, float lineWidth);

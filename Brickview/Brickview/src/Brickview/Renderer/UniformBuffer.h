@@ -8,8 +8,8 @@ namespace Brickview
 	{
 		None = 0,
 		Bool,
-		Float, Float2, Float3,
-		Int, Int2, Int3,
+		Float, Float2, Float3, Float4,
+		Int, Int2, Int3, Int4,
 		Mat2, Mat3, Mat4,
 		// Array
 	};
@@ -52,6 +52,7 @@ namespace Brickview
 
 	struct UniformBufferSpecifications
 	{
+		std::string BlockName = "<Unknown>";
 		uint32_t BindingPoint = 0;
 		UniformBufferLayout Layout;
 

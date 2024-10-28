@@ -1,5 +1,7 @@
 #include "ApplicationLayer.h"
 
+#include "Renderer/UniformBuffer.h"
+
 #include <ImGuizmo/ImGuizmo.h>
 #include <imgui_internal.h>
 #include <glm/glm.hpp>
@@ -24,6 +26,14 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
+		// TEMP
+		UniformBufferLayout uboLayoutTest = {
+			UniformBufferElementType::Float,
+			UniformBufferElementType::Float3,
+			UniformBufferElementType::Float3,
+			UniformBufferElementType::Float,
+		};
+
 		// Scene
 		m_scene = createRef<Scene>();
 		// Renderer
@@ -163,6 +173,22 @@ namespace Brickview
 		// (otherwise viewportMinRegion = (0, 0))
 		m_viewportMinBound = { viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y };
 		m_viewportMaxBound = { m_viewportMinBound.x + viewportDim.x, m_viewportMinBound.y + viewportDim.y };
+
+		// Debug
+		if (m_mousePosition.x > m_viewportMinBound.x && m_mousePosition.x < m_viewportMaxBound.x
+			&& m_mousePosition.y > m_viewportMinBound.y && m_mousePosition.y < m_viewportMaxBound.y)
+		{
+			ImVec2 screenPosition = {
+				m_mousePosition.x - m_viewportMinBound.x,
+				m_mousePosition.y - m_viewportMinBound.y
+			};
+			// Flipping Y coordinate to make the bottom left corner (0, 0)
+			float viewportHeight = m_viewportMaxBound.y - m_viewportMinBound.y;
+			screenPosition.y = viewportHeight - screenPosition.y;
+
+			int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
+			BV_LOG_INFO("Entity ID: {}", entityID);
+		}
 
 		// Gizmo
 		m_gizmoVisible = false;

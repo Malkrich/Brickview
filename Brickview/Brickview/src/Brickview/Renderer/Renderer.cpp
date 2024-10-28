@@ -3,11 +3,21 @@
 
 #include "RenderCommand.h"
 #include "Buffer.h"
+#include "UniformBuffer.h"
 
 #include "Vendors/OpenGL/OpenGLError.h"
 
 namespace Brickview
 {
+
+	struct LightVertex
+	{
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+
+		LightVertex() = default;
+		LightVertex(const glm::vec3& position)
+			: Position(position) {}
+	};
 
 	struct LineVertex
 	{
@@ -21,7 +31,10 @@ namespace Brickview
 
 	struct RendererData
 	{
+		// Shaders
 		Ref<ShaderLibrary> ShaderLibrary = nullptr;
+
+		Ref<GpuMesh> LightMesh = nullptr;
 	};
 
 	static RendererData* s_rendererData;
@@ -35,8 +48,35 @@ namespace Brickview
 		// Meshes
 		s_rendererData->ShaderLibrary->load("data/Shaders/SolidMesh.glsl");
 		s_rendererData->ShaderLibrary->load("data/Shaders/LightedMesh.glsl");
+		// Lights
+		s_rendererData->ShaderLibrary->load("data/Shaders/Light.glsl");
 		// Lines
 		s_rendererData->ShaderLibrary->load("data/Shaders/Line.glsl");
+
+
+		// Upload light cube mesh to GPU
+		std::vector<LightVertex> lightMeshVertices;
+		std::vector<TriangleFace> lightMeshIndices;
+		{
+			Ref<Mesh> lightSourceMesh = Mesh::load("data/Meshes/Cube.obj");
+			lightSourceMesh->scale(0.1f);
+
+			// Vertices
+			const auto& sourceMeshVertices = lightSourceMesh->getVertices();
+			lightMeshVertices.reserve(sourceMeshVertices.size());
+			for (const auto& sourceVertex : sourceMeshVertices)
+				lightMeshVertices.emplace_back(sourceVertex.Position);
+
+			// Indices
+			lightMeshIndices = lightSourceMesh->getConnectivities();
+		}
+
+		Layout lightMeshLayout = {
+			{ 0, "a_position", BufferElementType::Float3 }
+		};
+
+		s_rendererData->LightMesh = createRef<GpuMesh>(lightMeshVertices.size() * sizeof(LightVertex), lightMeshVertices.data(), lightMeshLayout,
+			lightMeshIndices.size() * sizeof(TriangleFace), lightMeshIndices.data());
 	}
 
 	void Renderer::shutdown()
@@ -65,6 +105,34 @@ namespace Brickview
 		shader->bind();
 		RenderCommand::drawInstances(instanceDrawCallVertexArray, instanceCount);
 		instanceDrawCallVertexArray->unbind();
+	}
+
+	void Renderer::renderLight(const Light& light, int entityID)
+	{
+		// Light draw data
+		UniformBufferSpecifications lightDrawDataUboSpecs;
+		lightDrawDataUboSpecs.BlockName = "LightDrawData";
+		lightDrawDataUboSpecs.BindingPoint = 2;
+		lightDrawDataUboSpecs.Layout = {
+			UniformBufferElementType::Float3,
+			UniformBufferElementType::Float3,
+			UniformBufferElementType::Int,
+		};
+		Ref<UniformBuffer> lightDrawDataUbo = UniformBuffer::create(lightDrawDataUboSpecs);
+		lightDrawDataUbo->setElement(0, &light.Position);
+		lightDrawDataUbo->setElement(1, &light.Color);
+		lightDrawDataUbo->setElement(2, &entityID);
+
+		// Light mesh
+		Ref<VertexArray> lightVertexArray = VertexArray::create();
+		lightVertexArray->addVertexBuffer(s_rendererData->LightMesh->getGeometryVertexBuffer());
+		lightVertexArray->setIndexBuffer(s_rendererData->LightMesh->getGeometryIndexBuffer());
+
+		Ref<Shader> lightShader = s_rendererData->ShaderLibrary->get("Light");
+
+		lightShader->bind();
+		RenderCommand::drawIndices(lightVertexArray);
+		lightVertexArray->unbind();
 	}
 
 	void Renderer::renderLines(const std::vector<Line>& lines, const glm::vec3& color, float lineWidth)

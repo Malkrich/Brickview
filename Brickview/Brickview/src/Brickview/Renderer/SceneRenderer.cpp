@@ -9,6 +9,7 @@ namespace Brickview
 	SceneRenderer::SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
 		UniformBufferSpecifications cameraDataUboSpecs;
+		cameraDataUboSpecs.BlockName = "CameraData";
 		cameraDataUboSpecs.BindingPoint = 0;
 		cameraDataUboSpecs.Layout = {
 			UniformBufferElementType::Mat4,
@@ -17,6 +18,7 @@ namespace Brickview
 		m_cameraDataUbo = UniformBuffer::create(cameraDataUboSpecs);
 
 		UniformBufferSpecifications lightDataUboSpecs;
+		lightDataUboSpecs.BlockName = "LightData";
 		lightDataUboSpecs.BindingPoint = 1;
 		lightDataUboSpecs.Layout = {
 			UniformBufferElementType::Float3,
@@ -25,8 +27,9 @@ namespace Brickview
 		m_lightDataUbo = UniformBuffer::create(lightDataUboSpecs);
 
 		// TEMP
-		m_lightData.Position = glm::vec3(0.0f, 1.0f, 0.0f);
-		m_lightData.Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		m_lightData.LightInfo.Position = glm::vec3(0.0f, 0.5f, 0.0f);
+		m_lightData.LightInfo.Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		m_lightData.EntityID = -1;
 
 		FrameBufferSpecifications viewportFrameBufferSpecs;
 		viewportFrameBufferSpecs.Width = viewportWidth;
@@ -137,6 +140,9 @@ namespace Brickview
 			Renderer::renderMeshInstances(solidShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(), 
 				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
 		}
+
+		// Lights
+		Renderer::renderLight(m_lightData.LightInfo, m_lightData.EntityID);
 
 		// Origin
 		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);

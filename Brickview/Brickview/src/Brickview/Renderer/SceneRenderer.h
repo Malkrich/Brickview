@@ -7,6 +7,7 @@
 #include "FrameBuffer.h"
 #include "PerspectiveCamera.h"
 #include "Primitives.h"
+#include "Light.h"
 #include "Scene/Components.h"
 #include "Lego/LegoPartMeshRegistry.h"
 
@@ -78,8 +79,8 @@ namespace Brickview
 
 		struct LightData
 		{
-			glm::vec3 Position;
-			glm::vec3 Color;
+			Light LightInfo;
+			int EntityID;
 		};
 
 	private:
@@ -90,6 +91,7 @@ namespace Brickview
 		CameraData m_cameraData;
 		Ref<UniformBuffer> m_cameraDataUbo;
 		LightData m_lightData;
+
 		Ref<UniformBuffer> m_lightDataUbo;
 
 		// Lego parts
