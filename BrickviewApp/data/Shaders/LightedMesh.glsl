@@ -75,7 +75,7 @@ void main()
         specular *= specularLight;
     }
 
-    vec3 finalColor = facingFactor * (diffuse + ambient + specular) * lightData.Color;
+    vec3 finalColor = facingFactor * (diffuse + ambient + specular) * f_color * lightData.Color;
     o_color = vec4(finalColor, 1.0);
     o_entityID = f_entityID;
 }

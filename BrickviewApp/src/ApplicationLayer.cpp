@@ -26,14 +26,6 @@ namespace Brickview
 
 	void ApplicationLayer::onAttach()
 	{
-		// TEMP
-		UniformBufferLayout uboLayoutTest = {
-			UniformBufferElementType::Float,
-			UniformBufferElementType::Float3,
-			UniformBufferElementType::Float3,
-			UniformBufferElementType::Float,
-		};
-
 		// Scene
 		m_scene = createRef<Scene>();
 		// Renderer

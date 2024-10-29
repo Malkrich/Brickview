@@ -19,6 +19,7 @@ namespace Brickview
 				case UniformBufferElementType::None:   BV_ASSERT(false, "Unknown elemnent type!");
 				case UniformBufferElementType::Int:    return sizeof(int);
 				case UniformBufferElementType::Float:  return sizeof(float);
+				case UniformBufferElementType::Float2: return sizeof(glm::vec2);
 				case UniformBufferElementType::Float3: return sizeof(glm::vec3);
 				case UniformBufferElementType::Mat4:   return sizeof(glm::mat4);
 			}
@@ -56,31 +57,29 @@ namespace Brickview
 	void UniformBufferLayout::calculateSizeAndElementOffsets()
 	{
 		uint32_t offset = 0;
-		uint32_t previousAlignment = 0;
-		uint32_t previousOffset = 0;
-		for (UniformBufferElement& element : m_elements)
+		for (size_t i = 0; i < m_elements.size() - 1; i++)
 		{
-			uint32_t elementAlignment = Utils::getElementAlignment(element.Type);
+			UniformBufferElement& element = m_elements[i];
 
-			uint32_t alignmentTest = (previousOffset + elementAlignment) % elementAlignment;
-			bool compatible = alignmentTest == 0;
-
-			if (!compatible)
-			{
-				uint32_t padding = elementAlignment - previousAlignment;
-				offset += padding;
-				m_bufferSize += padding;
-			}
-
-			element.Size = Utils::getElementSize(element.Type);
+			uint32_t currentSize = Utils::getElementSize(element.Type);
+			element.Size = currentSize;
 			element.Offset = offset;
+			offset += currentSize;
 
-			offset += elementAlignment;
-			m_bufferSize += elementAlignment;
-
-			previousAlignment = elementAlignment;
-			previousOffset = offset;
+			uint32_t nextAlignment = Utils::getElementAlignment(m_elements[i+1].Type);
+			if (offset % nextAlignment != 0)
+			{
+				uint32_t padding = nextAlignment - currentSize;
+				offset += padding;
+			}
 		}
+
+		UniformBufferElement& lastElement = m_elements[m_elements.size() - 1];
+		lastElement.Size = Utils::getElementSize(lastElement.Type);
+		lastElement.Offset = offset;
+
+		uint32_t lastAlignment = Utils::getElementAlignment(lastElement.Type);
+		m_bufferSize = offset + lastAlignment;
 	}
 
 	Ref<UniformBuffer> UniformBuffer::create(const UniformBufferSpecifications& specs)

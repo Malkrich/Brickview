@@ -26,11 +26,6 @@ namespace Brickview
 		};
 		m_lightDataUbo = UniformBuffer::create(lightDataUboSpecs);
 
-		// TEMP
-		m_lightData.LightInfo.Position = glm::vec3(0.0f, 0.5f, 0.0f);
-		m_lightData.LightInfo.Color = glm::vec3(1.0f, 1.0f, 1.0f);
-		m_lightData.EntityID = -1;
-
 		FrameBufferSpecifications viewportFrameBufferSpecs;
 		viewportFrameBufferSpecs.Width = viewportWidth;
 		viewportFrameBufferSpecs.Height = viewportHeight;
@@ -125,9 +120,11 @@ namespace Brickview
 		m_viewportFrameBuffer->clearAttachment(1, -1);
 
 		// Camera Uniform buffer
-		m_cameraDataUbo->setElements(&m_cameraData);
+		m_cameraDataUbo->setElement(0, &m_cameraData.ViewProjectionMatrix);
+		m_cameraDataUbo->setElement(1, &m_cameraData.Position);
 		// Light Uniform buffer
-		m_lightDataUbo->setElements(&m_lightData);
+		m_lightDataUbo->setElement(0, &m_lightData.LightInfo.Position);
+		m_lightDataUbo->setElement(1, &m_lightData.LightInfo.Color);
 		
 		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("LightedMesh");
 
