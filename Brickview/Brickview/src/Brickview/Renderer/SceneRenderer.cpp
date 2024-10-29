@@ -75,10 +75,10 @@ namespace Brickview
 			m_viewportFrameBuffer->resize(width, height);
 	}
 
-	void SceneRenderer::begin(const PerspectiveCamera& camera)
+	void SceneRenderer::begin(const RendererCameraData& cameraData, const std::vector<RendererLightData>& lightData)
 	{
-		m_cameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
-		m_cameraData.Position = camera.getPosition();
+		m_cameraData = cameraData;
+		m_lightData = lightData;
 	}
 
 	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, uint32_t entityID)
@@ -121,25 +121,31 @@ namespace Brickview
 
 		// Camera Uniform buffer
 		m_cameraDataUbo->setElement(0, &m_cameraData.ViewProjectionMatrix);
-		m_cameraDataUbo->setElement(1, &m_cameraData.Position);
-		// Light Uniform buffer
-		m_lightDataUbo->setElement(0, &m_lightData.LightInfo.Position);
-		m_lightDataUbo->setElement(1, &m_lightData.LightInfo.Color);
-		
-		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("LightedMesh");
+		m_cameraDataUbo->setElement(1, &m_cameraData.Position);		
 
 		// TEMP: move this to render pass
 		RenderCommand::enableDepthTesting(true);
 
-		// Lego parts
-		for (const InstanceBuffer& buffer : m_instanceBuffers)
+		// lighted render
+		if (!m_lightData.empty())
 		{
-			Renderer::renderMeshInstances(solidShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(), 
-				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
-		}
+			Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("LightedMesh");
 
-		// Lights
-		Renderer::renderLight(m_lightData.LightInfo, m_lightData.EntityID);
+			// Light Uniform buffer
+			m_lightDataUbo->setElement(0, &m_lightData[0].LightInfo.Position);
+			m_lightDataUbo->setElement(1, &m_lightData[0].LightInfo.Color);
+
+			// Lego parts
+			for (const InstanceBuffer& buffer : m_instanceBuffers)
+			{
+				Renderer::renderMeshInstances(solidShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(), 
+					m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
+			}
+
+			// Lights
+			for (const auto& lightData : m_lightData)
+				Renderer::renderLight(lightData.LightInfo, lightData.EntityID);
+		}
 
 		// Origin
 		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);

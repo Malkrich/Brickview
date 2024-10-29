@@ -28,6 +28,11 @@ namespace Brickview
 	{
 		// Scene
 		m_scene = createRef<Scene>();
+		// TEMP: make a button to add light
+		Entity lightEntity = m_scene->createEntity();
+		TransformComponent& transformComponent = lightEntity.getComponent<TransformComponent>();
+		transformComponent.Translation = { 0.0f, 0.1f, 0.0f };
+		lightEntity.addComponent<LightComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
 		// not the actual ImGui viewport size
@@ -125,8 +130,7 @@ namespace Brickview
 		//m_cameraControl->onUpdate();
 
 		const PerspectiveCamera& camera = m_cameraControl->getCamera();
-		m_renderer->begin(camera);
-		m_scene->onUpdate(dt, m_renderer);
+		m_scene->onUpdate(dt, camera, m_renderer);
 		m_renderer->render();
 	}
 

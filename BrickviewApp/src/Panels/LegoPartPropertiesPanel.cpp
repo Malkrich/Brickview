@@ -23,8 +23,19 @@ namespace Brickview
 	{
 		ImGui::Columns(2);
 
+		if (entity.hasComponent<TransformComponent>())
+		{
+			ImGui::Separator();
+			TransformComponent& transform = entity.getComponent<TransformComponent>();
+			ImGui::Text("Position");
+			ImGui::NextColumn();
+			ImGui::DragFloat3("##TransformPosition", (float*)glm::value_ptr(transform.Translation), 0.001f);
+			ImGui::NextColumn();
+		}
+
 		if (entity.hasComponent<LegoPartComponent>())
 		{
+			ImGui::Separator();
 			LegoPartComponent& legoPartComponent = entity.getComponent<LegoPartComponent>();
 			LegoPartID partID = legoPartComponent.ID;
 			LegoMaterial& legoMaterial = legoPartComponent.Material;
@@ -35,6 +46,17 @@ namespace Brickview
 			ImGui::Text("Color:");
 			ImGui::NextColumn();
 			ImGui::ColorEdit3("##LegoColor", (float*)glm::value_ptr(legoMaterial.Color));
+			ImGui::NextColumn();
+		}
+
+		if (entity.hasComponent<LightComponent>())
+		{
+			ImGui::Separator();
+			LightComponent& lightCompoenent = entity.getComponent<LightComponent>();
+			ImGui::Text("Light Color");
+			ImGui::NextColumn();
+			ImGui::ColorEdit3("##LightColor", (float*)glm::value_ptr(lightCompoenent.Color));
+			ImGui::NextColumn();
 		}
 
 		ImGui::Columns(1);

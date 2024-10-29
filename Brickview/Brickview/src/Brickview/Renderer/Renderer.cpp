@@ -59,7 +59,7 @@ namespace Brickview
 		std::vector<TriangleFace> lightMeshIndices;
 		{
 			Ref<Mesh> lightSourceMesh = Mesh::load("data/Meshes/Cube.obj");
-			lightSourceMesh->scale(0.1f);
+			lightSourceMesh->scale(0.05f);
 
 			// Vertices
 			const auto& sourceMeshVertices = lightSourceMesh->getVertices();

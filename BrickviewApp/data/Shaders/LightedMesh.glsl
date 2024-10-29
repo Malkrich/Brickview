@@ -15,20 +15,19 @@ layout (std140, binding = 0) uniform CameraData
     vec3 Position;
 } cameraData;
 
-out vec3 f_currentPosition;
+out vec4 f_worldPosition;
 out vec3 f_normal;
 out vec3 f_color;
 out flat int f_entityID;
 
 void main()
 {
-    f_currentPosition = a_position;
+    f_worldPosition = a_transform * vec4(a_position, 1.0);
     mat3 normalTransform = mat3(transpose(inverse(a_transform)));
     f_normal = normalTransform * a_normal;
     f_color = a_color;
     f_entityID = a_entityID;
-    vec4 worldSpacePosition = a_transform * vec4(f_currentPosition, 1.0);
-    gl_Position = cameraData.ViewProjectionMatrix * worldSpacePosition;
+    gl_Position = cameraData.ViewProjectionMatrix * f_worldPosition;
 }
 
 #type fragment
@@ -37,7 +36,7 @@ void main()
 layout(location = 0) out vec4 o_color;
 layout(location = 1) out int o_entityID;
 
-in vec3 f_currentPosition;
+in vec4 f_worldPosition;
 in vec3 f_normal;
 in vec3 f_color;
 in flat int f_entityID;
@@ -57,10 +56,12 @@ layout (std140, binding = 1) uniform LightData
 
 void main()
 {
-    float ambient = 0.2;
+    vec3 worldPosition = vec3(f_worldPosition);
     
-    vec3 lightDirection  = normalize(lightData.Position - f_currentPosition);
-    vec3 cameraDirection = normalize(cameraData.Position - f_currentPosition);
+    float ambient = 0.5;
+    
+    vec3 lightDirection  = normalize(lightData.Position - worldPosition);
+    vec3 cameraDirection = normalize(cameraData.Position - worldPosition);
     
     float facingFactor = dot(cameraDirection, f_normal) >= 0.0 ? 1.0 : ambient;
     float diffuse = max(dot(f_normal, lightDirection), 0.0);
@@ -69,7 +70,7 @@ void main()
     if(diffuse != 0.0)
     {
         float specularLight = 0.5;
-        vec3 viewDirection = normalize(cameraData.Position - f_currentPosition);
+        vec3 viewDirection = normalize(cameraData.Position - worldPosition);
         vec3 reflectionDirection = reflect(-lightDirection, f_normal);
         specular = pow(max(dot(viewDirection, reflectionDirection), 0.0), 64);
         specular *= specularLight;

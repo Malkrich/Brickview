@@ -51,4 +51,15 @@ namespace Brickview
 		LegoPartComponent(const LegoPartComponent&) = default;
 	};
 
+	struct LightComponent
+	{
+		glm::vec3 Color;
+
+		LightComponent(const glm::vec3& color)
+			: Color(color)
+		{}
+		LightComponent() = default;
+		LightComponent(LightComponent&) = default;
+	};
+
 }

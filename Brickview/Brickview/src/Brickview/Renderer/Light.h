@@ -11,6 +11,11 @@ namespace Brickview
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 
 		Light() = default;
+		Light(const Light&) = default;
+		Light(const glm::vec3& position, const glm::vec3& color)
+			: Position(position)
+			, Color(color)
+		{}
  	};
 
 }

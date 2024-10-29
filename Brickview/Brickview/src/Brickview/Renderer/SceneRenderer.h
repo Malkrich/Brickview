@@ -15,6 +15,25 @@
 
 namespace Brickview
 {
+	struct RendererCameraData
+	{
+		glm::mat4 ViewProjectionMatrix;
+		glm::vec3 Position;
+	};
+
+	struct RendererLightData
+	{
+		Light LightInfo;
+		int EntityID = -1;
+
+		RendererLightData() = default;
+		RendererLightData(const RendererLightData& other) = default;
+		RendererLightData(const glm::vec3& position, const glm::vec3& color, int entityID)
+			: LightInfo(position, color)
+			, EntityID(entityID)
+		{}
+	};
+
 	struct EditorGridSettings
 	{
 		float Bound = 1.0f;
@@ -57,7 +76,7 @@ namespace Brickview
 		void resizeViewport(uint32_t width, uint32_t height);
 
 		// Submission
-		void begin(const PerspectiveCamera& camera);
+		void begin(const RendererCameraData& cameraData, const std::vector<RendererLightData>& lightData);
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID);
 		void render();
 
@@ -71,27 +90,13 @@ namespace Brickview
 		std::vector<Line> generateGrid(float gridBound, float gridStep);
 
 	private:
-		struct CameraData
-		{
-			glm::mat4 ViewProjectionMatrix;
-			glm::vec3 Position;
-		};
-
-		struct LightData
-		{
-			Light LightInfo;
-			int EntityID;
-		};
-
-	private:
 		// Viewport
 		Ref<FrameBuffer> m_viewportFrameBuffer;
 
-		// Ubo data
-		CameraData m_cameraData;
+		// Camera / Environment
+		RendererCameraData m_cameraData;
 		Ref<UniformBuffer> m_cameraDataUbo;
-		LightData m_lightData;
-
+		std::vector<RendererLightData> m_lightData;
 		Ref<UniformBuffer> m_lightDataUbo;
 
 		// Lego parts
