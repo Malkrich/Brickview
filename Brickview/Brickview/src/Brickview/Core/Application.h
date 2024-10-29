@@ -17,6 +17,7 @@ namespace Brickview
 
 		static const Application* get() { return s_instance; }
 		Ref<Window> getWindow() const { return m_window; }
+		ImGuiLayer* getGuiLayer() const { return m_ImGuiLayer; }
 
 		void run();
 

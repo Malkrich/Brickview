@@ -64,7 +64,7 @@ namespace Brickview
 
 	void ApplicationLayer::onEvent(Event& e)
 	{
-		//m_cameraControl->onEvent(e);
+		m_cameraControl->onEvent(e);
 
 		EventDispatcher dispatcher(e);
 
@@ -76,21 +76,17 @@ namespace Brickview
 	{
 		if (e.getMouseButton() == BV_MOUSE_BUTTON_LEFT && !(ImGuizmo::IsOver() && m_gizmoVisible))
 		{
-			if (m_mousePosition.x > m_viewportMinBound.x && m_mousePosition.x < m_viewportMaxBound.x
-				&& m_mousePosition.y > m_viewportMinBound.y && m_mousePosition.y < m_viewportMaxBound.y)
-			{
-				ImVec2 screenPosition = {
-					m_mousePosition.x - m_viewportMinBound.x,
-					m_mousePosition.y - m_viewportMinBound.y
-				};
-				// Flipping Y coordinate to make the bottom left corner (0, 0)
-				float viewportHeight = m_viewportMaxBound.y - m_viewportMinBound.y;
-				screenPosition.y = viewportHeight - screenPosition.y;
+			ImVec2 screenPosition = {
+				m_mousePosition.x - m_viewportMinBound.x,
+				m_mousePosition.y - m_viewportMinBound.y
+			};
+			// Flipping Y coordinate to make the bottom left corner (0, 0)
+			float viewportHeight = m_viewportMaxBound.y - m_viewportMinBound.y;
+			screenPosition.y = viewportHeight - screenPosition.y;
 
-				int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
-				Entity selectedEntity = Entity((entt::entity)entityID, m_scenePartsListPanel->getContext().get());
-				m_legoPartPropertiesPanel->setEntityContext(selectedEntity);
-			}
+			int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
+			Entity selectedEntity = Entity((entt::entity)entityID, m_scenePartsListPanel->getContext().get());
+			m_legoPartPropertiesPanel->setEntityContext(selectedEntity);
 		}
 
 		return true;
@@ -158,7 +154,14 @@ namespace Brickview
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
 		ImGui::Begin("Viewport");
+		// Focus if middle mouse button clicked because it controls the viewport
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
+			ImGui::SetWindowFocus("Viewport");
+
 		// Updates
+		bool viewportActive = ImGui::IsWindowHovered() && ImGui::IsWindowFocused();
+		Application::get()->getGuiLayer()->setBlockEvent(!viewportActive);
+
 		m_cameraControl->setViewportHovered(ImGui::IsWindowHovered());
 		ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		ImVec2 viewportDim = ImGui::GetContentRegionAvail();

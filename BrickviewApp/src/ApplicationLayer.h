@@ -57,6 +57,7 @@ namespace Brickview
 		bool m_gizmoVisible = false;
 		
 		// Mouse
+		bool m_viewportHovered = false;
 		ImVec2 m_mousePosition;
 		ImVec2 m_viewportMinBound;
 		ImVec2 m_viewportMaxBound;

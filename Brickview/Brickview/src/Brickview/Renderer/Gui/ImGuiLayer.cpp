@@ -50,11 +50,14 @@ namespace Brickview
 
 	void ImGuiLayer::onEvent(Event& e)
 	{
-		ImGuiIO& io = ImGui::GetIO();
-		bool isHandle = false;
-		isHandle |= e.isInCategory(EventCategoryMouse) & io.WantCaptureMouse;
-		isHandle |= e.isInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
-		e.setIsHandle(isHandle);
+		if (m_blockEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			bool isHandle = false;
+			isHandle |= e.isInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+			isHandle |= e.isInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+			e.setIsHandle(isHandle);
+		}
 	}
 
 	void ImGuiLayer::begin()
