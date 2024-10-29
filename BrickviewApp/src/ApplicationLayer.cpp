@@ -64,7 +64,7 @@ namespace Brickview
 
 	void ApplicationLayer::onEvent(Event& e)
 	{
-		m_cameraControl->onEvent(e);
+		//m_cameraControl->onEvent(e);
 
 		EventDispatcher dispatcher(e);
 
@@ -126,8 +126,7 @@ namespace Brickview
 		m_renderer->resizeViewport(m_viewportWidth, m_viewportHeight);
 		m_cameraControl->resize((float)m_viewportWidth, (float)m_viewportHeight);
 
-		// TODO: control the camera every frame instead of waiting for events
-		//m_cameraControl->onUpdate();
+		m_cameraControl->onUpdate();
 
 		const PerspectiveCamera& camera = m_cameraControl->getCamera();
 		m_scene->onUpdate(dt, camera, m_renderer);
@@ -169,22 +168,6 @@ namespace Brickview
 		// (otherwise viewportMinRegion = (0, 0))
 		m_viewportMinBound = { viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y };
 		m_viewportMaxBound = { m_viewportMinBound.x + viewportDim.x, m_viewportMinBound.y + viewportDim.y };
-
-		// Debug
-		if (m_mousePosition.x > m_viewportMinBound.x && m_mousePosition.x < m_viewportMaxBound.x
-			&& m_mousePosition.y > m_viewportMinBound.y && m_mousePosition.y < m_viewportMaxBound.y)
-		{
-			ImVec2 screenPosition = {
-				m_mousePosition.x - m_viewportMinBound.x,
-				m_mousePosition.y - m_viewportMinBound.y
-			};
-			// Flipping Y coordinate to make the bottom left corner (0, 0)
-			float viewportHeight = m_viewportMaxBound.y - m_viewportMinBound.y;
-			screenPosition.y = viewportHeight - screenPosition.y;
-
-			int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
-			BV_LOG_INFO("Entity ID: {}", entityID);
-		}
 
 		// Gizmo
 		m_gizmoVisible = false;

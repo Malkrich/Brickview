@@ -2,25 +2,44 @@
 
 namespace Brickview
 {
-	#define WRITE_TYPE_GETTERS(type) inline virtual eventType getType() const override { return type; } \
-									 inline static eventType getTypeStatic() { return type; }
+	#define WRITE_EVENT_TYPE(type) virtual EventType getType() const override { return type; } \
+								   static  EventType getTypeStatic() { return type; } \
 
-	enum class eventType
+	#define WRITE_EVENT_CATEGORY(category) virtual uint32_t getCategoryFlags() const override { return category; }
+
+	enum class EventType
 	{
-		windowClose = 0, windowResize,
-		mouseMoved, mousePressed, mouseReleased, MouseScrolled,
-		keyPressed, keyReleased
+		WindowClose = 0, WindowResize,
+		MouseMoved, MousePressed, MouseReleased, MouseScrolled,
+		KeyPressed, KeyReleased
+	};
+
+	enum EventCategory : uint32_t
+	{
+		EventCategoryNone        = 0,
+		EventCategoryApplication = 1 << 0,
+		EventCategoryInput       = 1 << 1,
+		EventCategoryKeyboard    = 1 << 2,
+		EventCategoryMouse       = 1 << 3,
+		EventCategoryMouseButton = 1 << 4
 	};
 
 	class Event
 	{
 	public:
-		inline virtual eventType getType() const = 0;
+		virtual EventType getType() const = 0;
+		virtual uint32_t getCategoryFlags() const = 0;
 
-		inline bool isHandled() const { return m_handle; }
+		bool isInCategory(EventCategory category)
+		{
+			return getCategoryFlags() & category;
+		}
+
+		bool isHandled() const { return m_isHandle; }
+		void setIsHandle(bool isHandle) { m_isHandle = isHandle; }
 
 	private:
-		bool m_handle = false;
+		bool m_isHandle = false;
 
 		friend class EventDispatcher;
 	};
@@ -38,9 +57,9 @@ namespace Brickview
 		template<typename T>
 		void dispatch(std::function<bool(T&)> callbackFunction)
 		{
-			if (!m_event.m_handle && m_event.getType() == T::getTypeStatic())
+			if (!m_event.m_isHandle && m_event.getType() == T::getTypeStatic())
 			{
-				m_event.m_handle = callbackFunction(*((T*)&m_event));
+				m_event.m_isHandle = callbackFunction(*((T*)&m_event));
 			}
 		}
 

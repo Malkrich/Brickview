@@ -10,7 +10,8 @@ namespace Brickview
 	public:
 		WindowCloseEvent() = default;
 
-		WRITE_TYPE_GETTERS(eventType::windowClose)
+		WRITE_EVENT_TYPE(EventType::WindowClose)
+		WRITE_EVENT_CATEGORY(EventCategoryApplication)
 	};
 
 	class WindowResizeEvent : public Event
@@ -24,8 +25,8 @@ namespace Brickview
 		inline uint32_t getWidth() const { return m_width; }
 		inline uint32_t getHeight() const { return m_height; }
 
-		WRITE_TYPE_GETTERS(eventType::windowResize)
-
+		WRITE_EVENT_TYPE(EventType::WindowResize)
+		WRITE_EVENT_CATEGORY(EventCategoryApplication)
 	private:
 		uint32_t m_width, m_height;
 	};

@@ -11,12 +11,12 @@ namespace Brickview
 	public:
 		virtual ~Layer() = default;
 
-		virtual void onAttach() = 0;
-		virtual void onDetach() = 0;
+		virtual void onAttach() {}
+		virtual void onDetach() {}
 
-		virtual void onEvent(Event& e) = 0;
-		virtual void onUpdate(DeltaTime dt) = 0;
-		virtual void onGuiRender() = 0;
+		virtual void onEvent(Event& e) {}
+		virtual void onUpdate(DeltaTime dt) {}
+		virtual void onGuiRender() {}
 	};
 
 }

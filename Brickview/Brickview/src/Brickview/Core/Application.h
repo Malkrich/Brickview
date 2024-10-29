@@ -3,7 +3,7 @@
 #include "Core/Window.h"
 #include "Core/Event/ApplicationEvent.h"
 #include "Core/Layer/LayerStack.h"
-#include "Renderer/Gui/GuiRenderer.h"
+#include "Renderer/Gui/ImGuiLayer.h"
 
 namespace Brickview
 {
@@ -36,7 +36,7 @@ namespace Brickview
 
 		Scope<LayerStack> m_layerStack = nullptr;
 
-		Scope<GuiRenderer> m_guiRenderer = nullptr;
+		ImGuiLayer* m_ImGuiLayer = nullptr;
 
 		// singleton instance
 		static Application* s_instance;

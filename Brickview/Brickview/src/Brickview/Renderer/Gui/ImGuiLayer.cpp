@@ -1,5 +1,5 @@
 #include "Pch.h"
-#include "GuiRenderer.h"
+#include "ImGuiLayer.h"
 #include "Core/Application.h"
 
 #include <GLFW/glfw3.h>
@@ -10,7 +10,11 @@
 
 namespace Brickview
 {
-	GuiRenderer::GuiRenderer()
+	ImGuiLayer::ImGuiLayer()
+	{
+	}
+
+	void ImGuiLayer::onAttach()
 	{
 		// IMGUI
 		IMGUI_CHECKVERSION();
@@ -22,7 +26,7 @@ namespace Brickview
 		ImGui::StyleColorsDark();
 
 		ImGuiStyle& style = ImGui::GetStyle();
-		if(io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			style.WindowRounding = 0.0f;
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
@@ -37,14 +41,23 @@ namespace Brickview
 		ImGuizmo::AllowAxisFlip(false);
 	}
 
-	GuiRenderer::~GuiRenderer()
+	void ImGuiLayer::onDetach()
 	{
 		ImGui_ImplGlfw_Shutdown();
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui::DestroyContext();
 	}
 
-	void GuiRenderer::onNewFrame()
+	void ImGuiLayer::onEvent(Event& e)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		bool isHandle = false;
+		isHandle |= e.isInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+		isHandle |= e.isInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		e.setIsHandle(isHandle);
+	}
+
+	void ImGuiLayer::begin()
 	{
 		// IMGUI TEST
 		ImGui_ImplOpenGL3_NewFrame();
@@ -62,7 +75,7 @@ namespace Brickview
 		m_time = time;
 	}
 
-	void GuiRenderer::onRender()
+	void ImGuiLayer::end()
 	{
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

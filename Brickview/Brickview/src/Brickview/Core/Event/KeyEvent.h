@@ -8,8 +8,9 @@ namespace Brickview
 	class KeyEvent : public Event
 	{
 	public:
-		inline uint32_t getKeyCode() const { return m_keyCode; }
+		uint32_t getKeyCode() const { return m_keyCode; }
 
+		WRITE_EVENT_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
 	protected:
 		KeyEvent(uint32_t keyCode)
 			: m_keyCode(keyCode)
@@ -26,7 +27,7 @@ namespace Brickview
 			: KeyEvent(keyCode)
 		{}
 
-		WRITE_TYPE_GETTERS(eventType::keyPressed)
+		WRITE_EVENT_TYPE(EventType::KeyPressed)
 	};
 
 	class KeyReleasedEvent : public KeyEvent
@@ -36,7 +37,7 @@ namespace Brickview
 			: KeyEvent(keyCode)
 		{}
 
-		WRITE_TYPE_GETTERS(eventType::keyReleased)
+		WRITE_EVENT_TYPE(EventType::KeyReleased)
 	};
 
 }

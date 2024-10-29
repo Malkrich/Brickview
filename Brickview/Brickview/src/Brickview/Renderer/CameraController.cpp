@@ -40,31 +40,19 @@ namespace Brickview
 		m_targetPoint = targetPoint;
 	}
 
-	void CameraController::onEvent(Event& e)
+	void CameraController::onUpdate()
 	{
-		EventDispatcher dispatcher(e);
+		if (Input::isMouseButtonPressed(getMovingButton()))
+		{
+			glm::ivec2 newMousePosition = Input::getMousePosition();
+			glm::ivec2 mouseOffset = newMousePosition - m_currentMousePosition;
+			m_currentMousePosition = newMousePosition;
 
-		dispatcher.dispatch<MouseMovedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseMoved));
-		dispatcher.dispatch<MousePressedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMousePressed));
-		dispatcher.dispatch<MouseReleasedEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseReleased));
-		dispatcher.dispatch<MouseScrolledEvent>(BV_BIND_EVENT_FUNCTION(CameraController::onMouseScrolled));
-	}
-
-	bool CameraController::onMouseMoved(const MouseMovedEvent& e)
-	{
-		if (!m_isCameraControlled)
-			return false;
-
-		glm::ivec2 newMousePosition = glm::ivec2(e.getPosX(), e.getPosY());
-		glm::ivec2 mouseOffset = newMousePosition - m_currentMousePosition;
-		m_currentMousePosition = newMousePosition;
-
-		if (Input::isKeyPressed(BV_KEY_LEFT_SHIFT) || Input::isKeyPressed(BV_KEY_RIGHT_SHIFT))
-			panCamera(mouseOffset);
-		else
-			orbitCamera(mouseOffset);
-	
-		return false;
+			if (Input::isKeyPressed(BV_KEY_LEFT_SHIFT) || Input::isKeyPressed(BV_KEY_RIGHT_SHIFT))
+				panCamera(mouseOffset);
+			else
+				orbitCamera(mouseOffset);
+		}
 	}
 
 	bool CameraController::onMousePressed(const MousePressedEvent& e)

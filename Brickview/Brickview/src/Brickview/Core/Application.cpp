@@ -40,10 +40,11 @@ namespace Brickview
 		m_window->setEventCallbackFunction(BV_BIND_EVENT_FUNCTION(Application::onEvent));
 
 		// GUI
-		m_guiRenderer = createScope<GuiRenderer>();
+		m_ImGuiLayer = new ImGuiLayer();
 
 		// Layers
 		m_layerStack = createScope<LayerStack>();
+		m_layerStack->pushOverlay(m_ImGuiLayer);
 
 		// Brickview API
 		BrickviewCore::init();
@@ -60,10 +61,10 @@ namespace Brickview
 			for(auto layer : *m_layerStack)
 				layer->onUpdate(dt);
 
-			m_guiRenderer->onNewFrame();
+			m_ImGuiLayer->begin();
 			for (auto layer : *m_layerStack)
 				layer->onGuiRender();
-			m_guiRenderer->onRender();
+			m_ImGuiLayer->end();
 
 			m_window->onUpdate();
 		}

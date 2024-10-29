@@ -16,8 +16,8 @@ namespace Brickview
 		inline uint32_t getPosX() const { return m_posX; }
 		inline uint32_t getPosY() const { return m_posY; }
 
-		WRITE_TYPE_GETTERS(eventType::mouseMoved)
-
+		WRITE_EVENT_TYPE(EventType::MouseMoved)
+		WRITE_EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 	private:
 		uint32_t m_posX, m_posY;
 	};
@@ -28,6 +28,7 @@ namespace Brickview
 	public:
 		inline int32_t getMouseButton() const { return m_button; }
 
+		WRITE_EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse | EventCategoryMouseButton)
 	protected:
 		MouseButtonEvent(int button)
 			: m_button(button)
@@ -44,7 +45,7 @@ namespace Brickview
 			: MouseButtonEvent(button)
 		{}
 
-		WRITE_TYPE_GETTERS(eventType::mousePressed)
+		WRITE_EVENT_TYPE(EventType::MousePressed)
 	};
 
 	class MouseReleasedEvent : public MouseButtonEvent
@@ -54,7 +55,7 @@ namespace Brickview
 			: MouseButtonEvent(button)
 		{}
 
-		WRITE_TYPE_GETTERS(eventType::mouseReleased)
+		WRITE_EVENT_TYPE(EventType::MouseReleased)
 	};
 
 	class MouseScrolledEvent : public Event
@@ -68,8 +69,8 @@ namespace Brickview
 		inline double getOffsetX() const { return m_offsetX; }
 		inline double getOffsetY() const { return m_offsetY; }
 
-		WRITE_TYPE_GETTERS(eventType::MouseScrolled)
-
+		WRITE_EVENT_TYPE(EventType::MouseScrolled)
+		WRITE_EVENT_CATEGORY(EventCategoryInput | EventCategoryMouse)
 	private:
 		double m_offsetX, m_offsetY;
 	};

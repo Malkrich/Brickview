@@ -36,12 +36,11 @@ namespace Brickview
 		void setViewportHovered(bool hovered) { m_isViewportHovered = hovered; }
 		void setLaptopMode(bool laptopMode) { m_laptopMode = laptopMode; }
 
-		void onEvent(Event& e);
+		void onUpdate();
 
 	private:
 		uint32_t getMovingButton() const { return m_laptopMode ? BV_MOUSE_BUTTON_LEFT : BV_MOUSE_BUTTON_MIDDLE; }
 
-		bool onMouseMoved(const MouseMovedEvent& e);
 		bool onMousePressed(const MousePressedEvent& e);
 		bool onMouseReleased(const MouseReleasedEvent& e);
 		bool onMouseScrolled(const MouseScrolledEvent& e);

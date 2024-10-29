@@ -15,8 +15,14 @@ namespace Brickview
 
 	void LayerStack::pushLayer(Layer* layer)
 	{
-		m_layerStack.push_back(layer);
+		m_layerStack.emplace(m_layerStack.begin() + m_currentLayerPushIndex, layer);
 		layer->onAttach();
+	}
+
+	void LayerStack::pushOverlay(Layer* overlay)
+	{
+		m_layerStack.push_back(overlay);
+		overlay->onAttach();
 	}
 
 }
