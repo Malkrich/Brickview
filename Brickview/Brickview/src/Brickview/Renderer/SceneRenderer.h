@@ -34,14 +34,23 @@ namespace Brickview
 		{}
 	};
 
-	struct EditorGridSettings
+	enum class RendererType
 	{
-		float Bound = 1.0f;
-		float Step = 0.1f;
-		bool DepthTestingEnable = true;
-		glm::vec3 Color = glm::vec3(0.0f, 0.0f, 0.0f);
+		Solid, Lighted
+	};
 
-		EditorGridSettings() = default;
+	struct SceneRendererSettings
+	{
+		// Global
+		RendererType RendererType = RendererType::Solid;
+
+		// Grid
+		float GridBound = 1.0f;
+		float GridStep = 0.1f;
+		bool GridDepthTestingEnable = true;
+		glm::vec3 GridColor = glm::vec3(0.0f, 0.0f, 0.0f);
+
+		SceneRendererSettings() = default;
 	};
 
 	struct InstanceElement
@@ -80,16 +89,25 @@ namespace Brickview
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID);
 		void render();
 
-		// Grid
-		bool isGridDepthTestEnable() const { return m_gridSettings.DepthTestingEnable; }
-		void setGridDepthTesting(bool enable) { m_gridSettings.DepthTestingEnable = enable; }
+		// RendererSettings
+		RendererType getRendererType() const { return m_rendererSettings.RendererType; }
+		void setRendererType(RendererType rendererType) { m_rendererSettings.RendererType = rendererType; }
+		// Grid settings
+		bool isGridDepthTestEnable() const { return m_rendererSettings.GridDepthTestingEnable; }
+		void setGridDepthTesting(bool enable) { m_rendererSettings.GridDepthTestingEnable = enable; }
 
 	private:
+		void RenderSolid();
+		void RenderLighted();
+
 		void insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement);
 
 		std::vector<Line> generateGrid(float gridBound, float gridStep);
 
 	private:
+		// Renderer internal
+		SceneRendererSettings m_rendererSettings;
+
 		// Viewport
 		Ref<FrameBuffer> m_viewportFrameBuffer;
 
@@ -104,11 +122,11 @@ namespace Brickview
 		std::unordered_map<LegoPartID, uint32_t> m_currentBufferIndex;
 		Layout m_instanceBufferLayout;
 
+		// Lines
 		// Origin helper
 		std::vector<Line> m_originLines;
-		std::vector<glm::vec3> m_originLineColors;
 		// Grid
-		EditorGridSettings m_gridSettings;
+		std::vector<glm::vec3> m_originLineColors;
 		std::vector<Line> m_gridLines;
 	};
 

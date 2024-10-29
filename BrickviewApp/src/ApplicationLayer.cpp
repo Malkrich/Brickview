@@ -262,13 +262,40 @@ namespace Brickview
 		ImGui::Text("Draw calls: %i", renderStats.DrawCalls);
 		ImGui::Text("Max Instance count: %i", renderStats.MaxInstanceCount);
 #endif
-
 		ImGui::SeparatorText("Renderer Settings:");
-		ImGui::Text("Grid depth testing");
-		ImGui::SameLine();
-		bool depthTestingEnable = m_renderer->isGridDepthTestEnable();
-		if (ImGui::Checkbox("##gridDepthTesting", &depthTestingEnable))
-			m_renderer->setGridDepthTesting(depthTestingEnable);
+
+		ImGui::Columns(2);
+		{
+			ImGui::Text("Grid depth testing");
+			ImGui::NextColumn();
+			bool depthTestingEnable = m_renderer->isGridDepthTestEnable();
+			if (ImGui::Checkbox("##gridDepthTesting", &depthTestingEnable))
+				m_renderer->setGridDepthTesting(depthTestingEnable);
+			ImGui::NextColumn();
+			ImGui::Text("Renderer Type");
+			ImGui::NextColumn();
+			RendererType rendererType = m_renderer->getRendererType();
+			const char* rendererTypeStrings[] = {"Solid", "Lighted"};
+			const char* selectedRendererTypeString = rendererTypeStrings[(int32_t)rendererType];
+			if (ImGui::BeginCombo("##rendererType", selectedRendererTypeString))
+			{
+				for (int i = 0; i < 2; i++)
+				{
+					bool isSelected = selectedRendererTypeString == rendererTypeStrings[i];
+					if (ImGui::Selectable(rendererTypeStrings[i], isSelected))
+					{
+						selectedRendererTypeString = rendererTypeStrings[i];
+						m_renderer->setRendererType((RendererType)i);
+					}
+
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndCombo();
+			}
+		}
+		ImGui::Columns(1);
 
 		ImGui::End();
 

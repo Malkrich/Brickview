@@ -6,7 +6,8 @@ layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
 // Per instances
 layout (location = 2) in int a_entityID;
-layout (location = 3) in mat4 a_transform;
+layout (location = 3) in vec3 a_color;
+layout (location = 4) in mat4 a_transform;
 
 layout (std140, binding = 0) uniform CameraData
 {
@@ -16,6 +17,7 @@ layout (std140, binding = 0) uniform CameraData
 
 out vec3 f_currentPosition;
 out vec3 f_normal;
+out vec3 f_color;
 out flat int f_entityID;
 
 void main()
@@ -24,6 +26,7 @@ void main()
     f_currentPosition = vec3(worldPosition);
     mat3 normalTransform = mat3(transpose(inverse(a_transform)));
     f_normal = normalTransform * a_normal;
+    f_color = a_color;
     f_entityID = a_entityID;
     gl_Position = cameraData.ViewProjectionMatrix * worldPosition;
 }
@@ -37,6 +40,7 @@ layout (location = 1) out int o_entityID;
 
 in vec3 f_currentPosition;
 in vec3 f_normal;
+in vec3 f_color;
 in flat int f_entityID;
 
 layout (std140, binding = 0) uniform CameraData
@@ -49,7 +53,7 @@ layout (std140, binding = 0) uniform CameraData
 void main()
 {
     float ambient = 0.15;
-    vec3 renderedColor = vec3(0.6);
+    vec3 renderedColor = vec3(0.6) * f_color;
     
     vec3 viewDirection = normalize(cameraData.Position - f_currentPosition);
     float facingFactor = dot(viewDirection, f_normal);

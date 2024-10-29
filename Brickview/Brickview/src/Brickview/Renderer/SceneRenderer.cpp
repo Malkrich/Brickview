@@ -50,7 +50,7 @@ namespace Brickview
 			glm::vec3(0.0f, 0.0f, 1.0f)
 		};
 
-		m_gridLines = generateGrid(m_gridSettings.Bound, m_gridSettings.Step);
+		m_gridLines = generateGrid(m_rendererSettings.GridBound, m_rendererSettings.GridStep);
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
@@ -127,32 +127,22 @@ namespace Brickview
 		RenderCommand::enableDepthTesting(true);
 
 		// lighted render
-		if (!m_lightData.empty())
+		switch (m_rendererSettings.RendererType)
 		{
-			Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("LightedMesh");
-
-			// Light Uniform buffer
-			m_lightDataUbo->setElement(0, &m_lightData[0].LightInfo.Position);
-			m_lightDataUbo->setElement(1, &m_lightData[0].LightInfo.Color);
-
-			// Lego parts
-			for (const InstanceBuffer& buffer : m_instanceBuffers)
-			{
-				Renderer::renderMeshInstances(solidShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(), 
-					m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
-			}
-
-			// Lights
-			for (const auto& lightData : m_lightData)
-				Renderer::renderLight(lightData.LightInfo, lightData.EntityID);
+			case RendererType::Solid:
+				RenderSolid();
+				break;
+			case RendererType::Lighted:
+				RenderLighted();
+				break;
 		}
 
 		// Origin
 		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
 
 		// Grid
-		RenderCommand::enableDepthTesting(m_gridSettings.DepthTestingEnable);
-		Renderer::renderLines(m_gridLines, m_gridSettings.Color, 1.0f);
+		RenderCommand::enableDepthTesting(m_rendererSettings.GridDepthTestingEnable);
+		Renderer::renderLines(m_gridLines, m_rendererSettings.GridColor, 1.0f);
 
 		m_viewportFrameBuffer->unbind();
 
@@ -160,6 +150,41 @@ namespace Brickview
 		m_instanceBuffers.clear();
 	}
 
+	void SceneRenderer::RenderSolid()
+	{
+		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("SolidMesh");
+
+		// Lego parts
+		for (const InstanceBuffer& buffer : m_instanceBuffers)
+		{
+			Renderer::renderMeshInstances(solidShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
+				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
+		}
+	}
+
+	void SceneRenderer::RenderLighted()
+	{
+		// TEMP: no lighted renderer if no lights
+		if (m_lightData.empty())
+			return;
+
+		Ref<Shader> lightedShader = Renderer::getShaderLibrary()->get("LightedMesh");
+
+		// Light Uniform buffer
+		m_lightDataUbo->setElement(0, &m_lightData[0].LightInfo.Position);
+		m_lightDataUbo->setElement(1, &m_lightData[0].LightInfo.Color);
+
+		// Lego parts
+		for (const InstanceBuffer& buffer : m_instanceBuffers)
+		{
+			Renderer::renderMeshInstances(lightedShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
+				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
+		}
+
+		// Lights
+		for (const auto& lightData : m_lightData)
+			Renderer::renderLight(lightData.LightInfo, lightData.EntityID);
+	}
 
 	void SceneRenderer::insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement)
 	{
