@@ -3,6 +3,7 @@
 #include "Buffer.h"
 #include "UniformBuffer.h"
 #include "Shader/Shader.h"
+#include "Material.h"
 #include "Texture2D.h"
 #include "FrameBuffer.h"
 #include "PerspectiveCamera.h"
@@ -42,7 +43,7 @@ namespace Brickview
 	struct SceneRendererSettings
 	{
 		// Global
-		RendererType RendererType = RendererType::Solid;
+		RendererType RendererType = RendererType::Lighted;
 
 		// Grid
 		float GridBound = 1.0f;
@@ -56,7 +57,7 @@ namespace Brickview
 	struct InstanceElement
 	{
 		int EntityID = -1;
-		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+		RendererMaterial Material;
 		glm::mat4 Transform = glm::mat4(1.0f);
 
 		InstanceElement() = default;

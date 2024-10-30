@@ -19,47 +19,61 @@ namespace Brickview
 		ImGui::End();
 	}
 
+	template<typename Component>
+	static void drawComponent(const std::string& name, Entity e, void(*drawFunction)(Component&))
+	{
+		if (e.hasComponent<Component>())
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
+
+			ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen
+											| ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth
+											| ImGuiTreeNodeFlags_AllowItemOverlap| ImGuiTreeNodeFlags_FramePadding;
+			if (ImGui::TreeNodeEx((void*)typeid(Component).hash_code(), treeNodeFlags, name.c_str()))
+			{
+				ImGui::Columns(2);
+				Component& component = e.getComponent<Component>();
+				drawFunction(component);
+				ImGui::Columns(1);
+
+				ImGui::TreePop();
+			}
+
+			ImGui::PopStyleVar();
+		}
+	}
+
 	void LegoPartPropertiesPanel::drawEntityComponents(Entity entity)
 	{
-		ImGui::Columns(2);
-
-		if (entity.hasComponent<TransformComponent>())
+		drawComponent<TransformComponent>("Transform", entity, [](TransformComponent& transform)
 		{
-			ImGui::Separator();
-			TransformComponent& transform = entity.getComponent<TransformComponent>();
 			ImGui::Text("Position");
 			ImGui::NextColumn();
 			ImGui::DragFloat3("##TransformPosition", (float*)glm::value_ptr(transform.Translation), 0.001f);
 			ImGui::NextColumn();
-		}
+		});
 
-		if (entity.hasComponent<LegoPartComponent>())
+		drawComponent<LegoPartComponent>("Lego Part", entity, [](LegoPartComponent& legoPartComponent)
 		{
-			ImGui::Separator();
-			LegoPartComponent& legoPartComponent = entity.getComponent<LegoPartComponent>();
 			LegoPartID partID = legoPartComponent.ID;
 			LegoMaterial& legoMaterial = legoPartComponent.Material;
-			ImGui::Text("Lego Part ID"); 
+			ImGui::Text("Lego Part ID");
 			ImGui::NextColumn();
 			ImGui::Text("%s", partID.c_str()); // TODO: ID should be an integer
 			ImGui::NextColumn();
 			ImGui::Text("Color:");
 			ImGui::NextColumn();
-			ImGui::ColorEdit3("##LegoColor", (float*)glm::value_ptr(legoMaterial.Color));
+			ImGui::ColorEdit4("##LegoColor", (float*)glm::value_ptr(legoMaterial.Color));
 			ImGui::NextColumn();
-		}
+		});
 
-		if (entity.hasComponent<LightComponent>())
+		drawComponent<LightComponent>("Light", entity, [](LightComponent& lightComponent)
 		{
-			ImGui::Separator();
-			LightComponent& lightCompoenent = entity.getComponent<LightComponent>();
 			ImGui::Text("Light Color");
 			ImGui::NextColumn();
-			ImGui::ColorEdit3("##LightColor", (float*)glm::value_ptr(lightCompoenent.Color));
+			ImGui::ColorEdit3("##LightColor", (float*)glm::value_ptr(lightComponent.Color));
 			ImGui::NextColumn();
-		}
-
-		ImGui::Columns(1);
+		});
 	}
 
 }

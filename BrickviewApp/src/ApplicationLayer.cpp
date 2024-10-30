@@ -28,11 +28,16 @@ namespace Brickview
 	{
 		// Scene
 		m_scene = createRef<Scene>();
-		// TEMP: make a button to add light
+
+		// TEMP: implement serialization
 		Entity lightEntity = m_scene->createEntity();
 		TransformComponent& transformComponent = lightEntity.getComponent<TransformComponent>();
-		transformComponent.Translation = { 0.0f, 0.1f, 0.0f };
+		transformComponent.Translation = { 0.0f, 0.3f, 0.0f };
 		lightEntity.addComponent<LightComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
+
+		Ref<Mesh> Lego15537Mesh = Mesh::load("./data/LDraw/parts/15537.dat");
+		m_scene->createLegoPartEntity("15537", Lego15537Mesh);
+
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
 		// not the actual ImGui viewport size

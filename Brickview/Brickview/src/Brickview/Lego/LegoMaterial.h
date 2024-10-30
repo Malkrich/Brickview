@@ -7,10 +7,10 @@ namespace Brickview
 
 	struct LegoMaterial
 	{
-		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+		glm::vec4 Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		LegoMaterial() = default;
-		LegoMaterial(const glm::vec3& color)
+		LegoMaterial(const glm::vec4& color)
 			: Color(color) {}
 	};
 

@@ -47,7 +47,8 @@ namespace Brickview
 		
 		// Meshes
 		s_rendererData->ShaderLibrary->load("data/Shaders/SolidMesh.glsl");
-		s_rendererData->ShaderLibrary->load("data/Shaders/LightedMesh.glsl");
+		s_rendererData->ShaderLibrary->load("data/Shaders/PhongMesh.glsl");
+		s_rendererData->ShaderLibrary->load("data/Shaders/PBRMesh.glsl");
 		// Lights
 		s_rendererData->ShaderLibrary->load("data/Shaders/Light.glsl");
 		// Lines

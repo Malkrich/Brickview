@@ -34,7 +34,7 @@ namespace Brickview
 
 		m_instanceBufferLayout = {
 			{ 2, "a_entityID", BufferElementType::Int, 1 },
-			{ 3, "a_color", BufferElementType::Float3, 1 },
+			{ 3, "a_albedo", BufferElementType::Float4, 1 },
 			{ 4, "a_transform", BufferElementType::Mat4, 1 }
 		};
 
@@ -96,7 +96,7 @@ namespace Brickview
 			{
 				InstanceElement instanceElement;
 				instanceElement.EntityID = (int)entityID;
-				instanceElement.Color = legoPart.Material.Color;
+				instanceElement.Material.Albedo = legoPart.Material.Color;
 				instanceElement.Transform = transformMat;
 				buffer.InstanceElements[buffer.InstanceCount] = instanceElement;
 				buffer.InstanceCount++;
@@ -108,7 +108,7 @@ namespace Brickview
 		InstanceElement instanceElement;
 		instanceElement.EntityID = (int)entityID;
 		instanceElement.Transform = transformMat;
-		instanceElement.Color = legoPart.Material.Color;
+		instanceElement.Material.Albedo = legoPart.Material.Color;
 		insertNewInstanceBuffer(id, legoPartMesh, instanceElement);
 	}
 
@@ -168,7 +168,7 @@ namespace Brickview
 		if (m_lightData.empty())
 			return;
 
-		Ref<Shader> lightedShader = Renderer::getShaderLibrary()->get("LightedMesh");
+		Ref<Shader> lightedShader = Renderer::getShaderLibrary()->get("PBRMesh");
 
 		// Light Uniform buffer
 		m_lightDataUbo->setElement(0, &m_lightData[0].LightInfo.Position);
