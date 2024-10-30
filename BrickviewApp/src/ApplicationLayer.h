@@ -52,7 +52,7 @@ namespace Brickview
 		uint32_t m_viewportWidth, m_viewportHeight;
 
 		Scope<CameraController> m_cameraControl = nullptr;
-		bool m_laptopMode = true;
+		bool m_laptopMode = false;
 		EditorManipulationType m_currentManipulationType = EditorManipulationType::Translate;
 		bool m_gizmoVisible = false;
 		
