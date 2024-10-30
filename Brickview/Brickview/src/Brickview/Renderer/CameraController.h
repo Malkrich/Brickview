@@ -34,6 +34,7 @@ namespace Brickview
 		void setTargetPoint(const glm::vec3& targetPoint);
 
 		void setViewportHovered(bool hovered) { m_isViewportHovered = hovered; }
+		bool isLaptopModeEnable() const { return m_laptopMode; }
 		void setLaptopMode(bool laptopMode) { m_laptopMode = laptopMode; }
 
 		void onEvent(Event& e);

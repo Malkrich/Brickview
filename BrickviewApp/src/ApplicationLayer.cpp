@@ -122,7 +122,8 @@ namespace Brickview
 		m_renderer->resizeViewport(m_viewportWidth, m_viewportHeight);
 		m_cameraControl->resize((float)m_viewportWidth, (float)m_viewportHeight);
 
-		m_cameraControl->onUpdate();
+		if (!ImGuizmo::IsOver() || !m_cameraControl->isLaptopModeEnable())
+			m_cameraControl->onUpdate();
 
 		const PerspectiveCamera& camera = m_cameraControl->getCamera();
 		m_scene->onUpdate(dt, camera, m_renderer);
@@ -171,6 +172,8 @@ namespace Brickview
 		// (otherwise viewportMinRegion = (0, 0))
 		m_viewportMinBound = { viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y };
 		m_viewportMaxBound = { m_viewportMinBound.x + viewportDim.x, m_viewportMinBound.y + viewportDim.y };
+		m_viewportWidth = (uint32_t)viewportDim.x;
+		m_viewportHeight = (uint32_t)viewportDim.y;
 
 		// Gizmo
 		m_gizmoVisible = false;
@@ -209,9 +212,6 @@ namespace Brickview
 			transform.Translation = translation;
 			transform.Rotation = glm::radians(rotation);
 		}
-
-		m_viewportWidth = (uint32_t)viewportDim.x;
-		m_viewportHeight = (uint32_t)viewportDim.y;
 		// Render
 		ImGui::Image((void*)m_renderer->getSceneRenderAttachment(), viewportDim, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
