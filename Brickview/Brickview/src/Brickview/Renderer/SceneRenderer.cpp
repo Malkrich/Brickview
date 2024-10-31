@@ -8,6 +8,8 @@ namespace Brickview
 {
 	SceneRenderer::SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
+		m_rendererSettings.RendererType = RendererType::Solid;
+
 		UniformBufferSpecifications cameraDataUboSpecs;
 		cameraDataUboSpecs.BlockName = "CameraData";
 		cameraDataUboSpecs.BindingPoint = 0;

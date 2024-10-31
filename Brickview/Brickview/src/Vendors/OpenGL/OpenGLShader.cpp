@@ -72,7 +72,6 @@ namespace Brickview
     static uint32_t compileShader(const std::string& shaderContent, GLenum shaderType)
     {
         int32_t success;
-        char log[128];
 
         int32_t shaderID;
         shaderID = glCreateShader(shaderType);
@@ -85,7 +84,12 @@ namespace Brickview
         glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
         if (!success)
         {
-            glGetShaderInfoLog(shaderID, 128, nullptr, log);
+            GLint shaderInfoLogLength = 0;
+            glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &shaderInfoLogLength);
+
+            std::vector<char> shaderInfoLog(shaderInfoLogLength);
+            glGetShaderInfoLog(shaderID, shaderInfoLogLength, &shaderInfoLogLength, shaderInfoLog.data());
+
             std::string shaderTypeStr;
             switch (shaderType)
             {
@@ -99,7 +103,8 @@ namespace Brickview
                     shaderTypeStr = "[Unknown]";
                     break;
             }
-            BV_LOG_WARN("{} shader compilation failed !", shaderTypeStr);
+            BV_LOG_ERROR("{} shader compilation failed !", shaderTypeStr);
+            BV_LOG_ERROR("{}", shaderInfoLog.data());
         }
 
         return shaderID;
@@ -132,7 +137,7 @@ namespace Brickview
             if (!success)
             {
                 glGetProgramInfoLog(programID, 128, nullptr, log);
-                BV_LOG_WARN("Shader program linking failed !");
+                BV_LOG_ERROR("Shader program linking failed !");
             }
         }
 
