@@ -35,8 +35,8 @@ namespace Brickview
 		transformComponent.Translation = { 0.0f, 0.3f, 0.0f };
 		lightEntity.addComponent<LightComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
 
-		Ref<Mesh> Lego15537Mesh = Mesh::load("./data/LDraw/parts/15537.dat");
-		m_scene->createLegoPartEntity("15537", Lego15537Mesh);
+		Ref<Mesh> sphere = Mesh::load("./data/Meshes/Plane.obj");
+		m_scene->createLegoPartEntity("15537", sphere);
 
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
@@ -266,11 +266,11 @@ namespace Brickview
 			ImGui::Text("Renderer Type");
 			ImGui::NextColumn();
 			RendererType rendererType = m_renderer->getRendererType();
-			const char* rendererTypeStrings[] = {"Solid", "Lighted"};
+			const char* rendererTypeStrings[] = {"Solid", "Lighted Phong", "Lighted PBR"};
 			const char* selectedRendererTypeString = rendererTypeStrings[(int32_t)rendererType];
 			if (ImGui::BeginCombo("##rendererType", selectedRendererTypeString))
 			{
-				for (int i = 0; i < 2; i++)
+				for (int i = 0; i < 3; i++)
 				{
 					bool isSelected = selectedRendererTypeString == rendererTypeStrings[i];
 					if (ImGui::Selectable(rendererTypeStrings[i], isSelected))

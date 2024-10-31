@@ -37,13 +37,13 @@ namespace Brickview
 
 	enum class RendererType
 	{
-		Solid, Lighted
+		Solid, LightedPhong, LightedPBR
 	};
 
 	struct SceneRendererSettings
 	{
 		// Global
-		RendererType RendererType = RendererType::Lighted;
+		RendererType RendererType = RendererType::LightedPBR;
 
 		// Grid
 		float GridBound = 1.0f;
@@ -98,6 +98,8 @@ namespace Brickview
 		void setGridDepthTesting(bool enable) { m_rendererSettings.GridDepthTestingEnable = enable; }
 
 	private:
+		Ref<Shader> getShader(RendererType rendererType);
+
 		void RenderSolid();
 		void RenderLighted();
 

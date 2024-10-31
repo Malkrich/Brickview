@@ -63,7 +63,6 @@ void main()
     vec3 lightDirection  = normalize(lightData.Position - worldPosition);
     vec3 cameraDirection = normalize(cameraData.Position - worldPosition);
     
-    float facingFactor = dot(cameraDirection, f_normal) >= 0.0 ? 1.0 : ambient;
     float diffuse = max(dot(f_normal, lightDirection), 0.0);
 
     float specular = 0.0;
@@ -72,10 +71,10 @@ void main()
         float specularLight = 0.5;
         vec3 viewDirection = normalize(cameraData.Position - worldPosition);
         vec3 reflectionDirection = reflect(-lightDirection, f_normal);
-        specular = pow(max(dot(viewDirection, reflectionDirection), 0.0), 64);
+        specular = pow(max(dot(viewDirection, reflectionDirection), 0.0), 128);
         specular *= specularLight;
     }
 
-    o_color = vec4(facingFactor * (diffuse + ambient + specular) * f_albedo.xyz * lightData.Color, 1.0);
+    o_color = vec4((diffuse + ambient + specular) * f_albedo.xyz * lightData.Color, 1.0);
     o_entityID = f_entityID;
 }

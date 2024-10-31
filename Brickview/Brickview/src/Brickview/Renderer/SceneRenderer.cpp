@@ -132,7 +132,8 @@ namespace Brickview
 			case RendererType::Solid:
 				RenderSolid();
 				break;
-			case RendererType::Lighted:
+			case RendererType::LightedPhong:
+			case RendererType::LightedPBR:
 				RenderLighted();
 				break;
 		}
@@ -150,9 +151,22 @@ namespace Brickview
 		m_instanceBuffers.clear();
 	}
 
+	Ref<Shader> SceneRenderer::getShader(RendererType rendererType)
+	{
+		switch (rendererType)
+		{
+			case RendererType::Solid:        return Renderer::getShaderLibrary()->get("SolidMesh");
+			case RendererType::LightedPhong: return Renderer::getShaderLibrary()->get("PhongMesh");
+			case RendererType::LightedPBR:   return Renderer::getShaderLibrary()->get("PBRMesh");
+		}
+
+		BV_ASSERT(false, "Unknown render type!");
+		return nullptr;
+	}
+
 	void SceneRenderer::RenderSolid()
 	{
-		Ref<Shader> solidShader = Renderer::getShaderLibrary()->get("SolidMesh");
+		Ref<Shader> solidShader = getShader(m_rendererSettings.RendererType);
 
 		// Lego parts
 		for (const InstanceBuffer& buffer : m_instanceBuffers)
@@ -168,7 +182,7 @@ namespace Brickview
 		if (m_lightData.empty())
 			return;
 
-		Ref<Shader> lightedShader = Renderer::getShaderLibrary()->get("PBRMesh");
+		Ref<Shader> lightedShader = getShader(m_rendererSettings.RendererType);
 
 		// Light Uniform buffer
 		m_lightDataUbo->setElement(0, &m_lightData[0].LightInfo.Position);
