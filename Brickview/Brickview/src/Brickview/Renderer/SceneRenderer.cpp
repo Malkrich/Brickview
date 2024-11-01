@@ -8,8 +8,6 @@ namespace Brickview
 {
 	SceneRenderer::SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
-		m_rendererSettings.RendererType = RendererType::Solid;
-
 		UniformBufferSpecifications cameraDataUboSpecs;
 		cameraDataUboSpecs.BlockName = "CameraData";
 		cameraDataUboSpecs.BindingPoint = 0;
@@ -37,7 +35,9 @@ namespace Brickview
 		m_instanceBufferLayout = {
 			{ 2, "a_entityID", BufferElementType::Int, 1 },
 			{ 3, "a_albedo", BufferElementType::Float4, 1 },
-			{ 4, "a_transform", BufferElementType::Mat4, 1 }
+			{ 4, "a_roughness", BufferElementType::Float, 1 },
+			{ 5, "a_metalness", BufferElementType::Float, 1 },
+			{ 6, "a_transform", BufferElementType::Mat4, 1 }
 		};
 
 		BV_ASSERT(m_originLines.size() == m_originLineColors.size(), "OriginLines and OriginLineColors must be the same length!");
@@ -99,6 +99,8 @@ namespace Brickview
 				InstanceElement instanceElement;
 				instanceElement.EntityID = (int)entityID;
 				instanceElement.Material.Albedo = legoPart.Material.Color;
+				instanceElement.Material.Roughness = 0.1f;
+				instanceElement.Material.Metalness = 0.0f;
 				instanceElement.Transform = transformMat;
 				buffer.InstanceElements[buffer.InstanceCount] = instanceElement;
 				buffer.InstanceCount++;
@@ -111,6 +113,8 @@ namespace Brickview
 		instanceElement.EntityID = (int)entityID;
 		instanceElement.Transform = transformMat;
 		instanceElement.Material.Albedo = legoPart.Material.Color;
+		instanceElement.Material.Roughness = 0.1f;
+		instanceElement.Material.Metalness = 0.0f;
 		insertNewInstanceBuffer(id, legoPartMesh, instanceElement);
 	}
 

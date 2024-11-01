@@ -71,8 +71,6 @@ namespace Brickview
 
     static uint32_t compileShader(const std::string& shaderContent, GLenum shaderType)
     {
-        int32_t success;
-
         int32_t shaderID;
         shaderID = glCreateShader(shaderType);
 
@@ -80,32 +78,8 @@ namespace Brickview
         glShaderSource(shaderID, 1, &rawShaderContent, nullptr);
 
         glCompileShader(shaderID);
-
-        glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            GLint shaderInfoLogLength = 0;
-            glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &shaderInfoLogLength);
-
-            std::vector<char> shaderInfoLog(shaderInfoLogLength);
-            glGetShaderInfoLog(shaderID, shaderInfoLogLength, &shaderInfoLogLength, shaderInfoLog.data());
-
-            std::string shaderTypeStr;
-            switch (shaderType)
-            {
-                case GL_VERTEX_SHADER:   
-                    shaderTypeStr = "Vertex";
-                    break;
-                case GL_FRAGMENT_SHADER: 
-                    shaderTypeStr = "Fragment"; 
-                    break;
-                default:
-                    shaderTypeStr = "[Unknown]";
-                    break;
-            }
-            BV_LOG_ERROR("{} shader compilation failed !", shaderTypeStr);
-            BV_LOG_ERROR("{}", shaderInfoLog.data());
-        }
+        CHECK_GLSL_COMPILE_ERROR(shaderID);
+        CHECK_GL_ERROR();
 
         return shaderID;
     }
@@ -128,18 +102,8 @@ namespace Brickview
         }
 
         glLinkProgram(programID);
-
-        // DEBUG
-        {
-            int32_t success;
-            char log[128];
-            glGetProgramiv(programID, GL_LINK_STATUS, &success);
-            if (!success)
-            {
-                glGetProgramInfoLog(programID, 128, nullptr, log);
-                BV_LOG_ERROR("Shader program linking failed !");
-            }
-        }
+        CHECK_GLSL_LINK_ERROR(programID);
+        CHECK_GL_ERROR();
 
         for (uint8_t i = 0; i < shaderSources.size(); i++)
         {

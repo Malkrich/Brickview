@@ -35,9 +35,6 @@ namespace Brickview
 		transformComponent.Translation = { 0.0f, 0.3f, 0.0f };
 		lightEntity.addComponent<LightComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
 
-		Ref<Mesh> sphere = Mesh::load("./data/Meshes/Plane.obj");
-		m_scene->createLegoPartEntity("15537", sphere);
-
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
 		// not the actual ImGui viewport size
