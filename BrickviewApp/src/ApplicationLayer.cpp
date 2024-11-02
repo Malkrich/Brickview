@@ -29,12 +29,6 @@ namespace Brickview
 		// Scene
 		m_scene = createRef<Scene>();
 
-		// TEMP: implement serialization
-		Entity lightEntity = m_scene->createEntity();
-		TransformComponent& transformComponent = lightEntity.getComponent<TransformComponent>();
-		transformComponent.Translation = { 0.0f, 0.3f, 0.0f };
-		lightEntity.addComponent<LightComponent>(glm::vec3(1.0f, 1.0f, 1.0f));
-
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
 		// not the actual ImGui viewport size
@@ -161,10 +155,28 @@ namespace Brickview
 		if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
 			ImGui::SetWindowFocus("Viewport");
 
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered())
+			ImGui::OpenPopup("rightClickViewportMenu");
+
+		if (ImGui::BeginPopup("rightClickViewportMenu"))
+		{
+			if (ImGui::Button("Light"))
+			{
+				Entity e = m_scene->createEntity();
+				e.addComponent<LightComponent>();
+				ImGui::CloseCurrentPopup();
+			}
+			ImGui::EndPopup();
+		}
+
 		// Updates
 		bool viewportActive = ImGui::IsWindowHovered() && ImGui::IsWindowFocused();
 		Application::get()->getGuiLayer()->setBlockEvent(!viewportActive);
 
+		// Resizing
+		// Save current size before new size computation to display the current frame properly
+		ImVec2 currentFrameViewportDim = { m_viewportMaxBound.x - m_viewportMinBound.x, m_viewportMaxBound.y - m_viewportMinBound.y };
+		// Refresh resizing
 		m_cameraControl->setViewportHovered(ImGui::IsWindowHovered());
 		ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		ImVec2 viewportDim = ImGui::GetContentRegionAvail();
@@ -176,6 +188,9 @@ namespace Brickview
 		m_viewportMaxBound = { m_viewportMinBound.x + viewportDim.x, m_viewportMinBound.y + viewportDim.y };
 		m_viewportWidth = (uint32_t)viewportDim.x;
 		m_viewportHeight = (uint32_t)viewportDim.y;
+
+		// Render
+		ImGui::Image((void*)m_renderer->getSceneRenderAttachment(), currentFrameViewportDim, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
 		// Gizmo
 		m_gizmoVisible = false;
@@ -214,8 +229,6 @@ namespace Brickview
 			transform.Translation = translation;
 			transform.Rotation = glm::radians(rotation);
 		}
-		// Render
-		ImGui::Image((void*)m_renderer->getSceneRenderAttachment(), viewportDim, ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
 
 		ImGui::End(); // Viewport
 		ImGui::PopStyleVar(3);
