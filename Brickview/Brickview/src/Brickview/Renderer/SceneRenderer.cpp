@@ -83,10 +83,11 @@ namespace Brickview
 		m_lightData = lightData;
 	}
 
-	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, uint32_t entityID)
+	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, const MaterialComponent& materialComponent, uint32_t entityID)
 	{
 		LegoPartID id = legoPart.ID;
 		glm::mat4 transformMat = transform.getTransform();
+		const RendererMaterial& material = materialComponent.Material;
 
 		if (m_currentBufferIndex.contains(id))
 		{
@@ -98,9 +99,9 @@ namespace Brickview
 			{
 				InstanceElement instanceElement;
 				instanceElement.EntityID = (int)entityID;
-				instanceElement.Material.Albedo = legoPart.Material.Color;
-				instanceElement.Material.Roughness = 0.1f;
-				instanceElement.Material.Metalness = 0.0f;
+				instanceElement.Material.Albedo = material.Albedo;
+				instanceElement.Material.Roughness = material.Roughness;
+				instanceElement.Material.Metalness = material.Metalness;
 				instanceElement.Transform = transformMat;
 				buffer.InstanceElements[buffer.InstanceCount] = instanceElement;
 				buffer.InstanceCount++;
@@ -112,9 +113,9 @@ namespace Brickview
 		InstanceElement instanceElement;
 		instanceElement.EntityID = (int)entityID;
 		instanceElement.Transform = transformMat;
-		instanceElement.Material.Albedo = legoPart.Material.Color;
-		instanceElement.Material.Roughness = 0.1f;
-		instanceElement.Material.Metalness = 0.0f;
+		instanceElement.Material.Albedo = material.Albedo;
+		instanceElement.Material.Roughness = material.Roughness;
+		instanceElement.Material.Metalness = material.Metalness;
 		insertNewInstanceBuffer(id, legoPartMesh, instanceElement);
 	}
 

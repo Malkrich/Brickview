@@ -3,6 +3,7 @@
 #include "Renderer/Camera.h"
 #include "Renderer/Light.h"
 #include "Renderer/Mesh.h"
+#include "Renderer/RendererMaterial.h"
 #include "Lego/LegoPart.h"
 #include "Lego/LegoMaterial.h"
 #include "Lego/LegoPartMeshRegistry.h"
@@ -40,11 +41,11 @@ namespace Brickview
 	struct LegoPartComponent
 	{
 		LegoPartID ID;
-		LegoMaterial Material;
+		// TODO: Lego material that generates a premade PBR material
+		//LegoMaterial Material;
 
 		LegoPartComponent(LegoPartID id, LegoPartMeshRegistry& legoMeshRegistry, Ref<Mesh> mesh)
 			: ID(id)
-			, Material({ 1.0f, 1.0f, 1.0f, 1.0f })
 		{
 			legoMeshRegistry.addPart(id, mesh);
 		}
@@ -60,6 +61,14 @@ namespace Brickview
 		{}
 		LightComponent() = default;
 		LightComponent(LightComponent&) = default;
+	};
+
+	struct MaterialComponent
+	{
+		RendererMaterial Material;
+
+		MaterialComponent() = default;
+		MaterialComponent(const MaterialComponent&) = default;
 	};
 
 }

@@ -3,7 +3,7 @@
 #include "Buffer.h"
 #include "UniformBuffer.h"
 #include "Shader/Shader.h"
-#include "Material.h"
+#include "RendererMaterial.h"
 #include "Texture2D.h"
 #include "FrameBuffer.h"
 #include "PerspectiveCamera.h"
@@ -87,7 +87,8 @@ namespace Brickview
 
 		// Submission
 		void begin(const RendererCameraData& cameraData, const std::vector<RendererLightData>& lightData);
-		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, uint32_t entityID);
+		// Material should be found from the LegoPartComponent material (LegoMaterial -> LegoMaterialRegistry -> RendererMaterial)
+		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
 		void render();
 
 		// RendererSettings

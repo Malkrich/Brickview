@@ -108,7 +108,7 @@ float TrowbridgeReitzDistributionGGX(vec3 normal, vec3 halfwayVector, float roug
     float normalDotHalfway = max(dot(normal, halfwayVector), 0.0);
     float denominator = pow(normalDotHalfway, 2.0) * (alphaSquared - 1.0) + 1.0;
     denominator = PI * pow(denominator, 2.0);
-    return alphaSquared / max(denominator, ZERO_EPSILON);
+    return max(alphaSquared, ZERO_EPSILON) / max(denominator, ZERO_EPSILON);
 }
 
 float G1(vec3 normal, vec3 direction, float roughness)

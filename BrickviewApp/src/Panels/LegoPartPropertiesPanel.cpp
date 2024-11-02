@@ -24,7 +24,7 @@ namespace Brickview
 	{
 		if (e.hasComponent<Component>())
 		{
-			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 
 			ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen
 											| ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_SpanAvailWidth
@@ -45,6 +45,15 @@ namespace Brickview
 
 	void LegoPartPropertiesPanel::drawEntityComponents(Entity entity)
 	{
+		drawComponent<LegoPartComponent>("Lego Part", entity, [](LegoPartComponent& legoPartComponent)
+		{
+			LegoPartID partID = legoPartComponent.ID;
+			ImGui::Text("Lego Part ID");
+			ImGui::NextColumn();
+			ImGui::Text("%s", partID.c_str()); // TODO: ID should be an integer
+			ImGui::NextColumn();
+		});
+
 		drawComponent<TransformComponent>("Transform", entity, [](TransformComponent& transform)
 		{
 			ImGui::Text("Position");
@@ -53,25 +62,28 @@ namespace Brickview
 			ImGui::NextColumn();
 		});
 
-		drawComponent<LegoPartComponent>("Lego Part", entity, [](LegoPartComponent& legoPartComponent)
-		{
-			LegoPartID partID = legoPartComponent.ID;
-			LegoMaterial& legoMaterial = legoPartComponent.Material;
-			ImGui::Text("Lego Part ID");
-			ImGui::NextColumn();
-			ImGui::Text("%s", partID.c_str()); // TODO: ID should be an integer
-			ImGui::NextColumn();
-			ImGui::Text("Color:");
-			ImGui::NextColumn();
-			ImGui::ColorEdit4("##LegoColor", (float*)glm::value_ptr(legoMaterial.Color));
-			ImGui::NextColumn();
-		});
-
 		drawComponent<LightComponent>("Light", entity, [](LightComponent& lightComponent)
 		{
 			ImGui::Text("Light Color");
 			ImGui::NextColumn();
 			ImGui::ColorEdit3("##LightColor", (float*)glm::value_ptr(lightComponent.Color));
+			ImGui::NextColumn();
+		});
+
+		drawComponent<MaterialComponent>("Material", entity, [](MaterialComponent& materialComponent)
+		{
+			RendererMaterial& material = materialComponent.Material;
+			ImGui::Text("Color");
+			ImGui::NextColumn();
+			ImGui::ColorEdit4("##albedo", (float*)glm::value_ptr(material.Albedo));
+			ImGui::NextColumn();
+			ImGui::Text("Roughness");
+			ImGui::NextColumn();
+			ImGui::SliderFloat("##rougnessSlider", &material.Roughness, 0.0f, 1.0f, "%.2f");
+			ImGui::NextColumn();
+			ImGui::Text("Metalness");
+			ImGui::NextColumn();
+			ImGui::SliderFloat("##metalnessSlider", &material.Metalness, 0.0f, 1.0f, "%.2f");
 			ImGui::NextColumn();
 		});
 	}

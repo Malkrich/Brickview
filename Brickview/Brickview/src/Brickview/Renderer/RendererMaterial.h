@@ -12,6 +12,7 @@ namespace Brickview
 		float Metalness = 0.0;
 
 		RendererMaterial() = default;
+		RendererMaterial(const RendererMaterial&) = default;
 	};
 
 }
