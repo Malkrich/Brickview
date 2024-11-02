@@ -90,6 +90,17 @@ layout (std140, binding = 0) uniform CameraData
 } cameraData;
 
 // TODO: make array
+//struct PointLight
+//{
+//    vec3 Position;
+//    vec3 Color;
+//};
+
+//layout (std140, binding = 1) uniform LoghtData
+//{
+//    PointLight PointLights[];
+//} lightData;
+
 layout (std140, binding = 1) uniform LightData
 {
     vec3 Position;
