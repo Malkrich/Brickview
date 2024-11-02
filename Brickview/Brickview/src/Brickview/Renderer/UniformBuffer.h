@@ -17,13 +17,25 @@ namespace Brickview
 	struct UniformBufferElement
 	{
 		UniformBufferElementType Type = UniformBufferElementType::None;
+		//std::vector<UniformBufferElementType> Types;
 		uint32_t Offset = 0; // Calculated by the uniform buffer layout class
 		uint32_t Size = 0; // Calculated by the uniform buffer layout class
 		//uint32_t ElementCount = 1; // Potentialy for arrays
 
 		UniformBufferElement(UniformBufferElementType type)
 			: Type(type)
-		{}
+		{
+			//Types.push_back(type);
+		}
+		//UniformBufferElement(const std::vector<UniformBufferElement>& structLayout, uint32_t elementCount)
+		//	: ElementCount(elementCount)
+		//{
+		//	Types.reserve(layout.size());
+		//	for (const auto& elementType : structLayout)
+		//	{
+		//		Types.push_back(elementType);
+		//	}
+		//}
 	};
 
 	class UniformBufferLayout

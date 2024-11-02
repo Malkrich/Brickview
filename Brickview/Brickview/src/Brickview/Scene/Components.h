@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/Camera.h"
-#include "Renderer/Light.h"
+#include "Renderer/Lights.h"
 #include "Renderer/Mesh.h"
 #include "Renderer/RendererMaterial.h"
 #include "Lego/LegoPart.h"

@@ -2,7 +2,7 @@
 
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Shader/Shader.h"
-#include "Light.h"
+#include "Lights.h"
 #include "GpuMesh.h"
 #include "Primitives.h"
 
@@ -25,7 +25,7 @@ namespace Brickview
 			const void* instanceBufferData, const Layout& instanceBufferLayout, uint32_t instanceBufferSize, size_t instanceCount);
 
 		// Lights
-		static void renderLight(const Light& light, int entityID = -1);
+		static void renderLight(const PointLight& light, int entityID = -1);
 
 		// Lines
 		static void renderLines(const std::vector<Line>& lines, const glm::vec3& color, float lineWidth);

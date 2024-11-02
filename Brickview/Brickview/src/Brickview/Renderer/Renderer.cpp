@@ -60,7 +60,7 @@ namespace Brickview
 		std::vector<TriangleFace> lightMeshIndices;
 		{
 			Ref<Mesh> lightSourceMesh = Mesh::load("data/Meshes/Cube.obj");
-			lightSourceMesh->scale(0.05f);
+			lightSourceMesh->scale(0.01f);
 
 			// Vertices
 			const auto& sourceMeshVertices = lightSourceMesh->getVertices();
@@ -108,7 +108,7 @@ namespace Brickview
 		instanceDrawCallVertexArray->unbind();
 	}
 
-	void Renderer::renderLight(const Light& light, int entityID)
+	void Renderer::renderLight(const PointLight& light, int entityID)
 	{
 		// Light draw data
 		UniformBufferSpecifications lightDrawDataUboSpecs;

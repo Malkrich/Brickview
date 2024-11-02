@@ -8,7 +8,7 @@
 #include "FrameBuffer.h"
 #include "PerspectiveCamera.h"
 #include "Primitives.h"
-#include "Light.h"
+#include "Lights.h"
 #include "Scene/Components.h"
 #include "Lego/LegoPartMeshRegistry.h"
 
@@ -24,13 +24,13 @@ namespace Brickview
 
 	struct RendererLightData
 	{
-		Light LightInfo;
+		PointLight PointLightInfo;
 		int EntityID = -1;
 
 		RendererLightData() = default;
 		RendererLightData(const RendererLightData& other) = default;
 		RendererLightData(const glm::vec3& position, const glm::vec3& color, int entityID)
-			: LightInfo(position, color)
+			: PointLightInfo(position, color)
 			, EntityID(entityID)
 		{}
 	};

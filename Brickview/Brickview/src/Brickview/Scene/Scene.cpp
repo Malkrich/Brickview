@@ -3,7 +3,7 @@
 
 #include "Entity.h"
 #include "Components.h"
-#include "Renderer/Light.h"
+#include "Renderer/Lights.h"
 
 #include <glm/glm.hpp>
 
@@ -44,7 +44,7 @@ namespace Brickview
 
 		// Lights
 		auto lightEntities = m_registry.view<TransformComponent, LightComponent>();
-		std::vector<RendererLightData> rendererLightData; // TODO: handle multiple lights
+		std::vector<RendererLightData> rendererLightData;
 		rendererLightData.reserve(lightEntities.size_hint());
 		for (auto e : lightEntities)
 		{

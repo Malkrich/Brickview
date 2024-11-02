@@ -17,15 +17,6 @@ namespace Brickview
 		};
 		m_cameraDataUbo = UniformBuffer::create(cameraDataUboSpecs);
 
-		UniformBufferSpecifications lightDataUboSpecs;
-		lightDataUboSpecs.BlockName = "LightData";
-		lightDataUboSpecs.BindingPoint = 1;
-		lightDataUboSpecs.Layout = {
-			UniformBufferElementType::Float3,
-			UniformBufferElementType::Float3
-		};
-		m_lightDataUbo = UniformBuffer::create(lightDataUboSpecs);
-
 		FrameBufferSpecifications viewportFrameBufferSpecs;
 		viewportFrameBufferSpecs.Width = viewportWidth;
 		viewportFrameBufferSpecs.Height = viewportHeight;
@@ -81,6 +72,17 @@ namespace Brickview
 	{
 		m_cameraData = cameraData;
 		m_lightData = lightData;
+		size_t pointLightCount = lightData.size();
+
+		UniformBufferSpecifications lightDataUboSpecs;
+		lightDataUboSpecs.BlockName = "LightsData";
+		lightDataUboSpecs.BindingPoint = 1;
+		UniformBufferLayout pointLightStructLayout = { UniformBufferElementType::Float3,  UniformBufferElementType::Float3 };
+		lightDataUboSpecs.Layout = {
+			{ pointLightStructLayout, (uint32_t)pointLightCount },
+			UniformBufferElementType::Int
+		};
+		m_lightDataUbo = UniformBuffer::create(lightDataUboSpecs);
 	}
 
 	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, const MaterialComponent& materialComponent, uint32_t entityID)
@@ -132,6 +134,9 @@ namespace Brickview
 
 		// TEMP: move this to render pass
 		RenderCommand::enableDepthTesting(true);
+
+		// Outline
+		//Renderer::renderWireframeMesh();
 
 		// lighted render
 		switch (m_rendererSettings.RendererType)
@@ -192,8 +197,8 @@ namespace Brickview
 		Ref<Shader> lightedShader = getShader(m_rendererSettings.RendererType);
 
 		// Light Uniform buffer
-		m_lightDataUbo->setElement(0, &m_lightData[0].LightInfo.Position);
-		m_lightDataUbo->setElement(1, &m_lightData[0].LightInfo.Color);
+		m_lightDataUbo->setElement(0, &m_lightData[0].PointLightInfo.Position);
+		m_lightDataUbo->setElement(1, &m_lightData[0].PointLightInfo.Color);
 
 		// Lego parts
 		for (const InstanceBuffer& buffer : m_instanceBuffers)
@@ -204,7 +209,7 @@ namespace Brickview
 
 		// Lights
 		for (const auto& lightData : m_lightData)
-			Renderer::renderLight(lightData.LightInfo, lightData.EntityID);
+			Renderer::renderLight(lightData.PointLightInfo, lightData.EntityID);
 	}
 
 	void SceneRenderer::insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement)

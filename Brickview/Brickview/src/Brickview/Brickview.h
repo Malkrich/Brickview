@@ -22,7 +22,7 @@
 #include "Renderer/Camera.h"
 #include "Renderer/PerspectiveCamera.h"
 #include "Renderer/CameraController.h"
-#include "Renderer/Light.h"
+#include "Renderer/Lights.h"
 #include "Renderer/Mesh.h"
 
 // Scene
