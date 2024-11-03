@@ -97,7 +97,7 @@ struct PointLight
 
 layout (std140, binding = 1) uniform LightsData
 {
-    PointLight[] PointLights;
+    PointLight PointLights[];
     int LightCount;
 } lightsData;
 

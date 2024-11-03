@@ -46,39 +46,50 @@ namespace Brickview
 			return 0;
 		}
 
+		static void updateCurrentElementSizeAndOffset(UniformBufferElement& currentElement, const UniformBufferElement& nextElement, uint32_t& offset)
+		{
+			uint32_t localOffset = 0;
+			for (size_t i = 0; i < currentElement.Types.size(); i++)
+			{
+				uint32_t currentSize   = Utils::getElementSize(currentElement.Types[i]);
+				currentElement.Size   += currentSize;
+				currentElement.Offset  = localOffset;
+				localOffset           += currentSize;
+
+				uint32_t nextAlignment = Utils::getElementAlignment(nextElement.Types[0]);
+				if (localOffset % nextAlignment != 0)
+				{
+					uint32_t padding = nextAlignment - currentSize;
+					localOffset += padding;
+				}
+			}
+
+			offset += localOffset;
+		}
+
 	}
 
 	UniformBufferLayout::UniformBufferLayout(const std::initializer_list<UniformBufferElement>& elements)
 		: m_elements(elements)
 	{
-		calculateSizeAndElementOffsets();
+		calculateElementSizesAndOffsets();
 	}
 
-	void UniformBufferLayout::calculateSizeAndElementOffsets()
+	void UniformBufferLayout::calculateElementSizesAndOffsets()
 	{
 		uint32_t offset = 0;
 		for (size_t i = 0; i < m_elements.size() - 1; i++)
 		{
 			UniformBufferElement& element = m_elements[i];
-
-			uint32_t currentSize = Utils::getElementSize(element.Type);
-			element.Size = currentSize;
-			element.Offset = offset;
-			offset += currentSize;
-
-			uint32_t nextAlignment = Utils::getElementAlignment(m_elements[i+1].Type);
-			if (offset % nextAlignment != 0)
-			{
-				uint32_t padding = nextAlignment - currentSize;
-				offset += padding;
-			}
+			const UniformBufferElement& nextElement = m_elements[i + 1];
+			Utils::updateCurrentElementSizeAndOffset(element, nextElement, offset);
 		}
 
 		UniformBufferElement& lastElement = m_elements[m_elements.size() - 1];
-		lastElement.Size = Utils::getElementSize(lastElement.Type);
+		lastElement.Size = Utils::getElementSize(lastElement.Types[0]);
 		lastElement.Offset = offset;
 
-		uint32_t lastAlignment = Utils::getElementAlignment(lastElement.Type);
+		uint32_t lastAlignment = Utils::getElementAlignment(lastElement.Types[0]);
 		m_bufferSize = offset + lastAlignment;
 	}
 
@@ -86,7 +97,7 @@ namespace Brickview
 	{
 		switch (RendererAPI::getAPI())
 		{
-			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;
+			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!"); return nullptr;
 			case RendererAPI::API::OpenGL: return createRef<OpenGLUniformBuffer>(specs);
 		}
 

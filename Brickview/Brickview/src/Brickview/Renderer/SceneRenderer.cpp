@@ -8,6 +8,7 @@ namespace Brickview
 {
 	SceneRenderer::SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
+		// Camera
 		UniformBufferSpecifications cameraDataUboSpecs;
 		cameraDataUboSpecs.BlockName = "CameraData";
 		cameraDataUboSpecs.BindingPoint = 0;
@@ -17,12 +18,18 @@ namespace Brickview
 		};
 		m_cameraDataUbo = UniformBuffer::create(cameraDataUboSpecs);
 
+		// Lights
+		m_lightDataUboSpecs.BlockName = "LightsData";
+		m_lightDataUboSpecs.BindingPoint = 1;
+
+		// Rendered frame buffer
 		FrameBufferSpecifications viewportFrameBufferSpecs;
 		viewportFrameBufferSpecs.Width = viewportWidth;
 		viewportFrameBufferSpecs.Height = viewportHeight;
 		viewportFrameBufferSpecs.Attachments = { FrameBufferAttachment::RGBA8, FrameBufferAttachment::RedInt, FrameBufferAttachment::Depth };
 		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
 
+		// Mesh instance geometry
 		m_instanceBufferLayout = {
 			{ 2, "a_entityID", BufferElementType::Int, 1 },
 			{ 3, "a_albedo", BufferElementType::Float4, 1 },
@@ -31,18 +38,21 @@ namespace Brickview
 			{ 6, "a_transform", BufferElementType::Mat4, 1 }
 		};
 
+		// Lines
 		BV_ASSERT(m_originLines.size() == m_originLineColors.size(), "OriginLines and OriginLineColors must be the same length!");
 		m_originLines = {
 			Line({ 0.0f, 0.0f, 0.0f }, { 0.1f, 0.0f, 0.0f }),
 			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.1f, 0.0f }),
 			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.1f })
 		};
+		// Origin
 		m_originLineColors = {
 			glm::vec3(1.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f)
 		};
 
+		// Grid
 		m_gridLines = generateGrid(m_rendererSettings.GridBound, m_rendererSettings.GridStep);
 	}
 
@@ -68,21 +78,16 @@ namespace Brickview
 			m_viewportFrameBuffer->resize(width, height);
 	}
 
-	void SceneRenderer::begin(const RendererCameraData& cameraData, const std::vector<RendererLightData>& lightData)
+	void SceneRenderer::begin(const RendererCameraData& cameraData, const RendererLightData& lightData)
 	{
 		m_cameraData = cameraData;
 		m_lightData = lightData;
-		size_t pointLightCount = lightData.size();
 
-		UniformBufferSpecifications lightDataUboSpecs;
-		lightDataUboSpecs.BlockName = "LightsData";
-		lightDataUboSpecs.BindingPoint = 1;
-		UniformBufferLayout pointLightStructLayout = { UniformBufferElementType::Float3,  UniformBufferElementType::Float3 };
-		lightDataUboSpecs.Layout = {
-			{ pointLightStructLayout, (uint32_t)pointLightCount },
+		m_lightDataUboSpecs.Layout = {
+			{ { UniformBufferElementType::Float3, UniformBufferElementType::Float3 }, lightData.PointLights.size() },
 			UniformBufferElementType::Int
 		};
-		m_lightDataUbo = UniformBuffer::create(lightDataUboSpecs);
+		m_lightDataUbo = UniformBuffer::create(m_lightDataUboSpecs);
 	}
 
 	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, const MaterialComponent& materialComponent, uint32_t entityID)
@@ -190,15 +195,13 @@ namespace Brickview
 
 	void SceneRenderer::RenderLighted()
 	{
-		// TEMP: no lighted renderer if no lights
-		if (m_lightData.empty())
-			return;
-
 		Ref<Shader> lightedShader = getShader(m_rendererSettings.RendererType);
 
 		// Light Uniform buffer
-		m_lightDataUbo->setElement(0, &m_lightData[0].PointLightInfo.Position);
-		m_lightDataUbo->setElement(1, &m_lightData[0].PointLightInfo.Color);
+		const std::vector<PointLight>& pointLights = m_lightData.PointLights;
+		m_lightDataUbo->setElement(0, pointLights.empty() ? nullptr : &pointLights[9]);
+		uint32_t lightCount = (uint32_t)pointLights.size();
+		m_lightDataUbo->setElement(1, (void*)(&lightCount));
 
 		// Lego parts
 		for (const InstanceBuffer& buffer : m_instanceBuffers)
@@ -208,8 +211,8 @@ namespace Brickview
 		}
 
 		// Lights
-		for (const auto& lightData : m_lightData)
-			Renderer::renderLight(lightData.PointLightInfo, lightData.EntityID);
+		for (size_t i = 0; i < m_lightData.PointLights.size(); i++)
+			Renderer::renderLight(m_lightData.PointLights[i], m_lightData.EntityIDs[i]);
 	}
 
 	void SceneRenderer::insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement)

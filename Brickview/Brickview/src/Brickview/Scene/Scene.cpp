@@ -44,15 +44,18 @@ namespace Brickview
 
 		// Lights
 		auto lightEntities = m_registry.view<TransformComponent, LightComponent>();
-		std::vector<RendererLightData> rendererLightData;
-		rendererLightData.reserve(lightEntities.size_hint());
+		RendererLightData rendererLightData;
+		rendererLightData.PointLights.reserve(lightEntities.size_hint());
+		rendererLightData.EntityIDs.reserve(lightEntities.size_hint());
 		for (auto e : lightEntities)
 		{
 			Entity entity = { e, this };
-			uint32_t entityID = (uint32_t)e;
+			uint32_t entityID = (int)e;
 			const glm::vec3& position = entity.getComponent<TransformComponent>().Translation;
 			const glm::vec3& color = entity.getComponent<LightComponent>().Color;
-			rendererLightData.emplace_back(position, color, entityID);
+
+			rendererLightData.PointLights.emplace_back(position, color);
+			rendererLightData.EntityIDs.emplace_back(entityID);
 		}
 		renderer->begin(rendererCameraData, rendererLightData);
 

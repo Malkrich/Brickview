@@ -11,31 +11,23 @@ namespace Brickview
 		Float, Float2, Float3, Float4,
 		Int, Int2, Int3, Int4,
 		Mat2, Mat3, Mat4,
-		// Array
 	};
 
 	struct UniformBufferElement
 	{
-		UniformBufferElementType Type = UniformBufferElementType::None;
-		//std::vector<UniformBufferElementType> Types;
-		uint32_t Offset = 0; // Calculated by the uniform buffer layout class
-		uint32_t Size = 0; // Calculated by the uniform buffer layout class
-		//uint32_t ElementCount = 1; // Potentialy for arrays
+		std::vector<UniformBufferElementType> Types = {};
+		uint32_t Offset = 0;   // Calculated by the uniform buffer layout class
+		uint32_t Size = 0;     // Calculated by the uniform buffer layout class
+		uint32_t ElementCount; // Potentialy for arrays
 
-		UniformBufferElement(UniformBufferElementType type)
-			: Type(type)
+		UniformBufferElement(UniformBufferElementType type, uint32_t arrayElementCount = 1)
+			: ElementCount(arrayElementCount) 
 		{
-			//Types.push_back(type);
+			Types.push_back(type);
 		}
-		//UniformBufferElement(const std::vector<UniformBufferElement>& structLayout, uint32_t elementCount)
-		//	: ElementCount(elementCount)
-		//{
-		//	Types.reserve(layout.size());
-		//	for (const auto& elementType : structLayout)
-		//	{
-		//		Types.push_back(elementType);
-		//	}
-		//}
+		UniformBufferElement(const std::initializer_list<UniformBufferElementType>& structLayoutTypes, uint32_t arrayElementCount = 1)
+			: Types(structLayoutTypes)
+			, ElementCount(arrayElementCount) {}
 	};
 
 	class UniformBufferLayout
@@ -55,7 +47,7 @@ namespace Brickview
 		}
 
 	private:
-		void calculateSizeAndElementOffsets();
+		void calculateElementSizesAndOffsets();
 
 	private:
 		std::vector<UniformBufferElement> m_elements = {};

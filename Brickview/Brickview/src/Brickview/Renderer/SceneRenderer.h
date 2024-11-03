@@ -24,15 +24,10 @@ namespace Brickview
 
 	struct RendererLightData
 	{
-		PointLight PointLightInfo;
-		int EntityID = -1;
+		std::vector<PointLight> PointLights;
+		std::vector<int> EntityIDs;
 
 		RendererLightData() = default;
-		RendererLightData(const RendererLightData& other) = default;
-		RendererLightData(const glm::vec3& position, const glm::vec3& color, int entityID)
-			: PointLightInfo(position, color)
-			, EntityID(entityID)
-		{}
 	};
 
 	enum class RendererType
@@ -86,7 +81,7 @@ namespace Brickview
 		void resizeViewport(uint32_t width, uint32_t height);
 
 		// Submission
-		void begin(const RendererCameraData& cameraData, const std::vector<RendererLightData>& lightData);
+		void begin(const RendererCameraData& cameraData, const RendererLightData& lightData);
 		// Material should be found from the LegoPartComponent material (LegoMaterial -> LegoMaterialRegistry -> RendererMaterial)
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
 		void render();
@@ -115,10 +110,13 @@ namespace Brickview
 		// Viewport
 		Ref<FrameBuffer> m_viewportFrameBuffer;
 
-		// Camera / Environment
+		// Camera
 		RendererCameraData m_cameraData;
 		Ref<UniformBuffer> m_cameraDataUbo;
-		std::vector<RendererLightData> m_lightData;
+
+		// Lights
+		UniformBufferSpecifications m_lightDataUboSpecs;
+		RendererLightData m_lightData;
 		Ref<UniformBuffer> m_lightDataUbo;
 
 		// Lego parts
