@@ -66,7 +66,8 @@ namespace Brickview
 	class UniformBuffer
 	{
 	public:
-		static Ref<UniformBuffer> create(const UniformBufferSpecifications& specs);
+		static Ref<UniformBuffer> create();
+		static Ref<UniformBuffer> create(uint32_t size, const void* data);
 
 		virtual ~UniformBuffer() = default;
 

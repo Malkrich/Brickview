@@ -1,6 +1,7 @@
 #include "Pch.h"
 #include "Renderer.h"
 
+#include "RendererCore.h"
 #include "RenderCommand.h"
 #include "Buffer.h"
 #include "UniformBuffer.h"
@@ -19,6 +20,20 @@ namespace Brickview
 			: Position(position) {}
 	};
 
+	struct GpuPointLight
+	{
+		glm::vec3 Position;
+		BV_GPU_INTERNAL_PADDING(1);
+		glm::vec3 Color;
+		BV_GPU_INTERNAL_PADDING(1);
+	};
+
+	struct GpuLightsData
+	{
+		std::vector<GpuPointLight> PointLights;
+		int LightCount;
+	};
+
 	struct LineVertex
 	{
 		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
@@ -34,6 +49,9 @@ namespace Brickview
 		// Shaders
 		Ref<ShaderLibrary> ShaderLibrary = nullptr;
 
+		// Lights
+		Ref<UniformBuffer> LightsDataUbo;
+
 		Ref<GpuMesh> LightMesh = nullptr;
 	};
 
@@ -44,15 +62,16 @@ namespace Brickview
 		s_rendererData = new RendererData();
 
 		s_rendererData->ShaderLibrary = createRef<ShaderLibrary>();
+		std::filesystem::path shaderBaseDir = "data/Shaders/";
 		
 		// Meshes
-		s_rendererData->ShaderLibrary->load("data/Shaders/SolidMesh.glsl");
-		s_rendererData->ShaderLibrary->load("data/Shaders/PhongMesh.glsl");
-		s_rendererData->ShaderLibrary->load("data/Shaders/PBRMesh.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "SolidMesh.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PhongMesh.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRMesh.glsl");
 		// Lights
-		s_rendererData->ShaderLibrary->load("data/Shaders/Light.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Light.glsl");
 		// Lines
-		s_rendererData->ShaderLibrary->load("data/Shaders/Line.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Line.glsl");
 
 
 		// Upload light cube mesh to GPU
@@ -78,12 +97,19 @@ namespace Brickview
 
 		s_rendererData->LightMesh = createRef<GpuMesh>(lightMeshVertices.size() * sizeof(LightVertex), lightMeshVertices.data(), lightMeshLayout,
 			lightMeshIndices.size() * sizeof(TriangleFace), lightMeshIndices.data());
+
+		s_rendererData->LightsDataUbo = UniformBuffer::create();
 	}
 
 	void Renderer::shutdown()
 	{
 		delete s_rendererData;
 		s_rendererData = nullptr;
+	}
+
+	void Renderer::setLightsData(const std::vector<PointLight> pointLights)
+	{
+
 	}
 
 	const Ref<ShaderLibrary>& Renderer::getShaderLibrary()

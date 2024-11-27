@@ -8,6 +8,21 @@
 namespace Brickview
 {
 
+	OpenGLUniformBuffer::OpenGLUniformBuffer(uint32_t size, const void* data)
+	{
+		glGenBuffers(1, &m_bufferID);
+		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
+		glBufferData(GL_UNIFORM_BUFFER, m_specs.Layout.getBufferSize(), nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_specs.BindingPoint, m_bufferID);
+
+		CHECK_GL_ERROR();
+	}
+
+	OpenGLUniformBuffer::OpenGLUniformBuffer()
+		: OpenGLUniformBuffer(0, nullptr)
+	{}
+
+#if 0
 	OpenGLUniformBuffer::OpenGLUniformBuffer(const UniformBufferSpecifications& specs)
 		: m_specs(specs)
 	{
@@ -18,6 +33,7 @@ namespace Brickview
 
 		CHECK_GL_ERROR();
 	}
+#endif
 
 	OpenGLUniformBuffer::~OpenGLUniformBuffer()
 	{

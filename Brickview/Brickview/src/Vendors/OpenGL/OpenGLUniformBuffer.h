@@ -8,7 +8,8 @@ namespace Brickview
 	class OpenGLUniformBuffer : public UniformBuffer
 	{
 	public:
-		OpenGLUniformBuffer(const UniformBufferSpecifications& specs);
+		OpenGLUniformBuffer(uint32_t size, const void* data);
+		OpenGLUniformBuffer();
 
 		virtual ~OpenGLUniformBuffer();
 

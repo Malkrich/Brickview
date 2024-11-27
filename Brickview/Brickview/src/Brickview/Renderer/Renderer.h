@@ -20,6 +20,9 @@ namespace Brickview
 		// Read only
 		static const Ref<ShaderLibrary>& getShaderLibrary();
 
+		// Ubo Data
+		static void setLightsData(const std::vector<PointLight>& pointLights);
+
 		// Meshes
 		static void renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh,
 			const void* instanceBufferData, const Layout& instanceBufferLayout, uint32_t instanceBufferSize, size_t instanceCount);

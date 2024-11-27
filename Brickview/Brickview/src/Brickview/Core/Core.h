@@ -1,5 +1,8 @@
 #pragma once
 
+#define BV_CONCAT_INTERNAL(a, b) a##b
+#define BV_CONCAT(a, b)          BV_CONCAT_INTERNAL(a, b)
+
 #define BV_BIND_EVENT_FUNCTION(function) std::bind(&function, this, std::placeholders::_1)
 
 #ifdef BV_DEBUG

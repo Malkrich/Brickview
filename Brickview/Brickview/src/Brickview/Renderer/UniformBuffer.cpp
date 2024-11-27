@@ -46,17 +46,20 @@ namespace Brickview
 			return 0;
 		}
 
-		static void updateCurrentElementSizeAndOffset(UniformBufferElement& currentElement, const UniformBufferElement& nextElement, uint32_t& offset)
+		static void updateCurrentElementSizeAndOffset(UniformBufferElement& currentElement, const UniformBufferElement& nextElement, uint32_t elementCount, uint32_t& offset)
 		{
-			uint32_t localOffset = 0;
-			for (size_t i = 0; i < currentElement.Types.size(); i++)
-			{
-				uint32_t currentSize   = Utils::getElementSize(currentElement.Types[i]);
-				currentElement.Size   += currentSize;
-				currentElement.Offset  = localOffset;
-				localOffset           += currentSize;
+			const std::vector<UniformBufferElementType>& currentElementTypes = currentElement.Types;
 
-				uint32_t nextAlignment = Utils::getElementAlignment(nextElement.Types[0]);
+			currentElement.Offset = offset;
+
+			uint32_t localOffset = 0;
+			for (size_t i = 0; i < currentElement.Types.size() - 1; i++)
+			{
+				uint32_t currentSize = Utils::getElementSize(currentElementTypes[i]);
+				//localSize            += currentSize;
+				localOffset += currentSize;
+
+				uint32_t nextAlignment = Utils::getElementAlignment(currentElementTypes[i + 1]);
 				if (localOffset % nextAlignment != 0)
 				{
 					uint32_t padding = nextAlignment - currentSize;
@@ -64,7 +67,9 @@ namespace Brickview
 				}
 			}
 
-			offset += localOffset;
+			uint32_t lastAlignment = Utils::getElementAlignment(currentElementTypes[currentElementTypes.size() - 1]);
+
+			offset += elementCount * localOffset;
 		}
 
 	}
@@ -82,23 +87,36 @@ namespace Brickview
 		{
 			UniformBufferElement& element = m_elements[i];
 			const UniformBufferElement& nextElement = m_elements[i + 1];
-			Utils::updateCurrentElementSizeAndOffset(element, nextElement, offset);
+			Utils::updateCurrentElementSizeAndOffset(element, nextElement, element.ElementCount, offset);
 		}
 
 		UniformBufferElement& lastElement = m_elements[m_elements.size() - 1];
-		lastElement.Size = Utils::getElementSize(lastElement.Types[0]);
-		lastElement.Offset = offset;
+		//lastElement.Size = Utils::getElementSize(lastElement.Types[0]);
+		//lastElement.Offset = offset;
 
-		uint32_t lastAlignment = Utils::getElementAlignment(lastElement.Types[0]);
-		m_bufferSize = offset + lastAlignment;
+		//uint32_t lastAlignment = Utils::getElementAlignment(lastElement.Types[0]);
+		//m_bufferSize = offset + lastAlignment;
 	}
 
-	Ref<UniformBuffer> UniformBuffer::create(const UniformBufferSpecifications& specs)
+	Ref<UniformBuffer> UniformBuffer::create()
 	{
 		switch (RendererAPI::getAPI())
 		{
-			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!"); return nullptr;
-			case RendererAPI::API::OpenGL: return createRef<OpenGLUniformBuffer>(specs);
+			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;
+			case RendererAPI::API::OpenGL: return createRef<UniformBuffer>();
+		}
+
+		BV_ASSERT(false, "Unknown API!");
+		return nullptr;
+
+	}
+
+	Ref<UniformBuffer> UniformBuffer::create(uint32_t size, const void* data)
+	{
+		switch (RendererAPI::getAPI())
+		{
+			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;
+			case RendererAPI::API::OpenGL: return createRef<UniformBuffer>(size, data);
 		}
 
 		BV_ASSERT(false, "Unknown API!");
