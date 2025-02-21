@@ -35,29 +35,22 @@ namespace Brickview
 		e.addComponent<MaterialComponent>();
 	}
 
-	void Scene::onUpdate(DeltaTime dt, const PerspectiveCamera& camera, Ref<SceneRenderer> renderer)
+	void Scene::onRender(const PerspectiveCamera& camera, Ref<SceneRenderer> renderer)
 	{
-		// Camera
-		RendererCameraData rendererCameraData;
-		rendererCameraData.Position = camera.getPosition();
-		rendererCameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
-
 		// Lights
 		auto lightEntities = m_registry.view<TransformComponent, LightComponent>();
-		RendererLightData rendererLightData;
-		rendererLightData.PointLights.reserve(lightEntities.size_hint());
-		rendererLightData.EntityIDs.reserve(lightEntities.size_hint());
+		std::vector<PointLight> pointLights;
+		pointLights.reserve(lightEntities.size_hint());
 		for (auto e : lightEntities)
 		{
 			Entity entity = { e, this };
-			uint32_t entityID = (int)e;
+			// uint32_t entityID = (int)e;
 			const glm::vec3& position = entity.getComponent<TransformComponent>().Translation;
 			const glm::vec3& color = entity.getComponent<LightComponent>().Color;
 
-			rendererLightData.PointLights.emplace_back(position, color);
-			rendererLightData.EntityIDs.emplace_back(entityID);
+			pointLights.emplace_back(position, color);
 		}
-		renderer->begin(rendererCameraData, rendererLightData);
+		renderer->begin(camera, pointLights);
 
 		// Lego meshes
 		//auto meshEntities = m_registry.view<TransformComponent, LegoPartComponent>();
@@ -72,6 +65,8 @@ namespace Brickview
 			const MaterialComponent& material   = entity.getComponent<MaterialComponent>();
 			renderer->submitLegoPart(legoPart, m_legoPartMeshRegistry, transform, material, (uint32_t)e);
 		}
+
+		renderer->render();
 	}
 
 }

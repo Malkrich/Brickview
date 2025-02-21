@@ -28,6 +28,8 @@ namespace Brickview
 	{
 		// Scene
 		m_scene = createRef<Scene>();
+		Entity lightEntity = m_scene->createEntity();
+		lightEntity.addComponent<LightComponent>();
 
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
@@ -122,8 +124,7 @@ namespace Brickview
 			m_cameraControl->onUpdate();
 
 		const PerspectiveCamera& camera = m_cameraControl->getCamera();
-		m_scene->onUpdate(dt, camera, m_renderer);
-		m_renderer->render();
+		m_scene->onRender(camera, m_renderer);
 	}
 
 	void ApplicationLayer::onGuiRender()

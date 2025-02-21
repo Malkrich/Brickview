@@ -11,6 +11,17 @@
 namespace Brickview
 {
 
+	struct CameraData
+	{
+		glm::mat4 ViewProjectionMatrix;
+		glm::vec3 Position;
+	};
+
+	struct LightsData
+	{
+		std::vector<PointLight> PointLights;
+	};
+
 	class Renderer
 	{
 	public:
@@ -20,15 +31,15 @@ namespace Brickview
 		// Read only
 		static const Ref<ShaderLibrary>& getShaderLibrary();
 
-		// Ubo Data
-		static void setLightsData(const std::vector<PointLight>& pointLights);
+		// Setup environment
+		static void begin(const CameraData& cameraData, const LightsData& lightsData);
 
 		// Meshes
 		static void renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh,
 			const void* instanceBufferData, const Layout& instanceBufferLayout, uint32_t instanceBufferSize, size_t instanceCount);
 
 		// Lights
-		static void renderLight(const PointLight& light, int entityID = -1);
+		static void renderPointLights();
 
 		// Lines
 		static void renderLines(const std::vector<Line>& lines, const glm::vec3& color, float lineWidth);

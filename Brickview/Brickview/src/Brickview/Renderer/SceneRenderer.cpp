@@ -8,52 +8,7 @@ namespace Brickview
 {
 	SceneRenderer::SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
-		// Camera
-		UniformBufferSpecifications cameraDataUboSpecs;
-		cameraDataUboSpecs.BlockName = "CameraData";
-		cameraDataUboSpecs.BindingPoint = 0;
-		cameraDataUboSpecs.Layout = {
-			UniformBufferElementType::Mat4,
-			UniformBufferElementType::Float3
-		};
-		m_cameraDataUbo = UniformBuffer::create(cameraDataUboSpecs);
-
-		// Lights
-		m_lightDataUboSpecs.BlockName = "LightsData";
-		m_lightDataUboSpecs.BindingPoint = 1;
-
-		// Rendered frame buffer
-		FrameBufferSpecifications viewportFrameBufferSpecs;
-		viewportFrameBufferSpecs.Width = viewportWidth;
-		viewportFrameBufferSpecs.Height = viewportHeight;
-		viewportFrameBufferSpecs.Attachments = { FrameBufferAttachment::RGBA8, FrameBufferAttachment::RedInt, FrameBufferAttachment::Depth };
-		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
-
-		// Mesh instance geometry
-		m_instanceBufferLayout = {
-			{ 2, "a_entityID", BufferElementType::Int, 1 },
-			{ 3, "a_albedo", BufferElementType::Float4, 1 },
-			{ 4, "a_roughness", BufferElementType::Float, 1 },
-			{ 5, "a_metalness", BufferElementType::Float, 1 },
-			{ 6, "a_transform", BufferElementType::Mat4, 1 }
-		};
-
-		// Lines
-		BV_ASSERT(m_originLines.size() == m_originLineColors.size(), "OriginLines and OriginLineColors must be the same length!");
-		m_originLines = {
-			Line({ 0.0f, 0.0f, 0.0f }, { 0.1f, 0.0f, 0.0f }),
-			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.1f, 0.0f }),
-			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.1f })
-		};
-		// Origin
-		m_originLineColors = {
-			glm::vec3(1.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 1.0f)
-		};
-
-		// Grid
-		m_gridLines = generateGrid(m_rendererSettings.GridBound, m_rendererSettings.GridStep);
+		init(viewportWidth, viewportHeight);
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
@@ -78,16 +33,17 @@ namespace Brickview
 			m_viewportFrameBuffer->resize(width, height);
 	}
 
-	void SceneRenderer::begin(const RendererCameraData& cameraData, const RendererLightData& lightData)
+	void SceneRenderer::begin(const PerspectiveCamera& camera, const std::vector<PointLight> pointLights)
 	{
-		m_cameraData = cameraData;
-		m_lightData = lightData;
+		// Camera
+		CameraData cameraData;
+		cameraData.Position = camera.getPosition();
+		cameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
+		// Lights
+		LightsData lightsData;
+		lightsData.PointLights = pointLights;
 
-		m_lightDataUboSpecs.Layout = {
-			{ { UniformBufferElementType::Float3, UniformBufferElementType::Float3 }, lightData.PointLights.size() },
-			UniformBufferElementType::Int
-		};
-		m_lightDataUbo = UniformBuffer::create(m_lightDataUboSpecs);
+		Renderer::begin(cameraData, lightsData);
 	}
 
 	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, const MaterialComponent& materialComponent, uint32_t entityID)
@@ -126,6 +82,19 @@ namespace Brickview
 		insertNewInstanceBuffer(id, legoPartMesh, instanceElement);
 	}
 
+	static Ref<Shader> getShader(RendererType rendererType)
+	{
+		switch (rendererType)
+		{
+			case RendererType::Solid:        return Renderer::getShaderLibrary()->get("SolidMesh");
+			case RendererType::LightedPhong: return Renderer::getShaderLibrary()->get("PhongMesh");
+			case RendererType::LightedPBR:   return Renderer::getShaderLibrary()->get("PBRMesh");
+		}
+
+		BV_ASSERT(false, "Unknown render type!");
+		return nullptr;
+	}
+
 	void SceneRenderer::render()
 	{
 		m_viewportFrameBuffer->bind();
@@ -133,27 +102,22 @@ namespace Brickview
 		RenderCommand::clear();
 		m_viewportFrameBuffer->clearAttachment(1, -1);
 
-		// Camera Uniform buffer
-		m_cameraDataUbo->setElement(0, &m_cameraData.ViewProjectionMatrix);
-		m_cameraDataUbo->setElement(1, &m_cameraData.Position);		
-
 		// TEMP: move this to render pass
 		RenderCommand::enableDepthTesting(true);
 
 		// Outline
 		//Renderer::renderWireframeMesh();
 
-		// lighted render
-		switch (m_rendererSettings.RendererType)
-		{
-			case RendererType::Solid:
-				RenderSolid();
-				break;
-			case RendererType::LightedPhong:
-			case RendererType::LightedPBR:
-				RenderLighted();
-				break;
-		}
+		// Lego parts rendering
+		//Ref<Shader> legoPartShader = getShader(m_rendererSettings.RendererType);
+
+		//for (const InstanceBuffer& buffer : m_instanceBuffers)
+		//{
+		//	Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
+		//		m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
+		//}
+
+		Renderer::renderPointLights();
 
 		// Origin
 		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
@@ -168,51 +132,40 @@ namespace Brickview
 		m_instanceBuffers.clear();
 	}
 
-	Ref<Shader> SceneRenderer::getShader(RendererType rendererType)
+	void SceneRenderer::init(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
-		switch (rendererType)
-		{
-			case RendererType::Solid:        return Renderer::getShaderLibrary()->get("SolidMesh");
-			case RendererType::LightedPhong: return Renderer::getShaderLibrary()->get("PhongMesh");
-			case RendererType::LightedPBR:   return Renderer::getShaderLibrary()->get("PBRMesh");
-		}
+		// Rendered frame buffer
+		FrameBufferSpecifications viewportFrameBufferSpecs;
+		viewportFrameBufferSpecs.Width = viewportWidth;
+		viewportFrameBufferSpecs.Height = viewportHeight;
+		viewportFrameBufferSpecs.Attachments = { FrameBufferAttachment::RGBA8, FrameBufferAttachment::RedInt, FrameBufferAttachment::Depth };
+		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
 
-		BV_ASSERT(false, "Unknown render type!");
-		return nullptr;
-	}
+		// Mesh instance geometry
+		m_instanceBufferLayout = {
+			{ 2, "a_entityID", BufferElementType::Int, 1 },
+			{ 3, "a_albedo", BufferElementType::Float4, 1 },
+			{ 4, "a_roughness", BufferElementType::Float, 1 },
+			{ 5, "a_metalness", BufferElementType::Float, 1 },
+			{ 6, "a_transform", BufferElementType::Mat4, 1 }
+		};
 
-	void SceneRenderer::RenderSolid()
-	{
-		Ref<Shader> solidShader = getShader(m_rendererSettings.RendererType);
+		// Lines
+		BV_ASSERT(m_originLines.size() == m_originLineColors.size(), "OriginLines and OriginLineColors must be the same length!");
+		m_originLines = {
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.1f, 0.0f, 0.0f }),
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.1f, 0.0f }),
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.1f })
+		};
+		// Origin
+		m_originLineColors = {
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f)
+		};
 
-		// Lego parts
-		for (const InstanceBuffer& buffer : m_instanceBuffers)
-		{
-			Renderer::renderMeshInstances(solidShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
-				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
-		}
-	}
-
-	void SceneRenderer::RenderLighted()
-	{
-		Ref<Shader> lightedShader = getShader(m_rendererSettings.RendererType);
-
-		// Light Uniform buffer
-		const std::vector<PointLight>& pointLights = m_lightData.PointLights;
-		m_lightDataUbo->setElement(0, pointLights.empty() ? nullptr : &pointLights[9]);
-		uint32_t lightCount = (uint32_t)pointLights.size();
-		m_lightDataUbo->setElement(1, (void*)(&lightCount));
-
-		// Lego parts
-		for (const InstanceBuffer& buffer : m_instanceBuffers)
-		{
-			Renderer::renderMeshInstances(lightedShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
-				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
-		}
-
-		// Lights
-		for (size_t i = 0; i < m_lightData.PointLights.size(); i++)
-			Renderer::renderLight(m_lightData.PointLights[i], m_lightData.EntityIDs[i]);
+		// Grid
+		m_gridLines = generateGrid(m_rendererSettings.GridBound, m_rendererSettings.GridStep);
 	}
 
 	void SceneRenderer::insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement)

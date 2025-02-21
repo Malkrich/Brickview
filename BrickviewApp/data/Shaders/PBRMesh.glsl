@@ -97,7 +97,7 @@ struct PointLight
 
 layout (std140, binding = 1) uniform LightsData
 {
-    PointLight PointLights[];
+    PointLight PointLights[10];
     int LightCount;
 } lightsData;
 
@@ -153,14 +153,14 @@ void main()
     vec3 albedo = f_material.Albedo.xyz;
     vec3 baseReflectivity = mix(vec3(0.04), albedo, metalness);
 
-    vec3 lightDirection = normalize(lightsData.Position - f_fragmentData.Position);
+    vec3 lightDirection = normalize(lightsData.PointLights[0].Position - f_fragmentData.Position);
     vec3 viewDirection = normalize(cameraData.Position - f_fragmentData.Position);
     vec3 halfwayVector = normalize(lightDirection + viewDirection);
 
     // Light
-    float distance = length(lightsData.Position - f_fragmentData.Position);
+    float distance = length(lightsData.PointLights[0].Position - f_fragmentData.Position);
     float attenuation = 1.0 / pow(distance, 2.0);
-    vec3 radiance = lightsData.Color * attenuation;
+    vec3 radiance = lightsData.PointLight[0].Color * attenuation;
 
     vec3 brdf = BRDF(albedo, lightDirection, viewDirection, f_fragmentData.Normal, halfwayVector, baseReflectivity, roughness, metalness);
     vec3 finalColor = brdf * radiance * max(dot(f_fragmentData.Normal, lightDirection), 0.0);

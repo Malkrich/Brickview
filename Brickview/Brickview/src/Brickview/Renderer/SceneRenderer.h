@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Buffer.h"
-#include "UniformBuffer.h"
+#include "GpuMesh.h"
 #include "Shader/Shader.h"
 #include "RendererMaterial.h"
 #include "Texture2D.h"
@@ -16,19 +15,6 @@
 
 namespace Brickview
 {
-	struct RendererCameraData
-	{
-		glm::mat4 ViewProjectionMatrix;
-		glm::vec3 Position;
-	};
-
-	struct RendererLightData
-	{
-		std::vector<PointLight> PointLights;
-		std::vector<int> EntityIDs;
-
-		RendererLightData() = default;
-	};
 
 	enum class RendererType
 	{
@@ -81,7 +67,7 @@ namespace Brickview
 		void resizeViewport(uint32_t width, uint32_t height);
 
 		// Submission
-		void begin(const RendererCameraData& cameraData, const RendererLightData& lightData);
+		void begin(const PerspectiveCamera& camera, const std::vector<PointLight> pointLights);
 		// Material should be found from the LegoPartComponent material (LegoMaterial -> LegoMaterialRegistry -> RendererMaterial)
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
 		void render();
@@ -94,10 +80,7 @@ namespace Brickview
 		void setGridDepthTesting(bool enable) { m_rendererSettings.GridDepthTestingEnable = enable; }
 
 	private:
-		Ref<Shader> getShader(RendererType rendererType);
-
-		void RenderSolid();
-		void RenderLighted();
+		void init(uint32_t viewportWidth, uint32_t viewportHeight);
 
 		void insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement);
 
@@ -109,15 +92,6 @@ namespace Brickview
 
 		// Viewport
 		Ref<FrameBuffer> m_viewportFrameBuffer;
-
-		// Camera
-		RendererCameraData m_cameraData;
-		Ref<UniformBuffer> m_cameraDataUbo;
-
-		// Lights
-		UniformBufferSpecifications m_lightDataUboSpecs;
-		RendererLightData m_lightData;
-		Ref<UniformBuffer> m_lightDataUbo;
 
 		// Lego parts
 		std::vector<InstanceBuffer> m_instanceBuffers;

@@ -8,58 +8,49 @@
 namespace Brickview
 {
 
-	OpenGLUniformBuffer::OpenGLUniformBuffer(uint32_t size, const void* data)
-	{
-		glGenBuffers(1, &m_bufferID);
-		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
-		glBufferData(GL_UNIFORM_BUFFER, m_specs.Layout.getBufferSize(), nullptr, GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, m_specs.BindingPoint, m_bufferID);
-
-		CHECK_GL_ERROR();
-	}
-
-	OpenGLUniformBuffer::OpenGLUniformBuffer()
-		: OpenGLUniformBuffer(0, nullptr)
-	{}
-
-#if 0
-	OpenGLUniformBuffer::OpenGLUniformBuffer(const UniformBufferSpecifications& specs)
+	OpenGLUniformBuffer::OpenGLUniformBuffer(const UniformBufferSpecifications& specs, uint32_t size)
 		: m_specs(specs)
 	{
-		glGenBuffers(1, &m_bufferID);
-		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
-		glBufferData(GL_UNIFORM_BUFFER, m_specs.Layout.getBufferSize(), nullptr, GL_DYNAMIC_DRAW);
-		glBindBufferBase(GL_UNIFORM_BUFFER, m_specs.BindingPoint, m_bufferID);
-
-		CHECK_GL_ERROR();
+		invalidate(size, nullptr);
 	}
-#endif
+
+	OpenGLUniformBuffer::OpenGLUniformBuffer(const UniformBufferSpecifications& specs, uint32_t size, const void* data)
+		: m_specs(specs)
+	{
+		invalidate(size, data);
+	}
 
 	OpenGLUniformBuffer::~OpenGLUniformBuffer()
 	{
 		glDeleteBuffers(1, &m_bufferID);
 	}
 
-	void OpenGLUniformBuffer::setElements(const void* data)
+	void OpenGLUniformBuffer::setData(const void* data)
 	{
-		uint32_t size = m_specs.Layout.getBufferSize();
-
 		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
-		glBufferSubData(GL_UNIFORM_BUFFER, 0, size, data);
+		glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, data, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		CHECK_GL_ERROR();
 	}
-
-	void OpenGLUniformBuffer::setElement(uint32_t elementIndex, const void* data)
+	
+	void OpenGLUniformBuffer::resize(uint32_t newSize)
 	{
-		const UniformBufferElement& bufferElement = m_specs.Layout.getBufferElement(elementIndex);
-		uint32_t size   = bufferElement.Size;
-		uint32_t offset = bufferElement.Offset;
+		invalidate(newSize, nullptr);
+	}
 
+	void OpenGLUniformBuffer::invalidate(uint32_t size, const void* data)
+	{
+		m_bufferSize = size;
+		if (m_bufferID != 0)
+		{
+			glDeleteBuffers(1, &m_bufferID);
+		}
+
+		glGenBuffers(1, &m_bufferID);
 		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
-		glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
-		glBindBuffer(GL_UNIFORM_BUFFER, 0);
+		glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, data, GL_DYNAMIC_DRAW);
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_specs.BindingPoint, m_bufferID);
 
 		CHECK_GL_ERROR();
 	}
