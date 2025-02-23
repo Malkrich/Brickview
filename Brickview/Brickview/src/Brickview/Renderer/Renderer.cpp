@@ -9,6 +9,8 @@
 
 #include "Vendors/OpenGL/OpenGLError.h"
 
+#define BV_MAX_LIGHTS_SUPPORTED 10
+
 namespace Brickview
 {
 
@@ -34,11 +36,12 @@ namespace Brickview
 
 	struct GpuPointLightStruct
 	{
-		glm::vec3 Position;
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
 		BV_GPU_INTERNAL_PADDING(1);
-		glm::vec3 Color;
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 		BV_GPU_INTERNAL_PADDING(1);
 
+		GpuPointLightStruct() = default;
 		GpuPointLightStruct(const PointLight& light)
 			: Position(light.Position)
 			, Color(light.Color)
@@ -128,7 +131,7 @@ namespace Brickview
 		UniformBufferSpecifications pointLightsDataSpecs;
 		pointLightsDataSpecs.BlockName = "PointLightsData";
 		pointLightsDataSpecs.BindingPoint = 1;
-		s_rendererData->PointLightsUbo = UniformBuffer::create(pointLightsDataSpecs, 4 * sizeof(s_rendererData->PointLightsCount) + 10 * sizeof(GpuPointLightStruct));
+		s_rendererData->PointLightsUbo = UniformBuffer::create(pointLightsDataSpecs, 4 * sizeof(s_rendererData->PointLightsCount) + BV_MAX_LIGHTS_SUPPORTED * sizeof(GpuPointLightStruct));
 	}
 
 	void Renderer::shutdown()
@@ -140,22 +143,22 @@ namespace Brickview
 	void Renderer::begin(const CameraData& cameraData, const std::vector<PointLight>& pointLights, const std::vector<int>& pLIDs)
 	{
 		BV_ASSERT(pointLights.size() == pLIDs.size(), "Point light object and ID vectors do not have the same size!");
+		BV_ASSERT(pointLights.size() <= BV_MAX_LIGHTS_SUPPORTED, "Renderer does not support more than 10 lights!");
 
 		// Camera
 		s_rendererData->CameraUbo->setData(&cameraData);
 
 		// Point Lights
 		s_rendererData->PointLightsCount = pointLights.size();
-		std::vector<GpuPointLightStruct> gpuPointLights;
-		gpuPointLights.reserve(s_rendererData->PointLightsCount);
+		std::array<GpuPointLightStruct, BV_MAX_LIGHTS_SUPPORTED> gpuPointLights;
 		s_rendererData->PointLightInstancesData.resize(s_rendererData->PointLightsCount);
 		for (int i = 0; i < s_rendererData->PointLightsCount; i++)
 		{
-			gpuPointLights.push_back(pointLights[i]);
+			gpuPointLights[i] = GpuPointLightStruct(pointLights[i]);
 			s_rendererData->PointLightInstancesData[i] = { i, pLIDs[i] };
 		}
 		// Computing sizes
-		uint32_t pointLightsArraySize = 10 * sizeof(GpuPointLightStruct);
+		uint32_t pointLightsArraySize = BV_MAX_LIGHTS_SUPPORTED * sizeof(GpuPointLightStruct);
 		uint32_t bufferSize = 4 * sizeof(s_rendererData->PointLightsCount) + pointLightsArraySize;
 		// Copying point lights data
 		Buffer pointLightUboData(bufferSize);
@@ -188,6 +191,9 @@ namespace Brickview
 
 	void Renderer::renderPointLights()
 	{
+		if (s_rendererData->PointLightsCount == 0)
+			return;
+
 		s_rendererData->PointLightInstancesVbo->setData(
 			s_rendererData->PointLightsCount * sizeof(PointLightInstance), 
 			s_rendererData->PointLightInstancesData.data());

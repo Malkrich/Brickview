@@ -28,8 +28,6 @@ namespace Brickview
 	{
 		// Scene
 		m_scene = createRef<Scene>();
-		Entity lightEntity = m_scene->createEntity();
-		lightEntity.addComponent<LightComponent>();
 
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
