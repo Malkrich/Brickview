@@ -23,8 +23,8 @@ struct PointLight
 
 layout (std140, binding = 1) uniform LightsData
 {
-    PointLight Lights[10];
     int Count;
+    PointLight Lights[10];
 } lightsData;
 
 out flat int f_lightIndex;
@@ -54,8 +54,8 @@ struct PointLight
 
 layout (std140, binding = 1) uniform LightsData
 {
-    PointLight Lights[10];
     int Count;
+    PointLight Lights[10];
 } lightsData;
 
 layout (location = 0) out vec4 o_color;

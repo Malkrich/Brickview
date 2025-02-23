@@ -11,12 +11,22 @@ namespace Brickview
 
 	void LegoPartPropertiesPanel::onGuiRender()
 	{
+		bool deleteEntity = false;
+
 		ImGui::Begin("Lego Part Properties");
-
 		if (m_entityContext)
+		{
+			deleteEntity = ImGui::Button("Delete");
+			ImGui::Separator();
 			drawEntityComponents(m_entityContext);
-
+		}
 		ImGui::End();
+
+		if (deleteEntity)
+		{
+			m_entityContext.m_scene->removeEntity(m_entityContext);
+			m_entityContext = Entity();
+		}
 	}
 
 	template<typename Component>

@@ -1,9 +1,10 @@
 #include "Pch.h"
 #include "Renderer.h"
 
+#include "Core/Buffer.h"
 #include "RendererCore.h"
 #include "RenderCommand.h"
-#include "Buffer.h"
+#include "GpuBuffer.h"
 #include "UniformBuffer.h"
 
 #include "Vendors/OpenGL/OpenGLError.h"
@@ -62,11 +63,12 @@ namespace Brickview
 		// Camera
 		Ref<UniformBuffer> CameraUbo = nullptr;
 
-		// Lights
+		// Point Lights
 		int PointLightsCount = 0;
 		Ref<UniformBuffer> PointLightsUbo = nullptr;
 		Ref<VertexBuffer> PointLightInstancesVbo = nullptr;
-
+		Layout PointLightInstancesBufferVboLayout;
+		std::vector<PointLightInstance> PointLightInstancesData;
 		Ref<GpuMesh> LightMesh = nullptr;
 	};
 
@@ -108,20 +110,25 @@ namespace Brickview
 			lightMeshIndices = lightSourceMesh->getConnectivities();
 		}
 
-		Layout lightMeshLayout = {
+		Layout pointLightMeshLayout = {
 			{ 0, "a_position", BufferElementType::Float3 }
 		};
+		Layout pointLightInstancesLayout = {
+			{ 1, "a_lightInstanceIndex", BufferElementType::Int, 1 },
+			{ 2, "a_lightInstanceEntityID", BufferElementType::Int, 1 }
+		};
 
-		// TODO: s_rendererData->Light = createRef<GpuMesh>(lightMeshVertices, lightMeshLayout, lightMeshIndices);
-		// Where lightMeshVertices and lightMeshIndices are buffers containing Size and Data attributes
-		s_rendererData->LightMesh = createRef<GpuMesh>(lightMeshVertices.size() * sizeof(LightVertex), lightMeshVertices.data(), 
-			lightMeshLayout, 
+		s_rendererData->LightMesh = createRef<GpuMesh>(
+			lightMeshVertices.size() * sizeof(LightVertex), lightMeshVertices.data(), 
+			pointLightMeshLayout,
 			lightMeshIndices.size() * sizeof(TriangleFace), lightMeshIndices.data());
+		s_rendererData->PointLightInstancesVbo = VertexBuffer::create(sizeof(PointLightInstance));
+		s_rendererData->PointLightInstancesVbo->setBufferLayout(pointLightInstancesLayout);
 
 		UniformBufferSpecifications pointLightsDataSpecs;
 		pointLightsDataSpecs.BlockName = "PointLightsData";
 		pointLightsDataSpecs.BindingPoint = 1;
-		s_rendererData->PointLightsUbo = UniformBuffer::create(pointLightsDataSpecs, 10 * sizeof(GpuPointLightStruct) + sizeof(int));
+		s_rendererData->PointLightsUbo = UniformBuffer::create(pointLightsDataSpecs, 4 * sizeof(s_rendererData->PointLightsCount) + 10 * sizeof(GpuPointLightStruct));
 	}
 
 	void Renderer::shutdown()
@@ -130,26 +137,31 @@ namespace Brickview
 		s_rendererData = nullptr;
 	}
 
-	void Renderer::begin(const CameraData& cameraData, const LightsData& lightsData)
+	void Renderer::begin(const CameraData& cameraData, const std::vector<PointLight>& pointLights, const std::vector<int>& pLIDs)
 	{
+		BV_ASSERT(pointLights.size() == pLIDs.size(), "Point light object and ID vectors do not have the same size!");
+
+		// Camera
 		s_rendererData->CameraUbo->setData(&cameraData);
 
 		// Point Lights
-		const std::vector<PointLight>& pointLights = lightsData.PointLights;
-		std::vector<GpuPointLightStruct> gpuPointLights;
-		gpuPointLights.reserve(pointLights.size());
-		for (const auto& pt : pointLights)
-			gpuPointLights.push_back(pt);
-
-		// Computing counts / sizes
 		s_rendererData->PointLightsCount = pointLights.size();
+		std::vector<GpuPointLightStruct> gpuPointLights;
+		gpuPointLights.reserve(s_rendererData->PointLightsCount);
+		s_rendererData->PointLightInstancesData.resize(s_rendererData->PointLightsCount);
+		for (int i = 0; i < s_rendererData->PointLightsCount; i++)
+		{
+			gpuPointLights.push_back(pointLights[i]);
+			s_rendererData->PointLightInstancesData[i] = { i, pLIDs[i] };
+		}
+		// Computing sizes
 		uint32_t pointLightsArraySize = 10 * sizeof(GpuPointLightStruct);
-		uint32_t bufferSize = pointLightsArraySize + sizeof(s_rendererData->PointLightsCount);
+		uint32_t bufferSize = 4 * sizeof(s_rendererData->PointLightsCount) + pointLightsArraySize;
 		// Copying point lights data
-		uint8_t* lightsDataBuffer = new uint8_t[bufferSize];
-		memcpy(lightsDataBuffer, gpuPointLights.data(), pointLightsArraySize);
-		memcpy(lightsDataBuffer + pointLightsArraySize, &s_rendererData->PointLightsCount, sizeof(s_rendererData->PointLightsCount));
-		s_rendererData->PointLightsUbo->setData(lightsDataBuffer);
+		Buffer pointLightUboData(bufferSize);
+		memcpy(pointLightUboData.Data, &s_rendererData->PointLightsCount, sizeof(s_rendererData->PointLightsCount));
+		memcpy(pointLightUboData.Data + 4 * sizeof(s_rendererData->PointLightsCount), gpuPointLights.data(), pointLightsArraySize);
+		s_rendererData->PointLightsUbo->setData(pointLightUboData.Data);
 	}
 
 	const Ref<ShaderLibrary>& Renderer::getShaderLibrary()
@@ -176,22 +188,14 @@ namespace Brickview
 
 	void Renderer::renderPointLights()
 	{
-		std::vector<PointLightInstance> pointLightInstances;
-		pointLightInstances.reserve(s_rendererData->PointLightsCount);
-		for (int i = 0; i < s_rendererData->PointLightsCount; i++)
-			pointLightInstances.emplace_back(i, 0);
-
-		Ref<VertexBuffer> lightInstancesVbo = VertexBuffer::create(pointLightInstances.size() * sizeof(int), pointLightInstances.data());
-		Layout lightInstancesLayout = {
-			{ 1, "a_lightInstanceIndex", BufferElementType::Int, 1 },
-			{ 2, "a_lightInstanceEntityID", BufferElementType::Int, 1 }
-		};
-		lightInstancesVbo->setBufferLayout(lightInstancesLayout);
+		s_rendererData->PointLightInstancesVbo->setData(
+			s_rendererData->PointLightsCount * sizeof(PointLightInstance), 
+			s_rendererData->PointLightInstancesData.data());
 
 		// Light mesh
 		Ref<VertexArray> lightVertexArray = VertexArray::create();
 		lightVertexArray->addVertexBuffer(s_rendererData->LightMesh->getGeometryVertexBuffer());
-		lightVertexArray->addVertexBuffer(lightInstancesVbo);
+		lightVertexArray->addVertexBuffer(s_rendererData->PointLightInstancesVbo);
 		lightVertexArray->setIndexBuffer(s_rendererData->LightMesh->getGeometryIndexBuffer());
 
 		Ref<Shader> lightShader = s_rendererData->ShaderLibrary->get("Light");

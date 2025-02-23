@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Mesh.h"
-#include "Buffer.h"
+#include "GpuBuffer.h"
 
 namespace Brickview
 {

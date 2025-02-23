@@ -1,13 +1,12 @@
 #include "Pch.h"
-#include "Buffer.h"
+#include "Core/Buffer.h"
 
 namespace Brickview
 {
 
-	Buffer::Buffer(uint32_t size, const uint8_t* data)
+	Buffer::Buffer(uint32_t size)
 	{
 		allocate(size);
-		memcpy(Data, data, (size_t)Size);
 	}
 
 	Buffer::~Buffer()

@@ -35,35 +35,47 @@ namespace Brickview
 		e.addComponent<MaterialComponent>();
 	}
 
+	void Scene::removeEntity(Entity e)
+	{
+		BV_ASSERT(m_registry.valid((entt::entity)e), "Unvalid entity to remove!");
+		m_registry.destroy((entt::entity)e);
+	}
+
 	void Scene::onRender(const PerspectiveCamera& camera, Ref<SceneRenderer> renderer)
 	{
 		// Lights
-		auto lightEntities = m_registry.view<TransformComponent, LightComponent>();
-		std::vector<PointLight> pointLights;
-		pointLights.reserve(lightEntities.size_hint());
-		for (auto e : lightEntities)
 		{
-			Entity entity = { e, this };
-			// uint32_t entityID = (int)e;
-			const glm::vec3& position = entity.getComponent<TransformComponent>().Translation;
-			const glm::vec3& color = entity.getComponent<LightComponent>().Color;
+			SceneEnvironment env;
+			// Point lights
+			auto lightEntities = m_registry.view<TransformComponent, LightComponent>();
+			size_t pointLightCount = lightEntities.size_hint();
+			env.PointLights.reserve(pointLightCount);
+			env.PointLightIDs.reserve(pointLightCount);
+			for (auto e : lightEntities)
+			{
+				Entity entity = { e, this };
+				uint32_t entityID = (uint32_t)e;
+				const glm::vec3& position = entity.getComponent<TransformComponent>().Translation;
+				const glm::vec3& color = entity.getComponent<LightComponent>().Color;
 
-			pointLights.emplace_back(position, color);
+				env.PointLights.emplace_back(position, color);
+				env.PointLightIDs.emplace_back(entityID);
+			}
+			renderer->begin(camera, env);
 		}
-		renderer->begin(camera, pointLights);
 
 		// Lego meshes
-		//auto meshEntities = m_registry.view<TransformComponent, LegoPartComponent>();
-		// TEMP
-		auto legoPartEntities = m_registry.view<TransformComponent, LegoPartComponent, MaterialComponent>();
-		for (auto e : legoPartEntities)
 		{
-			Entity entity = { e, this };
+			auto legoPartEntities = m_registry.view<TransformComponent, LegoPartComponent, MaterialComponent>();
+			for (auto e : legoPartEntities)
+			{
+				Entity entity = { e, this };
 
-			const TransformComponent& transform = entity.getComponent<TransformComponent>();
-			const LegoPartComponent& legoPart   = entity.getComponent<LegoPartComponent>();
-			const MaterialComponent& material   = entity.getComponent<MaterialComponent>();
-			renderer->submitLegoPart(legoPart, m_legoPartMeshRegistry, transform, material, (uint32_t)e);
+				const TransformComponent& transform = entity.getComponent<TransformComponent>();
+				const LegoPartComponent& legoPart = entity.getComponent<LegoPartComponent>();
+				const MaterialComponent& material = entity.getComponent<MaterialComponent>();
+				renderer->submitLegoPart(legoPart, m_legoPartMeshRegistry, transform, material, (uint32_t)e);
+			}
 		}
 
 		renderer->render();

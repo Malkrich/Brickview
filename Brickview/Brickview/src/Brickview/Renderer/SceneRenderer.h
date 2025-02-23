@@ -56,6 +56,12 @@ namespace Brickview
 		InstanceBuffer() = default;
 	};
 
+	struct SceneEnvironment
+	{
+		std::vector<PointLight> PointLights;
+		std::vector<int> PointLightIDs;
+	};
+
 	class SceneRenderer
 	{
 	public:
@@ -67,7 +73,7 @@ namespace Brickview
 		void resizeViewport(uint32_t width, uint32_t height);
 
 		// Submission
-		void begin(const PerspectiveCamera& camera, const std::vector<PointLight> pointLights);
+		void begin(const PerspectiveCamera& camera, const SceneEnvironment& env);
 		// Material should be found from the LegoPartComponent material (LegoMaterial -> LegoMaterialRegistry -> RendererMaterial)
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
 		void render();

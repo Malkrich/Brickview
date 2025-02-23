@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Buffer.h"
+#include "Renderer/GpuBuffer.h"
 
 namespace Brickview
 {

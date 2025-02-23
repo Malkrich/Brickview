@@ -1,5 +1,5 @@
 #include "Pch.h"
-#include "Buffer.h"
+#include "GpuBuffer.h"
 
 #include "RendererAPI.h"
 #include "Vendors/OpenGL/OpenGLBuffer.h"

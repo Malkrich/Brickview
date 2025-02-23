@@ -55,6 +55,8 @@ namespace Brickview
 	struct LightComponent
 	{
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
+		//float Strength
+		//float Radius
 
 		LightComponent(const glm::vec3& color)
 			: Color(color)

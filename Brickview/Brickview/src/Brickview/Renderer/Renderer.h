@@ -17,11 +17,6 @@ namespace Brickview
 		glm::vec3 Position;
 	};
 
-	struct LightsData
-	{
-		std::vector<PointLight> PointLights;
-	};
-
 	class Renderer
 	{
 	public:
@@ -32,7 +27,7 @@ namespace Brickview
 		static const Ref<ShaderLibrary>& getShaderLibrary();
 
 		// Setup environment
-		static void begin(const CameraData& cameraData, const LightsData& lightsData);
+		static void begin(const CameraData& cameraData, const std::vector<PointLight>& pointLights, const std::vector<int>& pLIDs);
 
 		// Meshes
 		static void renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh,

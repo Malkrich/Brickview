@@ -33,17 +33,14 @@ namespace Brickview
 			m_viewportFrameBuffer->resize(width, height);
 	}
 
-	void SceneRenderer::begin(const PerspectiveCamera& camera, const std::vector<PointLight> pointLights)
+	void SceneRenderer::begin(const PerspectiveCamera& camera, const SceneEnvironment& env)
 	{
 		// Camera
 		CameraData cameraData;
 		cameraData.Position = camera.getPosition();
 		cameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
-		// Lights
-		LightsData lightsData;
-		lightsData.PointLights = pointLights;
 
-		Renderer::begin(cameraData, lightsData);
+		Renderer::begin(cameraData, env.PointLights, env.PointLightIDs);
 	}
 
 	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, const MaterialComponent& materialComponent, uint32_t entityID)

@@ -83,7 +83,7 @@ namespace Brickview
 			screenPosition.y = viewportHeight - screenPosition.y;
 
 			int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
-			Entity selectedEntity = Entity((entt::entity)entityID, m_scenePartsListPanel->getContext().get());
+			Entity selectedEntity = entityID == -1 ? Entity() : Entity((entt::entity)entityID, m_scenePartsListPanel->getContext().get());
 			m_legoPartPropertiesPanel->setEntityContext(selectedEntity);
 		}
 
