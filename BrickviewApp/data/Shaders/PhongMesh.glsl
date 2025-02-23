@@ -47,12 +47,19 @@ layout (std140, binding = 0) uniform CameraData
     vec3 Position;
 } cameraData;
 
-// TODO: make array
-layout (std140, binding = 1) uniform LightData
+struct PointLight
 {
     vec3 Position;
+    float __padding1;
     vec3 Color;
-} lightData;
+    float __padding2;
+};
+
+layout (std140, binding = 1) uniform LightsData
+{
+    int LightCount;
+    PointLight PointLights[10];
+} lightsData;
 
 void main()
 {
@@ -60,7 +67,7 @@ void main()
     
     float ambient = 0.3;
     
-    vec3 lightDirection  = normalize(lightData.Position - worldPosition);
+    vec3 lightDirection  = normalize(lightsData.PointLights[0].Position - worldPosition);
     vec3 cameraDirection = normalize(cameraData.Position - worldPosition);
     
     float diffuse = max(dot(f_normal, lightDirection), 0.0);
@@ -75,6 +82,7 @@ void main()
         specular *= specularLight;
     }
 
-    o_color = vec4((diffuse + ambient + specular) * f_albedo.xyz * lightData.Color, 1.0);
+    o_color = vec4((diffuse + ambient + specular) * f_albedo.xyz * lightsData.PointLights[0].Color, 1.0);
+    o_color = vec4(1.0f, 1.0f, 0.0f, 1.0f);
     o_entityID = f_entityID;
 }

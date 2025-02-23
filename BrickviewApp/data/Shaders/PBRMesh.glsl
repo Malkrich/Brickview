@@ -92,13 +92,15 @@ layout (std140, binding = 0) uniform CameraData
 struct PointLight
 {
     vec3 Position;
+    float __padding1;
     vec3 Color;
+    float __padding2;
 };
 
 layout (std140, binding = 1) uniform LightsData
 {
-    PointLight PointLights[10];
     int LightCount;
+    PointLight PointLights[10];
 } lightsData;
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
@@ -160,7 +162,7 @@ void main()
     // Light
     float distance = length(lightsData.PointLights[0].Position - f_fragmentData.Position);
     float attenuation = 1.0 / pow(distance, 2.0);
-    vec3 radiance = lightsData.PointLight[0].Color * attenuation;
+    vec3 radiance = lightsData.PointLights[0].Color * attenuation;
 
     vec3 brdf = BRDF(albedo, lightDirection, viewDirection, f_fragmentData.Normal, halfwayVector, baseReflectivity, roughness, metalness);
     vec3 finalColor = brdf * radiance * max(dot(f_fragmentData.Normal, lightDirection), 0.0);

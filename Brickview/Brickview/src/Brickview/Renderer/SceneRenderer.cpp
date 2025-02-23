@@ -106,13 +106,13 @@ namespace Brickview
 		//Renderer::renderWireframeMesh();
 
 		// Lego parts rendering
-		//Ref<Shader> legoPartShader = getShader(m_rendererSettings.RendererType);
+		Ref<Shader> legoPartShader = getShader(m_rendererSettings.RendererType);
 
-		//for (const InstanceBuffer& buffer : m_instanceBuffers)
-		//{
-		//	Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
-		//		m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
-		//}
+		for (const InstanceBuffer& buffer : m_instanceBuffers)
+		{
+			Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
+				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
+		}
 
 		Renderer::renderPointLights();
 
