@@ -56,6 +56,21 @@ namespace Brickview
 		InstanceBuffer() = default;
 	};
 
+	struct MeshSubmissionData
+	{
+		Ref<GpuMesh> Mesh = nullptr;
+		glm::mat4 Transform = glm::mat4(1.0f);
+		RendererMaterial Material;
+		int EntityID = -1;
+
+		MeshSubmissionData() = default;
+		MeshSubmissionData(Ref<GpuMesh> mesh, const glm::mat4& transform, const RendererMaterial& material, int entityID)
+			: Mesh(mesh)
+			, Transform(transform)
+			, Material(material) 
+			, EntityID(entityID){}
+	};
+
 	struct SceneEnvironment
 	{
 		std::vector<PointLight> PointLights;
@@ -74,9 +89,11 @@ namespace Brickview
 
 		// Submission
 		void begin(const PerspectiveCamera& camera, const SceneEnvironment& env);
+		void render();
+
 		// Material should be found from the LegoPartComponent material (LegoMaterial -> LegoMaterialRegistry -> RendererMaterial)
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
-		void render();
+		void submitMesh(const MeshComponent& mesh, const TransformComponent& transform, const MaterialComponent& material, uint32_t entityID);
 
 		// RendererSettings
 		RendererType getRendererType() const { return m_rendererSettings.RendererType; }
@@ -103,6 +120,9 @@ namespace Brickview
 		std::vector<InstanceBuffer> m_instanceBuffers;
 		std::unordered_map<LegoPartID, uint32_t> m_currentBufferIndex;
 		Layout m_instanceBufferLayout;
+
+		// Meshes
+		std::vector<MeshSubmissionData> m_meshSubmissions;
 
 		// Lines
 		// Origin helper

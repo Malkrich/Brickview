@@ -18,7 +18,8 @@ project "Brickview"
         "../Vendors/spdlog/include",
         "../Vendors/imgui/",
         "../Vendors/entt/include/",
-        "../Vendors/stb_image/"
+        "../Vendors/stb_image/",
+        "../Vendors/OBJ-Loader/Source/"
     }
 
     files
@@ -43,6 +44,7 @@ project "Brickview"
         "glad",
         "spdlog",
         "imgui",
+        "OBJ-Loader"
     }
 
     filter "system:windows"

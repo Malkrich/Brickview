@@ -5,20 +5,20 @@
 layout (location = 0) in vec3 a_position;
 layout (location = 1) in vec3 a_normal;
 
+// Per instance
+layout (location = 2) in int a_entityID;
+
+layout (location = 3) in vec4 a_albedo;
+layout (location = 4) in float a_roughness;
+layout (location = 5) in float a_metalness;
+
+layout (location = 6) in mat4 a_transform;
+
 layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
     vec3 Position;
 } cameraData;
-
-layout (std140, binding = 2) uniform ModelData
-{
-    mat4 Transform;
-    vec4 Albedo;
-    float Roughness;
-    float Metalness;
-    int EntityID;
-} modelData;
 
 struct FragmentData
 {
@@ -39,19 +39,19 @@ out flat int f_entityID;
 
 void main()
 {
-    vec4 worldPosition = modelData.Transform * vec4(a_position, 1.0);
-    mat3 normalTransform = mat3(transpose(inverse(modelData.Transform)));
+    vec4 worldPosition = a_transform * vec4(a_position, 1.0);
+    mat3 normalTransform = mat3(transpose(inverse(a_transform)));
 
     // Fragment data
     f_fragmentData.Position = worldPosition.xyz;
     f_fragmentData.Normal   = normalTransform * a_normal;
     // Material
-    f_material.Albedo    = modelData.Albedo;
-    f_material.Roughness = modelData.Roughness;
-    f_material.Metalness = modelData.Metalness;
+    f_material.Albedo    = a_albedo;
+    f_material.Roughness = a_roughness;
+    f_material.Metalness = a_metalness;
 
     // Entity ID
-    f_entityID = modelData.EntityID;
+    f_entityID = a_entityID;
 
     // GL position
     gl_Position = cameraData.ViewProjectionMatrix * worldPosition;

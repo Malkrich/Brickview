@@ -58,6 +58,13 @@ namespace Brickview
 			: Position(position), Color(color) {}
 	};
 
+	struct ModelDataUboBlock
+	{
+		glm::mat4 Transform = glm::mat4(1.0f);
+		RendererMaterial Material;
+		int EntityID = -1;
+	};
+
 	struct RendererData
 	{
 		// Shaders
@@ -73,6 +80,10 @@ namespace Brickview
 		Layout PointLightInstancesBufferVboLayout;
 		std::vector<PointLightInstance> PointLightInstancesData;
 		Ref<GpuMesh> LightMesh = nullptr;
+
+		// Meshes
+		Ref<UniformBuffer> ModelDataUbo = nullptr;
+		Layout MeshVboLayout;
 	};
 
 	static RendererData* s_rendererData;
@@ -85,7 +96,8 @@ namespace Brickview
 		s_rendererData->ShaderLibrary = createRef<ShaderLibrary>();
 		std::filesystem::path shaderBaseDir = "data/Shaders/";
 		//s_rendererData->ShaderLibrary->load(shaderBaseDir / "SolidMesh.glsl");
-		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PhongMesh.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PhongLegoMesh.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRLegoMesh.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRMesh.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Light.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Line.glsl");
@@ -132,6 +144,16 @@ namespace Brickview
 		pointLightsDataSpecs.BlockName = "PointLightsData";
 		pointLightsDataSpecs.BindingPoint = 1;
 		s_rendererData->PointLightsUbo = UniformBuffer::create(pointLightsDataSpecs, 4 * sizeof(s_rendererData->PointLightsCount) + BV_MAX_LIGHTS_SUPPORTED * sizeof(GpuPointLightStruct));
+
+		// Meshes
+		UniformBufferSpecifications modelDataUboSpecs;
+		modelDataUboSpecs.BlockName = "ModelData";
+		modelDataUboSpecs.BindingPoint = 2;
+		s_rendererData->ModelDataUbo = UniformBuffer::create(modelDataUboSpecs, sizeof(ModelDataUboBlock));
+		s_rendererData->MeshVboLayout = {
+			{ 0, "a_position", BufferElementType::Float3 },
+			{ 1, "a_normal", BufferElementType::Float3 }
+		};
 	}
 
 	void Renderer::shutdown()
@@ -171,6 +193,25 @@ namespace Brickview
 	{
 		BV_ASSERT(s_rendererData, "Renderer class is not initialized!");
 		return s_rendererData->ShaderLibrary;
+	}
+
+	void Renderer::renderMesh(Ref<Shader> shader, const RendererMaterial& material, const Ref<GpuMesh>& mesh, const glm::mat4& transform, int entityID)
+	{
+		// Model Ubo block
+		ModelDataUboBlock modelData;
+		modelData.Transform = transform;
+		modelData.Material = material;
+		modelData.EntityID = entityID;
+		s_rendererData->ModelDataUbo->setData(&modelData);
+
+		// Mesh geometry
+		Ref<VertexArray> vao = VertexArray::create();
+		vao->addVertexBuffer(mesh->getGeometryVertexBuffer());
+		vao->setIndexBuffer(mesh->getGeometryIndexBuffer());
+
+		shader->bind();
+		RenderCommand::drawIndices(vao);
+		vao->unbind();
 	}
 
 	void Renderer::renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh, 

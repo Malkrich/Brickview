@@ -52,6 +52,18 @@ namespace Brickview
 		LegoPartComponent(const LegoPartComponent&) = default;
 	};
 
+	struct MeshComponent
+	{
+		Ref<GpuMesh> MeshData = nullptr;
+
+		MeshComponent(Ref<Mesh> mesh)
+		{
+			MeshData = createRef<GpuMesh>(mesh);
+		}
+		MeshComponent() = default;
+		MeshComponent(const MeshComponent&) = default;
+	};
+
 	struct LightComponent
 	{
 		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
@@ -70,6 +82,9 @@ namespace Brickview
 		RendererMaterial Material;
 
 		MaterialComponent() = default;
+		MaterialComponent(const RendererMaterial& material)
+			: Material(material)
+		{}
 		MaterialComponent(const MaterialComponent&) = default;
 	};
 

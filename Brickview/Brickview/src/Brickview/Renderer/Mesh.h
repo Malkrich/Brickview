@@ -18,6 +18,12 @@ namespace Brickview
 	{
 		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
 		glm::vec3 Normal = { 0.0f, 0.0f, 0.0f };
+
+		Vertex() = default;
+		Vertex(const Vertex&) = default;
+		Vertex(const glm::vec3& position, const glm::vec3& normal)
+			: Position(position)
+			, Normal(normal) {}
 	};
 
 	struct TriangleFace

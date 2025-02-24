@@ -43,6 +43,65 @@ namespace Brickview
 		Renderer::begin(cameraData, env.PointLights, env.PointLightIDs);
 	}
 
+	static Ref<Shader> getLegoPartShader(RendererType rendererType)
+	{
+		switch (rendererType)
+		{
+			case RendererType::Solid:        return Renderer::getShaderLibrary()->get("SolidMesh");
+			case RendererType::LightedPhong: return Renderer::getShaderLibrary()->get("PhongLegoMesh");
+			case RendererType::LightedPBR:   return Renderer::getShaderLibrary()->get("PBRLegoMesh");
+		}
+
+		BV_ASSERT(false, "Unknown render type!");
+		return nullptr;
+	}
+
+	void SceneRenderer::render()
+	{
+		m_viewportFrameBuffer->bind();
+		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
+		RenderCommand::clear();
+		m_viewportFrameBuffer->clearAttachment(1, -1);
+
+		// TEMP: move this to render pass
+		RenderCommand::enableDepthTesting(true);
+
+		// Outline
+		//Renderer::renderWireframeMesh();
+
+		// Lego parts rendering
+		Ref<Shader> legoPartShader = getLegoPartShader(m_rendererSettings.RendererType);
+
+		for (const InstanceBuffer& buffer : m_instanceBuffers)
+		{
+			Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
+				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
+		}
+
+		Ref<Shader> meshShader = Renderer::getShaderLibrary()->get("PBRMesh");
+		for (const MeshSubmissionData& meshSub : m_meshSubmissions)
+		{
+			Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
+		}
+
+		Renderer::renderPointLights();
+
+		// Origin
+		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
+
+		// Grid
+		RenderCommand::enableDepthTesting(m_rendererSettings.GridDepthTestingEnable);
+		Renderer::renderLines(m_gridLines, m_rendererSettings.GridColor, 1.0f);
+
+		m_viewportFrameBuffer->unbind();
+
+		// Lego Part instances
+		m_currentBufferIndex.clear();
+		m_instanceBuffers.clear();
+		// Meshes
+		m_meshSubmissions.clear();
+	}
+
 	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, const MaterialComponent& materialComponent, uint32_t entityID)
 	{
 		LegoPartID id = legoPart.ID;
@@ -79,54 +138,10 @@ namespace Brickview
 		insertNewInstanceBuffer(id, legoPartMesh, instanceElement);
 	}
 
-	static Ref<Shader> getShader(RendererType rendererType)
+	void SceneRenderer::submitMesh(const MeshComponent& mesh, const TransformComponent& transform, const MaterialComponent& material, uint32_t entityID)
 	{
-		switch (rendererType)
-		{
-			case RendererType::Solid:        return Renderer::getShaderLibrary()->get("SolidMesh");
-			case RendererType::LightedPhong: return Renderer::getShaderLibrary()->get("PhongMesh");
-			case RendererType::LightedPBR:   return Renderer::getShaderLibrary()->get("PBRMesh");
-		}
-
-		BV_ASSERT(false, "Unknown render type!");
-		return nullptr;
-	}
-
-	void SceneRenderer::render()
-	{
-		m_viewportFrameBuffer->bind();
-		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
-		RenderCommand::clear();
-		m_viewportFrameBuffer->clearAttachment(1, -1);
-
-		// TEMP: move this to render pass
-		RenderCommand::enableDepthTesting(true);
-
-		// Outline
-		//Renderer::renderWireframeMesh();
-
-		// Lego parts rendering
-		Ref<Shader> legoPartShader = getShader(m_rendererSettings.RendererType);
-
-		for (const InstanceBuffer& buffer : m_instanceBuffers)
-		{
-			Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
-				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
-		}
-
-		Renderer::renderPointLights();
-
-		// Origin
-		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
-
-		// Grid
-		RenderCommand::enableDepthTesting(m_rendererSettings.GridDepthTestingEnable);
-		Renderer::renderLines(m_gridLines, m_rendererSettings.GridColor, 1.0f);
-
-		m_viewportFrameBuffer->unbind();
-
-		m_currentBufferIndex.clear();
-		m_instanceBuffers.clear();
+		glm::mat4 transformMatrix = transform.getTransform();
+		m_meshSubmissions.emplace_back(mesh.MeshData, transformMatrix, material.Material, entityID);
 	}
 
 	void SceneRenderer::init(uint32_t viewportWidth, uint32_t viewportHeight)

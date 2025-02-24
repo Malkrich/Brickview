@@ -21,6 +21,8 @@ namespace Brickview
 
 		Entity createEntity();
 		void createLegoPartEntity(LegoPartID partID, Ref<Mesh> mesh);
+		void createMeshEntity(Ref<Mesh> mesh, const glm::vec3& position, const RendererMaterial& material);
+		void createLightEntity(const glm::vec3& position = glm::vec3(0.0f));
 		void removeEntity(Entity e);
 
 		void onRender(const PerspectiveCamera& camera, Ref<SceneRenderer> renderer);

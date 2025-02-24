@@ -14,6 +14,41 @@
 namespace Brickview
 {
 
+	namespace ExampleScenes
+	{
+		void loadSpheresAndPlaneScene(Ref<Scene> scene)
+		{
+			float xStart = -1.0f;
+			float xEnd = 1.0f;
+			uint32_t sphereCount = 8;
+
+			Ref<Mesh> sphereMesh = Mesh::load("./data/Meshes/SmoothSphere.obj");
+			sphereMesh->scale(0.1f);
+
+			glm::vec3 meshPosition = { xStart, 0.0f, -0.5f };
+			glm::vec3 lightPosition = { xStart, 0.5f, -0.0f };
+			RendererMaterial material;
+			material.Albedo = { 0.9f, 0.1f, 0.1f, 1.0f };
+			material.Roughness = 0.0f;
+			material.Metalness = 0.0f;
+
+			for (uint32_t i = 0; i < sphereCount; i++)
+			{
+				float roughness = (float)i / (sphereCount - 1);
+				float metalness = -roughness + 1.0f;
+				float xPos = xStart + ((xEnd - xStart) * ((float)i / (sphereCount-1)));
+
+				meshPosition.x = xPos;
+				lightPosition.x = xPos;
+				material.Roughness = roughness;
+				material.Metalness = metalness;
+
+				scene->createMeshEntity(sphereMesh, meshPosition, material);
+				scene->createLightEntity(lightPosition);
+			}
+		}
+	}
+
 	ApplicationLayer::ApplicationLayer()
 		: m_viewportWidth(Input::getWindowSize().x)
 		, m_viewportHeight(Input::getWindowSize().y)
@@ -28,6 +63,8 @@ namespace Brickview
 	{
 		// Scene
 		m_scene = createRef<Scene>();
+
+		ExampleScenes::loadSpheresAndPlaneScene(m_scene);
 
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
@@ -161,8 +198,7 @@ namespace Brickview
 		{
 			if (ImGui::Button("Light"))
 			{
-				Entity e = m_scene->createEntity();
-				e.addComponent<LightComponent>();
+				m_scene->createLightEntity();
 				ImGui::CloseCurrentPopup();
 			}
 			ImGui::EndPopup();
