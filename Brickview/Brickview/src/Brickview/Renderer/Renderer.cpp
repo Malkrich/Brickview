@@ -101,6 +101,7 @@ namespace Brickview
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRMesh.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Light.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Line.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "MeshWireframe.glsl");
 
 		// Camera
 		UniformBufferSpecifications cameraDataSpecs;
@@ -154,6 +155,11 @@ namespace Brickview
 			{ 0, "a_position", BufferElementType::Float3 },
 			{ 1, "a_normal", BufferElementType::Float3 }
 		};
+
+		RenderCommand::enableDepthTesting(true);
+		RenderCommand::enableFaceCulling(true);
+		RenderCommand::setFaceCullingMode(FaceCullingMode::Back);
+		RenderCommand::setFaceWindingMode(FaceWindingMode::CounterClockwise);
 	}
 
 	void Renderer::shutdown()
@@ -228,6 +234,25 @@ namespace Brickview
 		shader->bind();
 		RenderCommand::drawInstances(instanceDrawCallVertexArray, instanceCount);
 		instanceDrawCallVertexArray->unbind();
+	}
+
+	void Renderer::renderMeshWireframe(Ref<GpuMesh> mesh, const glm::mat4& transform, float lineWidth)
+	{
+		Ref<Shader> wireframeShader = s_rendererData->ShaderLibrary->get("MeshWireframe");
+
+		// Model Ubo block
+		ModelDataUboBlock modelData;
+		modelData.Transform = transform;
+		s_rendererData->ModelDataUbo->setData(&modelData);
+
+		Ref<VertexArray> vao = VertexArray::create();
+		vao->addVertexBuffer(mesh->getGeometryVertexBuffer());
+		vao->setIndexBuffer(mesh->getGeometryIndexBuffer());
+
+		wireframeShader->bind();
+		RenderCommand::setLineWidth(lineWidth);
+		RenderCommand::drawLinesIndexed(vao);
+		vao->unbind();
 	}
 
 	void Renderer::renderPointLights()

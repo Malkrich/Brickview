@@ -124,6 +124,7 @@ namespace Brickview
 			int32_t entityID = m_renderer->getEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
 			Entity selectedEntity = entityID == -1 ? Entity() : Entity((entt::entity)entityID, m_scenePartsListPanel->getContext().get());
 			m_legoPartPropertiesPanel->setEntityContext(selectedEntity);
+			m_renderer->setSelectedEntity(selectedEntity);
 		}
 
 		return true;
@@ -297,24 +298,16 @@ namespace Brickview
 		ImGui::Text("ts: %.3f ms", m_dt.getMilliseconds());
 		ImGui::Text("Fps: %.3f", m_dt.getSeconds() == 0.0f ? 0.0f : 1.0f / m_dt.getSeconds());
 		
-#if 0
-		const RenderStatistics& renderStats = Lego3DRenderer::getRenderStatistics();
-		ImGui::Text("Draw calls: %i", renderStats.DrawCalls);
-		ImGui::Text("Max Instance count: %i", renderStats.MaxInstanceCount);
-#endif
 		ImGui::SeparatorText("Renderer Settings:");
 
 		ImGui::Columns(2);
 		{
-			ImGui::Text("Grid depth testing");
-			ImGui::NextColumn();
-			bool depthTestingEnable = m_renderer->isGridDepthTestEnable();
-			if (ImGui::Checkbox("##gridDepthTesting", &depthTestingEnable))
-				m_renderer->setGridDepthTesting(depthTestingEnable);
-			ImGui::NextColumn();
+			SceneRendererSettings& rendererSettings = m_renderer->getRendererSettings();
+
+			// Render mode
 			ImGui::Text("Renderer Type");
 			ImGui::NextColumn();
-			RendererType rendererType = m_renderer->getRendererType();
+			RendererType rendererType = rendererSettings.RendererType;
 			const char* rendererTypeStrings[] = {"Solid", "Lighted Phong", "Lighted PBR"};
 			const char* selectedRendererTypeString = rendererTypeStrings[(int32_t)rendererType];
 			if (ImGui::BeginCombo("##rendererType", selectedRendererTypeString))
@@ -325,7 +318,7 @@ namespace Brickview
 					if (ImGui::Selectable(rendererTypeStrings[i], isSelected))
 					{
 						selectedRendererTypeString = rendererTypeStrings[i];
-						m_renderer->setRendererType((RendererType)i);
+						rendererSettings.RendererType = (RendererType)i;
 					}
 
 					if (isSelected)
@@ -334,6 +327,13 @@ namespace Brickview
 
 				ImGui::EndCombo();
 			}
+			ImGui::NextColumn();
+
+			// Selection outline width
+			ImGui::Text("Outline width");
+			ImGui::NextColumn();
+			ImGui::SliderFloat("##outlineWidthSlider", &rendererSettings.OutlineWidth, 1.0f, 10.0f);
+			ImGui::NextColumn();
 		}
 		ImGui::Columns(1);
 

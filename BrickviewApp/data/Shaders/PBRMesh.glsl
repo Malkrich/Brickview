@@ -63,8 +63,8 @@ void main()
 #define PI           3.1415926538
 #define ZERO_EPSILON 0.0000001
 
-layout(location = 0) out vec4 o_color;
-layout(location = 1) out int o_entityID;
+layout (location = 0) out vec4 o_color;
+layout (location = 1) out int o_entityID;
 
 struct FragmentData
 {

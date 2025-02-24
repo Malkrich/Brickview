@@ -33,8 +33,8 @@ void main()
 #type fragment
 #version 450 core
 
-layout(location = 0) out vec4 o_color;
-layout(location = 1) out int o_entityID;
+layout (location = 0) out vec4 o_color;
+layout (location = 1) out int o_entityID;
 
 in vec4 f_worldPosition;
 in vec3 f_normal;

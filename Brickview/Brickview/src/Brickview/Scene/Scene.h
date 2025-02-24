@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/Time.h"
-#include "Renderer/SceneRenderer.h"
-#include "Renderer/Texture2D.h"
+#include "Renderer/PerspectiveCamera.h"
+#include "Renderer/RendererMaterial.h"
 #include "Renderer/Mesh.h"
 #include "Lego/LegoPart.h"
 #include "Lego/LegoPartMeshRegistry.h"
@@ -13,6 +13,7 @@ namespace Brickview
 {
 
 	class Entity;
+	class SceneRenderer;
 
 	class Scene
 	{

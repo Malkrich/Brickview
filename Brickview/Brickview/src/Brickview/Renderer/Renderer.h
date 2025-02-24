@@ -32,8 +32,8 @@ namespace Brickview
 
 		// Meshes
 		static void renderMesh(Ref<Shader> shader, const RendererMaterial& material, const Ref<GpuMesh>& mesh, const glm::mat4& transform, int entityID);
-		static void renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh,
-			const void* instanceBufferData, const Layout& instanceBufferLayout, uint32_t instanceBufferSize, size_t instanceCount);
+		static void renderMeshInstances(Ref<Shader> shader, const Ref<GpuMesh>& mesh, const void* instanceBufferData, const Layout& instanceBufferLayout, uint32_t instanceBufferSize, size_t instanceCount);
+		static void renderMeshWireframe(Ref<GpuMesh> mesh, const glm::mat4& transform, float lineWidth);
 
 		// Lights
 		static void renderPointLights();

@@ -5,6 +5,16 @@
 namespace Brickview
 {
 
+	enum class FaceCullingMode
+	{
+		Front, Back, FrontAndBack
+	};
+
+	enum class FaceWindingMode
+	{
+		Clockwise, CounterClockwise
+	};
+
 	class RendererAPI
 	{
 	public:
@@ -30,6 +40,9 @@ namespace Brickview
 		// Pipeline
 		virtual void setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 		virtual void enableDepthTesting(bool enable) = 0;
+		virtual void enableFaceCulling(bool enable) = 0;
+		virtual void setFaceCullingMode(FaceCullingMode mode) = 0;
+		virtual void setFaceWindingMode(FaceWindingMode mode) = 0;
 
 		// Elements
 		virtual void drawIndices(const Ref<VertexArray>& vertexArray) = 0;
@@ -38,6 +51,7 @@ namespace Brickview
 		// Lines
 		virtual void setLineWidth(float lineWidth) = 0;
 		virtual void drawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount) = 0;
+		virtual void drawLinesIndexed(const Ref<VertexArray>& vetexArray) = 0;
 
 	private:
 		inline static API s_api = API::OpenGL;

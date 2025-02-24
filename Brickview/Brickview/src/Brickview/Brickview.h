@@ -16,6 +16,7 @@
 
 // Render
 #include "Renderer/Renderer.h"
+#include "Renderer/SceneRenderer.h"
 #include "Renderer/Texture2D.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Shader/ShaderLibrary.h"

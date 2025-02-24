@@ -51,6 +51,21 @@ namespace Brickview
 		s_rendererAPI->enableDepthTesting(enable);
 	}
 
+	void RenderCommand::enableFaceCulling(bool enable)
+	{
+		s_rendererAPI->enableFaceCulling(enable);
+	}
+
+	void RenderCommand::setFaceCullingMode(FaceCullingMode mode)
+	{
+		s_rendererAPI->setFaceCullingMode(mode);
+	}
+
+	void RenderCommand::setFaceWindingMode(FaceWindingMode mode)
+	{
+		s_rendererAPI->setFaceWindingMode(mode);
+	}
+
 	void RenderCommand::drawIndices(const Ref<VertexArray>& vertexArray)
 	{
 		s_rendererAPI->drawIndices(vertexArray);
@@ -69,6 +84,11 @@ namespace Brickview
 	void RenderCommand::drawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount)
 	{
 		s_rendererAPI->drawLines(vertexArray, vertexCount);
+	}
+
+	void RenderCommand::drawLinesIndexed(const Ref<VertexArray>& vertexArray)
+	{
+		s_rendererAPI->drawLinesIndexed(vertexArray);
 	}
 
 }

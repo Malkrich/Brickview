@@ -63,11 +63,16 @@ namespace Brickview
 		RenderCommand::clear();
 		m_viewportFrameBuffer->clearAttachment(1, -1);
 
-		// TEMP: move this to render pass
-		RenderCommand::enableDepthTesting(true);
-
 		// Outline
-		//Renderer::renderWireframeMesh();
+		if (m_selectedEntity && m_selectedEntity.hasComponent<TransformComponent>() && m_selectedEntity.hasComponent<MeshComponent>())
+		{
+			const MeshComponent& mesh = m_selectedEntity.getComponent<MeshComponent>();
+			const TransformComponent& transform = m_selectedEntity.getComponent<TransformComponent>();
+
+			RenderCommand::setFaceCullingMode(FaceCullingMode::Front);
+			Renderer::renderMeshWireframe(mesh.MeshData, transform.getTransform(), m_rendererSettings.OutlineWidth);
+			RenderCommand::setFaceCullingMode(FaceCullingMode::Back);
+		}
 
 		// Lego parts rendering
 		Ref<Shader> legoPartShader = getLegoPartShader(m_rendererSettings.RendererType);
@@ -82,6 +87,7 @@ namespace Brickview
 		for (const MeshSubmissionData& meshSub : m_meshSubmissions)
 		{
 			Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
+			RenderCommand::setFaceWindingMode(FaceWindingMode::CounterClockwise);
 		}
 
 		Renderer::renderPointLights();
@@ -90,7 +96,6 @@ namespace Brickview
 		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
 
 		// Grid
-		RenderCommand::enableDepthTesting(m_rendererSettings.GridDepthTestingEnable);
 		Renderer::renderLines(m_gridLines, m_rendererSettings.GridColor, 1.0f);
 
 		m_viewportFrameBuffer->unbind();

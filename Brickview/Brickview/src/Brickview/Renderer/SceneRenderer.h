@@ -3,13 +3,13 @@
 #include "GpuMesh.h"
 #include "Shader/Shader.h"
 #include "RendererMaterial.h"
-#include "Texture2D.h"
 #include "FrameBuffer.h"
 #include "PerspectiveCamera.h"
 #include "Primitives.h"
 #include "Lights.h"
-#include "Scene/Components.h"
 #include "Lego/LegoPartMeshRegistry.h"
+#include "Scene/Components.h"
+#include "Scene/Entity.h"
 
 #include <glm/glm.hpp>
 
@@ -29,8 +29,10 @@ namespace Brickview
 		// Grid
 		float GridBound = 1.0f;
 		float GridStep = 0.1f;
-		bool GridDepthTestingEnable = true;
 		glm::vec3 GridColor = glm::vec3(0.0f, 0.0f, 0.0f);
+
+		// Wireframe
+		float OutlineWidth = 1.0f;
 
 		SceneRendererSettings() = default;
 	};
@@ -95,12 +97,9 @@ namespace Brickview
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
 		void submitMesh(const MeshComponent& mesh, const TransformComponent& transform, const MaterialComponent& material, uint32_t entityID);
 
-		// RendererSettings
-		RendererType getRendererType() const { return m_rendererSettings.RendererType; }
-		void setRendererType(RendererType rendererType) { m_rendererSettings.RendererType = rendererType; }
-		// Grid settings
-		bool isGridDepthTestEnable() const { return m_rendererSettings.GridDepthTestingEnable; }
-		void setGridDepthTesting(bool enable) { m_rendererSettings.GridDepthTestingEnable = enable; }
+		SceneRendererSettings& getRendererSettings() { return m_rendererSettings; }
+
+		void setSelectedEntity(Entity e) { m_selectedEntity = e; }
 
 	private:
 		void init(uint32_t viewportWidth, uint32_t viewportHeight);
@@ -112,6 +111,9 @@ namespace Brickview
 	private:
 		// Renderer internal
 		SceneRendererSettings m_rendererSettings;
+
+		// Selected entity
+		Entity m_selectedEntity;
 
 		// Viewport
 		Ref<FrameBuffer> m_viewportFrameBuffer;

@@ -3,6 +3,7 @@
 
 #include "Entity.h"
 #include "Components.h"
+#include "Renderer/SceneRenderer.h"
 #include "Renderer/Lights.h"
 
 #include <glm/glm.hpp>
@@ -16,9 +17,9 @@ namespace Brickview
 
 	Entity Scene::createEntity()
 	{
-		entt::entity enttEntity = m_registry.create();
+		entt::entity e = m_registry.create();
 
-		Entity entity = Entity(enttEntity, this);
+		Entity entity = Entity(e, this);
 		entity.addComponent<TransformComponent>();
 
 		return entity;

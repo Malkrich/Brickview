@@ -8,6 +8,34 @@
 namespace Brickview
 {
 
+	namespace Utils
+	{
+		static GLenum internalCullModeToOpenGLCullMode(FaceCullingMode mode)
+		{
+			switch (mode)
+			{
+				case FaceCullingMode::Front:        return GL_FRONT;
+				case FaceCullingMode::Back:         return GL_BACK;
+				case FaceCullingMode::FrontAndBack: return GL_FRONT_AND_BACK;
+			}
+
+			BV_ASSERT(false, "Unknown face culling mode!");
+			return GL_FRONT;
+		}
+
+		static GLenum internalFaceWindingModeToOpenGLWindingMode(FaceWindingMode mode)
+		{
+			switch (mode)
+			{
+				case FaceWindingMode::Clockwise:        return GL_CW;
+				case FaceWindingMode::CounterClockwise: return GL_CCW;
+			}
+
+			BV_ASSERT(false, "Unknown face winding mode!");
+			return GL_CCW;
+		}
+	}
+
 	void OpenGLRendererAPI::init()
 	{
 		enableDepthTesting(true);
@@ -40,6 +68,26 @@ namespace Brickview
 			glDisable(GL_DEPTH_TEST);
 	}
 
+	void OpenGLRendererAPI::enableFaceCulling(bool enable)
+	{
+		if (enable)
+			glEnable(GL_CULL_FACE);
+		else
+			glDisable(GL_CULL_FACE);
+	}
+
+	void OpenGLRendererAPI::setFaceCullingMode(FaceCullingMode mode)
+	{
+		GLenum glCullMode = Utils::internalCullModeToOpenGLCullMode(mode);
+		glCullFace(glCullMode);
+	}
+
+	void OpenGLRendererAPI::setFaceWindingMode(FaceWindingMode mode)
+	{
+		GLenum glFaceWindingMode = Utils::internalFaceWindingModeToOpenGLWindingMode(mode);
+		glFrontFace(glFaceWindingMode);
+	}
+
 	void OpenGLRendererAPI::drawIndices(const Ref<VertexArray>& vertexArray)
 	{
 		vertexArray->bind();
@@ -61,6 +109,12 @@ namespace Brickview
 	{
 		vertexArray->bind();
 		glDrawArrays(GL_LINES, 0, vertexCount);
+	}
+
+	void OpenGLRendererAPI::drawLinesIndexed(const Ref<VertexArray>& vertexArray)
+	{
+		vertexArray->bind();
+		glDrawElements(GL_LINES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
 	}
 
 }

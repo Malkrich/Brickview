@@ -18,6 +18,9 @@ namespace Brickview
 		// Pipeline
 		virtual void setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 		virtual void enableDepthTesting(bool enable) override;
+		virtual void enableFaceCulling(bool enable) override;
+		virtual void setFaceCullingMode(FaceCullingMode mode) override;
+		virtual void setFaceWindingMode(FaceWindingMode mode) override;
 
 		// Elements
 		virtual void drawIndices(const Ref<VertexArray>& vertexArray) override;
@@ -26,6 +29,7 @@ namespace Brickview
 		// Lines
 		virtual void setLineWidth(float lineWidth) override;
 		virtual void drawLines(const Ref<VertexArray>& vertexArray, uint32_t vertexCount) override;
+		virtual void drawLinesIndexed(const Ref<VertexArray>& vertexArray) override;
 	};
 
 }
