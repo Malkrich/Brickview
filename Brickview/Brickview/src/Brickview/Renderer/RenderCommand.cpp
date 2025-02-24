@@ -66,9 +66,14 @@ namespace Brickview
 		s_rendererAPI->setFaceWindingMode(mode);
 	}
 
-	void RenderCommand::drawIndices(const Ref<VertexArray>& vertexArray)
+	void RenderCommand::setPolygonMode(PolygonMode mode)
 	{
-		s_rendererAPI->drawIndices(vertexArray);
+		s_rendererAPI->setPolygonMode(mode);
+	}
+
+	void RenderCommand::drawIndexed(const Ref<VertexArray>& vertexArray)
+	{
+		s_rendererAPI->drawIndexed(vertexArray);
 	}
 
 	void RenderCommand::drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount)

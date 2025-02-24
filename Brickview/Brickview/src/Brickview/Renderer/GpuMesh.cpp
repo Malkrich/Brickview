@@ -7,7 +7,7 @@ namespace Brickview
 	GpuMesh::GpuMesh(Ref<Mesh> mesh)
 	{
 		const std::vector<Vertex>& vertices = mesh->getVertices();
-		const std::vector<TriangleFace> indices = mesh->getConnectivities();
+		const std::vector<TriangleFace>& indices = mesh->getConnectivities();
 
 		Layout vertexBufferLayout = {
 			{ 0, "a_position", BufferElementType::Float3 },

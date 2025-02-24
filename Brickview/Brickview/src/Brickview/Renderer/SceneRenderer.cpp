@@ -87,7 +87,6 @@ namespace Brickview
 		for (const MeshSubmissionData& meshSub : m_meshSubmissions)
 		{
 			Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
-			RenderCommand::setFaceWindingMode(FaceWindingMode::CounterClockwise);
 		}
 
 		Renderer::renderPointLights();

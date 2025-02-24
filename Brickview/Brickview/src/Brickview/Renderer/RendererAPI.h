@@ -15,6 +15,11 @@ namespace Brickview
 		Clockwise, CounterClockwise
 	};
 
+	enum class PolygonMode
+	{
+		Fill, Line, Point
+	};
+
 	class RendererAPI
 	{
 	public:
@@ -43,9 +48,10 @@ namespace Brickview
 		virtual void enableFaceCulling(bool enable) = 0;
 		virtual void setFaceCullingMode(FaceCullingMode mode) = 0;
 		virtual void setFaceWindingMode(FaceWindingMode mode) = 0;
+		virtual void setPolygonMode(PolygonMode mode) = 0;
 
 		// Elements
-		virtual void drawIndices(const Ref<VertexArray>& vertexArray) = 0;
+		virtual void drawIndexed(const Ref<VertexArray>& vertexArray) = 0;
 		virtual void drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount) = 0;
 
 		// Lines

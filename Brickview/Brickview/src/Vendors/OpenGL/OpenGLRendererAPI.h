@@ -21,9 +21,10 @@ namespace Brickview
 		virtual void enableFaceCulling(bool enable) override;
 		virtual void setFaceCullingMode(FaceCullingMode mode) override;
 		virtual void setFaceWindingMode(FaceWindingMode mode) override;
+		virtual void setPolygonMode(PolygonMode mode) override;
 
 		// Elements
-		virtual void drawIndices(const Ref<VertexArray>& vertexArray) override;
+		virtual void drawIndexed(const Ref<VertexArray>& vertexArray) override;
 		virtual void drawInstances(const Ref<VertexArray>& vertexArray, uint32_t instanceCount) override;
 
 		// Lines

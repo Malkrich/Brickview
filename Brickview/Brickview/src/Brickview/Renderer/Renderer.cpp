@@ -216,7 +216,7 @@ namespace Brickview
 		vao->setIndexBuffer(mesh->getGeometryIndexBuffer());
 
 		shader->bind();
-		RenderCommand::drawIndices(vao);
+		RenderCommand::drawIndexed(vao);
 		vao->unbind();
 	}
 
@@ -251,7 +251,9 @@ namespace Brickview
 
 		wireframeShader->bind();
 		RenderCommand::setLineWidth(lineWidth);
-		RenderCommand::drawLinesIndexed(vao);
+		RenderCommand::setPolygonMode(PolygonMode::Line);
+		RenderCommand::drawIndexed(vao);
+		RenderCommand::setPolygonMode(PolygonMode::Fill);
 		vao->unbind();
 	}
 

@@ -32,7 +32,7 @@ namespace Brickview
 		glm::vec3 GridColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
 		// Wireframe
-		float OutlineWidth = 1.0f;
+		float OutlineWidth = 3.5f;
 
 		SceneRendererSettings() = default;
 	};

@@ -34,6 +34,20 @@ namespace Brickview
 			BV_ASSERT(false, "Unknown face winding mode!");
 			return GL_CCW;
 		}
+
+		static GLenum internalPolygonModeToOpenGLPolygonMode(PolygonMode mode)
+		{
+			switch (mode)
+			{
+				case PolygonMode::Fill: return GL_FILL;
+				case PolygonMode::Line: return GL_LINE;
+				case PolygonMode::Point: return GL_POINT;
+			}
+
+			BV_ASSERT(false, "Unknown polygon mode!");
+			return GL_FILL;
+		}
+
 	}
 
 	void OpenGLRendererAPI::init()
@@ -78,17 +92,23 @@ namespace Brickview
 
 	void OpenGLRendererAPI::setFaceCullingMode(FaceCullingMode mode)
 	{
-		GLenum glCullMode = Utils::internalCullModeToOpenGLCullMode(mode);
-		glCullFace(glCullMode);
+		GLenum glMode = Utils::internalCullModeToOpenGLCullMode(mode);
+		glCullFace(glMode);
 	}
 
 	void OpenGLRendererAPI::setFaceWindingMode(FaceWindingMode mode)
 	{
-		GLenum glFaceWindingMode = Utils::internalFaceWindingModeToOpenGLWindingMode(mode);
-		glFrontFace(glFaceWindingMode);
+		GLenum glMode = Utils::internalFaceWindingModeToOpenGLWindingMode(mode);
+		glFrontFace(glMode);
 	}
 
-	void OpenGLRendererAPI::drawIndices(const Ref<VertexArray>& vertexArray)
+	void OpenGLRendererAPI::setPolygonMode(PolygonMode mode)
+	{
+		GLenum glMode = Utils::internalPolygonModeToOpenGLPolygonMode(mode);
+		glPolygonMode(GL_FRONT_AND_BACK, glMode);
+	}
+
+	void OpenGLRendererAPI::drawIndexed(const Ref<VertexArray>& vertexArray)
 	{
 		vertexArray->bind();
 		glDrawElements(GL_TRIANGLES, vertexArray->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr);
