@@ -105,7 +105,8 @@ layout (std140, binding = 1) uniform LightsData
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
 {
-    return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - max(dot(halfwayVector, viewDirection), 0.0), 5.0);
+    float cosTheta = max(dot(halfwayVector, viewDirection), 0.0);
+    return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 float TrowbridgeReitzDistributionGGX(vec3 normal, vec3 halfwayVector, float roughness)
@@ -113,7 +114,8 @@ float TrowbridgeReitzDistributionGGX(vec3 normal, vec3 halfwayVector, float roug
     float alpha = pow(roughness, 2.0);
     float alphaSquared = pow(alpha, 2.0);
     float normalDotHalfway = max(dot(normal, halfwayVector), 0.0);
-    float denominator = pow(normalDotHalfway, 2.0) * (alphaSquared - 1.0) + 1.0;
+    float normalDotHalfway2 = pow(normalDotHalfway, 2.0);
+    float denominator = normalDotHalfway2 * (alphaSquared - 1.0) + 1.0;
     denominator = PI * pow(denominator, 2.0);
     return max(alphaSquared, ZERO_EPSILON) / max(denominator, ZERO_EPSILON);
 }
@@ -145,7 +147,7 @@ vec3 BRDF(vec3 albedo, vec3 lightDirection, vec3 viewDirection, vec3 normal, vec
     vec3 kd = vec3(1.0) - ks;
     kd *= 1.0 - metalness;
 
-    return (kd * albedo) / PI + specular;
+    return kd * albedo / PI + specular;
 }
 
 void main()

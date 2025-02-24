@@ -105,36 +105,52 @@ layout (std140, binding = 1) uniform LightsData
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
 {
-    return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - max(dot(halfwayVector, viewDirection), 0.0), 5.0);
+    float cosTheta = max(dot(halfwayVector, viewDirection), 0.0);
+    return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
-float TrowbridgeReitzDistributionGGX(vec3 normal, vec3 halfwayVector, float roughness)
+float distributionGGX(vec3 normal, vec3 halfwayVector, float roughness)
 {
-    float alpha = pow(roughness, 2.0);
-    float alphaSquared = pow(alpha, 2.0);
+    float alpha = roughness * roughness;
+    float alphaSquared = alpha * alpha;
     float normalDotHalfway = max(dot(normal, halfwayVector), 0.0);
-    float denominator = pow(normalDotHalfway, 2.0) * (alphaSquared - 1.0) + 1.0;
-    denominator = PI * pow(denominator, 2.0);
-    return max(alphaSquared, ZERO_EPSILON) / max(denominator, ZERO_EPSILON);
+    float normalDotHalfway2 = normalDotHalfway * normalDotHalfway;
+    float denominator = normalDotHalfway2 * (alphaSquared - 1.0) + 1.0;
+    denominator = PI * denominator * denominator;
+
+    float numerator = alphaSquared;
+
+    return numerator / denominator;
 }
 
-float G1(vec3 normal, vec3 direction, float roughness)
+float geometrySchlickGGX(float NdotV, float roughness)
 {
-    float k = pow(roughness, 2.0) / 2.0;
-    float normalDotDirection = max(dot(normal, direction), 0.0);
-    float denominator = normalDotDirection * (1.0 - k) + k;
-    return normalDotDirection / max(denominator, ZERO_EPSILON);
+    float r = (roughness + 1.0);
+    float k = (r*r) / 8.0;
+
+    float numerator   = NdotV;
+    float denominator = NdotV * (1.0 - k) + k;
+	
+    return numerator / denominator;
+}
+float geometrySmith(vec3 normal, vec3 viewDirection, vec3 lightDirection, float roughness)
+{
+    float NdotL = max(dot(normal, lightDirection), 0.0);
+    float NdotV = max(dot(normal, viewDirection), 0.0);
+    float ggx1  = geometrySchlickGGX(NdotL, roughness);
+    float ggx2  = geometrySchlickGGX(NdotV, roughness);
+	
+    return ggx1 * ggx2;
 }
 
 vec3 cookTorrance(vec3 viewDirection, vec3 lightDirection, vec3 normal, vec3 halfwayVector, vec3 baseReflectivity, float roughness)
 {
-    float D = TrowbridgeReitzDistributionGGX(normal, halfwayVector, roughness);
-    float G = G1(normal, lightDirection, roughness) * G1(normal, viewDirection, roughness);
+    float D = distributionGGX(normal, halfwayVector, roughness);
+    float G = geometrySmith(normal, viewDirection, lightDirection, roughness);
     vec3 F = fresnelSchlick(baseReflectivity, viewDirection, halfwayVector);
     vec3 numerator = D * G * F;
-    float denominator = 4.0 * max(dot(normal, viewDirection), 0.0) * max(dot(normal, lightDirection), 0.0);
+    float denominator = 4.0 * max(dot(normal, viewDirection), 0.0) * max(dot(normal, lightDirection), 0.0) + ZERO_EPSILON;
 
-    denominator = max(denominator, ZERO_EPSILON);
     return numerator / denominator;
 }
 
@@ -145,7 +161,7 @@ vec3 BRDF(vec3 albedo, vec3 lightDirection, vec3 viewDirection, vec3 normal, vec
     vec3 kd = vec3(1.0) - ks;
     kd *= 1.0 - metalness;
 
-    return (kd * albedo) / PI + specular;
+    return kd * albedo / PI + specular;
 }
 
 void main()
