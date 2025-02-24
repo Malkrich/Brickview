@@ -95,7 +95,7 @@ namespace Brickview
 		// Shaders
 		s_rendererData->ShaderLibrary = createRef<ShaderLibrary>();
 		std::filesystem::path shaderBaseDir = "data/Shaders/";
-		//s_rendererData->ShaderLibrary->load(shaderBaseDir / "SolidMesh.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "SolidMesh.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PhongLegoMesh.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRLegoMesh.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRMesh.glsl");

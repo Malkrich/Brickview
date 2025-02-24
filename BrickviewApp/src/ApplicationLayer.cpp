@@ -28,15 +28,17 @@ namespace Brickview
 			glm::vec3 meshPosition = { xStart, 0.0f, -0.5f };
 			glm::vec3 lightPosition = { xStart, 0.5f, -0.0f };
 			RendererMaterial material;
-			material.Albedo = { 0.9f, 0.1f, 0.1f, 1.0f };
-			material.Roughness = 0.0f;
+			material.Albedo = { 1.0f, 0.0f, 0.0f, 1.0f };
+			material.Roughness = 0.1f;
 			material.Metalness = 0.0f;
 
 			for (uint32_t i = 0; i < sphereCount; i++)
 			{
-				float roughness = (float)i / (sphereCount - 1);
-				float metalness = -roughness + 1.0f;
-				float xPos = xStart + ((xEnd - xStart) * ((float)i / (sphereCount-1)));
+				float factor = ((float)i / (sphereCount - 1));
+
+				float roughness = 0.1f + 0.9f * factor;
+				float metalness = -factor + 1.0f;
+				float xPos = xStart + ((xEnd - xStart) * factor);
 
 				meshPosition.x = xPos;
 				lightPosition.x = xPos;
@@ -44,7 +46,9 @@ namespace Brickview
 				material.Metalness = metalness;
 
 				scene->createMeshEntity(sphereMesh, meshPosition, material);
-				scene->createLightEntity(lightPosition);
+
+				if ((i % 2) == 0)
+					scene->createLightEntity(lightPosition);
 			}
 		}
 	}
