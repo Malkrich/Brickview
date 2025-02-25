@@ -97,10 +97,20 @@ struct PointLight
     float __padding2;
 };
 
-layout (std140, binding = 1) uniform LightsData
+//struct DirectionalLight
+//{
+//    vec3 Direction;
+//    float __padding1;
+//    vec3 Color;
+//    float __padding2;
+//}
+
+layout (std430, binding = 0) buffer LightsData
 {
-    int LightCount;
-    PointLight PointLights[10];
+    int PointLightsCount;
+    //bool DirectionalLightEnable;
+    //DirectionalLight DirectionalLightData;
+    PointLight PointLights[];
 } lightsData;
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)

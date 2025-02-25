@@ -21,10 +21,10 @@ struct PointLight
     float __padding2;
 };
 
-layout (std140, binding = 1) uniform LightsData
+layout (std430, binding = 1) buffer LightsData
 {
-    int Count;
-    PointLight Lights[10];
+    uint PointLightsCount;
+    PointLight PointLights[];
 } lightsData;
 
 out flat int f_lightIndex;
@@ -34,7 +34,7 @@ void main()
 {
     f_lightIndex = a_lightInstanceIndex;
     f_entityID = a_lightInstanceEntityID;
-    vec4 worldPosition = vec4(lightsData.Lights[a_lightInstanceIndex].Position + a_position, 1.0);
+    vec4 worldPosition = vec4(lightsData.PointLights[a_lightInstanceIndex].Position + a_position, 1.0);
     gl_Position = cameraData.ViewProjectionMatrix * worldPosition;
 }
 
@@ -52,10 +52,10 @@ struct PointLight
     float __padding2;
 };
 
-layout (std140, binding = 1) uniform LightsData
+layout (std430, binding = 1) buffer LightsData
 {
-    int Count;
-    PointLight Lights[10];
+    uint PointLightsCount;
+    PointLight PointLights[];
 } lightsData;
 
 layout (location = 0) out vec4 o_color;
@@ -63,6 +63,6 @@ layout (location = 1) out int o_entityID;
 
 void main()
 {
-    o_color = vec4(lightsData.Lights[f_lightIndex].Color, 1.0);
+    o_color = vec4(lightsData.PointLights[f_lightIndex].Color, 1.0);
     o_entityID = f_entityID;
 }

@@ -42,7 +42,7 @@ namespace Brickview
 	void OpenGLUniformBuffer::invalidate(uint32_t size, const void* data)
 	{
 		m_bufferSize = size;
-		if (m_bufferID != 0)
+		if (m_bufferID)
 		{
 			glDeleteBuffers(1, &m_bufferID);
 		}
@@ -51,6 +51,7 @@ namespace Brickview
 		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
 		glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, data, GL_DYNAMIC_DRAW);
 		glBindBufferBase(GL_UNIFORM_BUFFER, m_specs.BindingPoint, m_bufferID);
+		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 		CHECK_GL_ERROR();
 	}

@@ -11,7 +11,6 @@ namespace Brickview
 		Buffer() = default;
 		Buffer(const Buffer&) = default;
 		Buffer(uint32_t size);
-		~Buffer();
 
 		static Buffer copy(const Buffer& other);
 

@@ -75,20 +75,21 @@ namespace Brickview
 		}
 
 		// Lego parts rendering
-		Ref<Shader> legoPartShader = getLegoPartShader(m_rendererSettings.RendererType);
+		//Ref<Shader> legoPartShader = getLegoPartShader(m_rendererSettings.RendererType);
 
-		for (const InstanceBuffer& buffer : m_instanceBuffers)
-		{
-			Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
-				m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
-		}
+		//for (const InstanceBuffer& buffer : m_instanceBuffers)
+		//{
+		//	Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
+		//		m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
+		//}
 
-		Ref<Shader> meshShader = Renderer::getShaderLibrary()->get("PBRMesh");
-		for (const MeshSubmissionData& meshSub : m_meshSubmissions)
-		{
-			Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
-		}
+		//Ref<Shader> meshShader = Renderer::getShaderLibrary()->get("PBRMesh");
+		//for (const MeshSubmissionData& meshSub : m_meshSubmissions)
+		//{
+		//	Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
+		//}
 
+		// TODO: maybe should not be handled by Renderer class but the scene renderer
 		Renderer::renderPointLights();
 
 		// Origin

@@ -11,7 +11,7 @@ layout (std140, binding = 0) uniform CameraData
     vec3 Position;
 } cameraData;
 
-layout (std140, binding = 2) uniform ModelData
+layout (std140, binding = 1) uniform ModelData
 {
     mat4 Transform;
     vec4 Albedo;
@@ -97,10 +97,10 @@ struct PointLight
     float __padding2;
 };
 
-layout (std140, binding = 1) uniform LightsData
+layout (std430, binding = 1) buffer LightsData
 {
-    int LightCount;
-    PointLight PointLights[10];
+    uint PointLightsCount;
+    PointLight PointLights[];
 } lightsData;
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
@@ -173,7 +173,7 @@ void main()
     vec3 baseReflectivity = mix(vec3(0.04), albedo, metalness);
 
     vec3 lightResult = vec3(0.0);
-    for (int i = 0; i < lightsData.LightCount; i++)
+    for (int i = 0; i < lightsData.PointLightsCount; i++)
     {
         vec3 lightDirection = normalize(lightsData.PointLights[i].Position - f_fragmentData.Position);
         vec3 viewDirection = normalize(cameraData.Position - f_fragmentData.Position);

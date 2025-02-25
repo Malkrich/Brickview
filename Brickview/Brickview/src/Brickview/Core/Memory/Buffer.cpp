@@ -1,5 +1,5 @@
 #include "Pch.h"
-#include "Core/Buffer.h"
+#include "Buffer.h"
 
 namespace Brickview
 {
@@ -7,11 +7,6 @@ namespace Brickview
 	Buffer::Buffer(uint32_t size)
 	{
 		allocate(size);
-	}
-
-	Buffer::~Buffer()
-	{
-		release();
 	}
 
 	void Buffer::release()

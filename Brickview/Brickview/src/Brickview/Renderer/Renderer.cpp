@@ -1,11 +1,13 @@
 #include "Pch.h"
 #include "Renderer.h"
 
-#include "Core/Buffer.h"
+#include "Core/Memory/Buffer.h"
+#include "Core/Memory/BufferStreamWriter.h"
 #include "RendererCore.h"
 #include "RenderCommand.h"
 #include "GpuBuffer.h"
 #include "UniformBuffer.h"
+#include "ShaderStorageBuffer.h"
 
 #include "Vendors/OpenGL/OpenGLError.h"
 
@@ -74,10 +76,9 @@ namespace Brickview
 		Ref<UniformBuffer> CameraUbo = nullptr;
 
 		// Point Lights
-		int PointLightsCount = 0;
-		Ref<UniformBuffer> PointLightsUbo = nullptr;
+		uint32_t PointLightsCount = 0;
+		Ref<ShaderStorageBuffer> LightsDataSsbo = nullptr;
 		Ref<VertexBuffer> PointLightInstancesVbo = nullptr;
-		Layout PointLightInstancesBufferVboLayout;
 		std::vector<PointLightInstance> PointLightInstancesData;
 		Ref<GpuMesh> LightMesh = nullptr;
 
@@ -95,9 +96,9 @@ namespace Brickview
 		// Shaders
 		s_rendererData->ShaderLibrary = createRef<ShaderLibrary>();
 		std::filesystem::path shaderBaseDir = "data/Shaders/";
-		s_rendererData->ShaderLibrary->load(shaderBaseDir / "SolidMesh.glsl");
-		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PhongLegoMesh.glsl");
-		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRLegoMesh.glsl");
+		//s_rendererData->ShaderLibrary->load(shaderBaseDir / "SolidMesh.glsl");
+		//s_rendererData->ShaderLibrary->load(shaderBaseDir / "PhongLegoMesh.glsl");
+		//s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRLegoMesh.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PBRMesh.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Light.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Line.glsl");
@@ -141,10 +142,10 @@ namespace Brickview
 		s_rendererData->PointLightInstancesVbo = VertexBuffer::create(sizeof(PointLightInstance));
 		s_rendererData->PointLightInstancesVbo->setBufferLayout(pointLightInstancesLayout);
 
-		UniformBufferSpecifications pointLightsDataSpecs;
-		pointLightsDataSpecs.BlockName = "PointLightsData";
-		pointLightsDataSpecs.BindingPoint = 1;
-		s_rendererData->PointLightsUbo = UniformBuffer::create(pointLightsDataSpecs, 4 * sizeof(s_rendererData->PointLightsCount) + BV_MAX_LIGHTS_SUPPORTED * sizeof(GpuPointLightStruct));
+		ShaderStorageBufferSpecifications lightsDataSsboSpecs;
+		lightsDataSsboSpecs.BlockName = "LightsData";
+		lightsDataSsboSpecs.BindingPoint = 1;
+		s_rendererData->LightsDataSsbo = ShaderStorageBuffer::create(lightsDataSsboSpecs, sizeof(s_rendererData->PointLightsCount) + sizeof(GpuPointLightStruct));
 
 		// Meshes
 		UniformBufferSpecifications modelDataUboSpecs;
@@ -171,28 +172,31 @@ namespace Brickview
 	void Renderer::begin(const CameraData& cameraData, const std::vector<PointLight>& pointLights, const std::vector<int>& pLIDs)
 	{
 		BV_ASSERT(pointLights.size() == pLIDs.size(), "Point light object and ID vectors do not have the same size!");
-		BV_ASSERT(pointLights.size() <= BV_MAX_LIGHTS_SUPPORTED, "Renderer does not support more than 10 lights!");
 
 		// Camera
 		s_rendererData->CameraUbo->setData(&cameraData);
 
 		// Point Lights
 		s_rendererData->PointLightsCount = pointLights.size();
-		std::array<GpuPointLightStruct, BV_MAX_LIGHTS_SUPPORTED> gpuPointLights;
+		std::vector<GpuPointLightStruct> gpuPointLights(s_rendererData->PointLightsCount);
 		s_rendererData->PointLightInstancesData.resize(s_rendererData->PointLightsCount);
 		for (int i = 0; i < s_rendererData->PointLightsCount; i++)
 		{
 			gpuPointLights[i] = GpuPointLightStruct(pointLights[i]);
 			s_rendererData->PointLightInstancesData[i] = { i, pLIDs[i] };
 		}
-		// Computing sizes
-		uint32_t pointLightsArraySize = BV_MAX_LIGHTS_SUPPORTED * sizeof(GpuPointLightStruct);
-		uint32_t bufferSize = 4 * sizeof(s_rendererData->PointLightsCount) + pointLightsArraySize;
-		// Copying point lights data
-		Buffer pointLightUboData(bufferSize);
-		memcpy(pointLightUboData.Data, &s_rendererData->PointLightsCount, sizeof(s_rendererData->PointLightsCount));
-		memcpy(pointLightUboData.Data + 4 * sizeof(s_rendererData->PointLightsCount), gpuPointLights.data(), pointLightsArraySize);
-		s_rendererData->PointLightsUbo->setData(pointLightUboData.Data);
+
+		Buffer lightsDataSsboBuffer;
+		BufferStreamWriter stream(lightsDataSsboBuffer);
+		stream.writePrimitiveType<uint32_t>(s_rendererData->PointLightsCount);
+		stream.writeSpan<uint32_t>(3, 0);
+		stream.writeVector(pointLights);
+
+		if (lightsDataSsboBuffer.Size != s_rendererData->LightsDataSsbo->getSize())
+			s_rendererData->LightsDataSsbo->resize(lightsDataSsboBuffer.Size);
+		s_rendererData->LightsDataSsbo->setData(lightsDataSsboBuffer.Data);
+
+		lightsDataSsboBuffer.release();
 	}
 
 	const Ref<ShaderLibrary>& Renderer::getShaderLibrary()
