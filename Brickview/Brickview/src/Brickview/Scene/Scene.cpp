@@ -25,18 +25,19 @@ namespace Brickview
 		return entity;
 	}
 
-	void Scene::createLegoPartEntity(LegoPartID partID, Ref<Mesh> mesh)
+	Entity Scene::createLegoPartEntity(LegoPartID partID, Ref<Mesh> mesh)
 	{
 		Entity e = createEntity();
 		// Note: LegoPartComponent should contain a LegoMaterial 
 		// which yield to the right PBR Material thanks to a LegoPartMaterialRegistry class
 		e.addComponent<LegoPartComponent>(partID, m_legoPartMeshRegistry, mesh);
 
-		// TEMP
 		e.addComponent<MaterialComponent>();
+
+		return e;
 	}
 
-	void Scene::createMeshEntity(Ref<Mesh> mesh, const glm::vec3& position, const RendererMaterial& material)
+	Entity Scene::createMeshEntity(Ref<Mesh> mesh, const glm::vec3& position, const RendererMaterial& material)
 	{
 		Entity e = createEntity();
 
@@ -47,9 +48,11 @@ namespace Brickview
 		transform.Translation = position;
 		// Material
 		e.addComponent<MaterialComponent>(material);
+
+		return e;
 	}
 
-	void Scene::createLightEntity(const glm::vec3& position)
+	Entity Scene::createLightEntity(const glm::vec3& position)
 	{
 		Entity e = createEntity();
 
@@ -58,6 +61,27 @@ namespace Brickview
 		transform.Translation = position;
 		// Light
 		e.addComponent<LightComponent>();
+
+		return e;
+	}
+
+	Entity Scene::createMeshEntity(Ref<Mesh> mesh, const RendererMaterial& material)
+	{
+		glm::vec3 position = glm::vec3(0.0f);
+		return createMeshEntity(mesh, position, material);
+	}
+
+	Entity Scene::createMeshEntity(Ref<Mesh> mesh, const glm::vec3& position)
+	{
+		RendererMaterial material;
+		return createMeshEntity(mesh, position, material);
+	}
+
+	Entity Scene::createMeshEntity(Ref<Mesh> mesh)
+	{
+		glm::vec3 position = glm::vec3(0.0f);
+		RendererMaterial material;
+		return createMeshEntity(mesh, position, material);
 	}
 
 	void Scene::removeEntity(Entity e)

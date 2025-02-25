@@ -22,33 +22,38 @@ namespace Brickview
 			float xEnd = 1.0f;
 			uint32_t sphereCount = 8;
 
-			Ref<Mesh> sphereMesh = Mesh::load("./data/Meshes/SmoothSphere.obj");
-			sphereMesh->scale(0.1f);
+			Ref<Mesh> smoothSphereMesh = Mesh::load("./data/Meshes/SmoothSphere.obj");
+			smoothSphereMesh->scale(0.1f);
+			Ref<Mesh> flatSphereMesh = Mesh::load("./data/Meshes/FlatSphere.obj");
+			flatSphereMesh->scale(0.1f);
 
-			glm::vec3 meshPosition = { xStart, 0.0f, -0.5f };
-			glm::vec3 lightPosition = { xStart, 0.5f, -0.0f };
-			RendererMaterial material;
-			material.Albedo = { 1.0f, 0.0f, 0.0f, 1.0f };
-			material.Roughness = 0.1f;
-			material.Metalness = 0.0f;
+			// Plane ground
+			Ref<Mesh> planeMesh = Mesh::load("./data/Meshes/Plane.obj");
+			RendererMaterial planeMaterial;
+			planeMaterial.Albedo = { 0.15f, 0.15f, 0.15f, 1.0f };
+			planeMaterial.Roughness = 0.1f;
+			scene->createMeshEntity(planeMesh, planeMaterial);
 
-			for (uint32_t i = 0; i < sphereCount; i++)
+			RendererMaterial sphereMaterial;
+			sphereMaterial.Albedo = { 1.0f, 0.0f, 0.0f, 1.0f };
+			sphereMaterial.Roughness = 0.1f;
+			sphereMaterial.Metalness = 0.0f;
+			glm::vec3 position = { -0.3f, 0.3f, -0.5f };
+			scene->createMeshEntity(smoothSphereMesh, position, sphereMaterial);
+
+			sphereMaterial.Albedo = { 0.2f, 0.8f, 0.2f, 1.0f };
+			sphereMaterial.Metalness = 1.0f;
+			sphereMaterial.Roughness = 0.5f;
+			position.x = 0.3f;
+			scene->createMeshEntity(flatSphereMesh, position, sphereMaterial);
+
+			for (uint32_t i = 0; i < 4; i++)
 			{
-				float factor = ((float)i / (sphereCount - 1));
-
-				float roughness = 0.1f + 0.9f * factor;
-				float metalness = -factor + 1.0f;
-				float xPos = xStart + ((xEnd - xStart) * factor);
-
-				meshPosition.x = xPos;
-				lightPosition.x = xPos;
-				material.Roughness = roughness;
-				material.Metalness = metalness;
-
-				scene->createMeshEntity(sphereMesh, meshPosition, material);
-
-				if ((i % 2) == 0)
-					scene->createLightEntity(lightPosition);
+				float factor = (float)i / (4.0f - 1.0f);
+				float xPos = factor * -0.5f + (1.0f - factor) * 0.5f;
+				glm::vec3 lightPos = { 0.0f, 0.5f, 0.0f };
+				lightPos.x = xPos;
+				scene->createLightEntity(lightPos);
 			}
 		}
 	}
