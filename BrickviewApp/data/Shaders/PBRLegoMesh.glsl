@@ -40,7 +40,7 @@ out flat int f_entityID;
 void main()
 {
     vec4 worldPosition = a_transform * vec4(a_position, 1.0);
-    mat3 normalTransform = mat3(transpose(inverse(a_transform)));
+    mat3 normalTransform = transpose(inverse(mat3(a_transform)));
 
     // Fragment data
     f_fragmentData.Position = worldPosition.xyz;
@@ -152,6 +152,7 @@ vec3 BRDF(vec3 albedo, vec3 lightDirection, vec3 viewDirection, vec3 normal, vec
 
 void main()
 {
+    vec3 normal = normalize(f_fragmentData.Normal);
     float roughness = f_material.Roughness;
     float metalness = f_material.Metalness;
     vec3 albedo = f_material.Albedo.xyz;
@@ -169,8 +170,8 @@ void main()
         float attenuation = 1.0 / pow(distance, 2.0);
         vec3 radiance = lightsData.PointLights[i].Color * attenuation;
 
-        vec3 brdf = BRDF(albedo, lightDirection, viewDirection, f_fragmentData.Normal, halfwayVector, baseReflectivity, roughness, metalness);
-        lightResult += brdf * radiance * max(dot(f_fragmentData.Normal, lightDirection), 0.0);
+        vec3 brdf = BRDF(albedo, lightDirection, viewDirection, normal, halfwayVector, baseReflectivity, roughness, metalness);
+        lightResult += brdf * radiance * max(dot(normal, lightDirection), 0.0);
     }
 
     // Ambiant lighting
