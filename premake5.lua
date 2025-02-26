@@ -1,5 +1,5 @@
 workspace "Brickview"
-    architecture "x86"
+    architecture "x64"
     startproject "BrickviewApp"
     
     configurations
