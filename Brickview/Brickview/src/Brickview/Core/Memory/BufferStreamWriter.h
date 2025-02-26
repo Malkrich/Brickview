@@ -16,8 +16,7 @@ namespace Brickview
 			uint32_t typeSize = sizeof(T);
 			m_buffer.resize(m_buffer.Size + typeSize);
 
-			void* destPtr = m_buffer.Data + m_bufferPointer;
-			memcpy(destPtr, &data, typeSize);
+			memcpy(m_buffer.Data + m_bufferPointer, &data, typeSize);
 
 			m_bufferPointer += typeSize;
 		}
