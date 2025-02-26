@@ -47,13 +47,16 @@ namespace Brickview
 			position.x = 0.3f;
 			scene->createMeshEntity(flatSphereMesh, position, sphereMaterial);
 
+			const glm::vec3 white = glm::vec3(1.0f);
+			const glm::vec3 green = { 0.0f, 1.0f, 0.0 };
 			for (uint32_t i = 0; i < 4; i++)
 			{
 				float factor = (float)i / (4.0f - 1.0f);
 				float xPos = factor * -0.5f + (1.0f - factor) * 0.5f;
 				glm::vec3 lightPos = { 0.0f, 0.5f, 0.0f };
+				glm::vec3 lightColor = white * (1.0f - factor) + green * factor;
 				lightPos.x = xPos;
-				scene->createLightEntity(lightPos);
+				scene->createLightEntity(lightPos, lightColor);
 			}
 		}
 	}

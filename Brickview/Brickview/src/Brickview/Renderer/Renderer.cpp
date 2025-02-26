@@ -11,8 +11,6 @@
 
 #include "Vendors/OpenGL/OpenGLError.h"
 
-#define BV_MAX_LIGHTS_SUPPORTED 10
-
 namespace Brickview
 {
 
@@ -25,15 +23,14 @@ namespace Brickview
 			: Position(position) {}
 	};
 
-	struct PointLightInstance
+	struct LineVertex
 	{
-		int LightIndex = 0;
-		int EntityID = -1;
+		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
 
-		PointLightInstance() = default;
-		PointLightInstance(int lightIndex, int entityID)
-			: LightIndex(lightIndex)
-			, EntityID(entityID) {}
+		LineVertex() = default;
+		LineVertex(const glm::vec3& position, const glm::vec3 color)
+			: Position(position), Color(color) {}
 	};
 
 	struct GpuPointLightStruct
@@ -48,16 +45,6 @@ namespace Brickview
 			: Position(light.Position)
 			, Color(light.Color)
 		{}
-	};
-
-	struct LineVertex
-	{
-		glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
-		glm::vec3 Color = { 1.0f, 1.0f, 1.0f };
-
-		LineVertex() = default;
-		LineVertex(const glm::vec3& position, const glm::vec3 color)
-			: Position(position), Color(color) {}
 	};
 
 	struct ModelDataUboBlock
@@ -79,7 +66,7 @@ namespace Brickview
 		uint32_t PointLightsCount = 0;
 		Ref<ShaderStorageBuffer> LightsDataSsbo = nullptr;
 		Ref<VertexBuffer> PointLightInstancesVbo = nullptr;
-		std::vector<PointLightInstance> PointLightInstancesData;
+		std::vector<int> PointLightInstancesData;
 		Ref<GpuMesh> LightMesh = nullptr;
 
 		// Meshes
@@ -131,21 +118,20 @@ namespace Brickview
 			{ 0, "a_position", BufferElementType::Float3 }
 		};
 		Layout pointLightInstancesLayout = {
-			{ 1, "a_lightInstanceIndex", BufferElementType::Int, 1 },
-			{ 2, "a_lightInstanceEntityID", BufferElementType::Int, 1 }
+			{ 1, "a_lightInstanceIndex", BufferElementType::Int, 1 }
 		};
 
 		s_rendererData->LightMesh = createRef<GpuMesh>(
 			lightMeshVertices.size() * sizeof(LightVertex), lightMeshVertices.data(), 
 			pointLightMeshLayout,
 			lightMeshIndices.size() * sizeof(TriangleFace), lightMeshIndices.data());
-		s_rendererData->PointLightInstancesVbo = VertexBuffer::create(sizeof(PointLightInstance));
+		s_rendererData->PointLightInstancesVbo = VertexBuffer::create(sizeof(int));
 		s_rendererData->PointLightInstancesVbo->setBufferLayout(pointLightInstancesLayout);
 
 		ShaderStorageBufferSpecifications lightsDataSsboSpecs;
 		lightsDataSsboSpecs.BlockName = "LightsData";
 		lightsDataSsboSpecs.BindingPoint = 1;
-		s_rendererData->LightsDataSsbo = ShaderStorageBuffer::create(lightsDataSsboSpecs, sizeof(s_rendererData->PointLightsCount) + sizeof(GpuPointLightStruct));
+		s_rendererData->LightsDataSsbo = ShaderStorageBuffer::create(lightsDataSsboSpecs, sizeof(GpuPointLightStruct));
 
 		// Meshes
 		UniformBufferSpecifications modelDataUboSpecs;
@@ -183,14 +169,14 @@ namespace Brickview
 		for (int i = 0; i < s_rendererData->PointLightsCount; i++)
 		{
 			gpuPointLights[i] = GpuPointLightStruct(pointLights[i]);
-			s_rendererData->PointLightInstancesData[i] = { i, pLIDs[i] };
+			s_rendererData->PointLightInstancesData[i] = pLIDs[i];
 		}
 
 		Buffer lightsDataSsboBuffer;
 		BufferStreamWriter stream(lightsDataSsboBuffer);
 		stream.writePrimitiveType<uint32_t>(s_rendererData->PointLightsCount);
-		stream.writeSpan<uint32_t>(3, 0);
-		stream.writeVector(pointLights);
+		stream.writeSpan(3, 0);
+		stream.writeVector(gpuPointLights);
 
 		if (lightsDataSsboBuffer.Size != s_rendererData->LightsDataSsbo->getSize())
 			s_rendererData->LightsDataSsbo->resize(lightsDataSsboBuffer.Size);
@@ -267,7 +253,7 @@ namespace Brickview
 			return;
 
 		s_rendererData->PointLightInstancesVbo->setData(
-			s_rendererData->PointLightsCount * sizeof(PointLightInstance), 
+			s_rendererData->PointLightsCount * sizeof(int), 
 			s_rendererData->PointLightInstancesData.data());
 
 		// Light mesh

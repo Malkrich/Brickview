@@ -11,7 +11,7 @@ layout (std140, binding = 0) uniform CameraData
     vec3 Position;
 } cameraData;
 
-layout (std140, binding = 1) uniform ModelData
+layout (std140, binding = 2) uniform ModelData
 {
     mat4 Transform;
     vec4 Albedo;
@@ -92,12 +92,10 @@ layout (std140, binding = 0) uniform CameraData
 struct PointLight
 {
     vec3 Position;
-    float __padding1;
     vec3 Color;
-    float __padding2;
 };
 
-layout (std430, binding = 1) buffer LightsData
+layout (std430, binding = 1) readonly buffer LightsData
 {
     uint PointLightsCount;
     PointLight PointLights[];
@@ -173,7 +171,7 @@ void main()
     vec3 baseReflectivity = mix(vec3(0.04), albedo, metalness);
 
     vec3 lightResult = vec3(0.0);
-    for (int i = 0; i < lightsData.PointLightsCount; i++)
+    for (uint i = 0; i < lightsData.PointLightsCount; i++)
     {
         vec3 lightDirection = normalize(lightsData.PointLights[i].Position - f_fragmentData.Position);
         vec3 viewDirection = normalize(cameraData.Position - f_fragmentData.Position);

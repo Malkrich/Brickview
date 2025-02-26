@@ -26,6 +26,7 @@ namespace Brickview
 		Entity createMeshEntity(Ref<Mesh> mesh, const RendererMaterial& material);
 		Entity createMeshEntity(Ref<Mesh> mesh, const glm::vec3& position);
 		Entity createMeshEntity(Ref<Mesh> mesh);
+		Entity createLightEntity(const glm::vec3& position, const glm::vec3& color);
 		Entity createLightEntity(const glm::vec3& position = glm::vec3(0.0f));
 		void removeEntity(Entity e);
 

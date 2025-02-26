@@ -52,7 +52,7 @@ namespace Brickview
 		return e;
 	}
 
-	Entity Scene::createLightEntity(const glm::vec3& position)
+	Entity Scene::createLightEntity(const glm::vec3& position, const glm::vec3& color)
 	{
 		Entity e = createEntity();
 
@@ -60,9 +60,15 @@ namespace Brickview
 		TransformComponent& transform = e.getComponent<TransformComponent>();
 		transform.Translation = position;
 		// Light
-		e.addComponent<LightComponent>();
+		e.addComponent<LightComponent>(color);
 
 		return e;
+	}
+
+	Entity Scene::createLightEntity(const glm::vec3& position)
+	{
+		glm::vec3 color = { 1.0f, 1.0f, 1.0f };
+		return createLightEntity(position, color);
 	}
 
 	Entity Scene::createMeshEntity(Ref<Mesh> mesh, const RendererMaterial& material)

@@ -3,9 +3,8 @@
 
 // Per vertex
 layout (location = 0) in vec3 a_position;
-
-layout (location = 1) in int a_lightInstanceIndex;
-layout (location = 2) in int a_lightInstanceEntityID;
+// Per Instance
+layout (location = 1) in int a_entityID;
 
 layout (std140, binding = 0) uniform CameraData
 {
@@ -16,12 +15,10 @@ layout (std140, binding = 0) uniform CameraData
 struct PointLight
 {
     vec3 Position;
-    float __padding1;
     vec3 Color;
-    float __padding2;
 };
 
-layout (std430, binding = 1) buffer LightsData
+layout (std430, binding = 1) readonly buffer LightsData
 {
     uint PointLightsCount;
     PointLight PointLights[];
@@ -32,9 +29,10 @@ out flat int f_entityID;
 
 void main()
 {
-    f_lightIndex = a_lightInstanceIndex;
-    f_entityID = a_lightInstanceEntityID;
-    vec4 worldPosition = vec4(lightsData.PointLights[a_lightInstanceIndex].Position + a_position, 1.0);
+    f_lightIndex = gl_InstanceID;
+    f_entityID = a_entityID;
+
+    vec4 worldPosition = vec4(lightsData.PointLights[gl_InstanceID].Position + a_position, 1.0);
     gl_Position = cameraData.ViewProjectionMatrix * worldPosition;
 }
 
@@ -47,12 +45,10 @@ in flat int f_entityID;
 struct PointLight
 {
     vec3 Position;
-    float __padding1;
     vec3 Color;
-    float __padding2;
 };
 
-layout (std430, binding = 1) buffer LightsData
+layout (std430, binding = 1) readonly buffer LightsData
 {
     uint PointLightsCount;
     PointLight PointLights[];

@@ -4,6 +4,7 @@
 #include "Shader/Shader.h"
 #include "RendererMaterial.h"
 #include "FrameBuffer.h"
+#include "ShaderStorageBuffer.h"
 #include "PerspectiveCamera.h"
 #include "Primitives.h"
 #include "Lights.h"

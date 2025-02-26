@@ -83,11 +83,11 @@ namespace Brickview
 		//		m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
 		//}
 
-		//Ref<Shader> meshShader = Renderer::getShaderLibrary()->get("PBRMesh");
-		//for (const MeshSubmissionData& meshSub : m_meshSubmissions)
-		//{
-		//	Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
-		//}
+		Ref<Shader> meshShader = Renderer::getShaderLibrary()->get("PBRMesh");
+		for (const MeshSubmissionData& meshSub : m_meshSubmissions)
+		{
+			Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
+		}
 
 		// TODO: maybe should not be handled by Renderer class but the scene renderer
 		Renderer::renderPointLights();
