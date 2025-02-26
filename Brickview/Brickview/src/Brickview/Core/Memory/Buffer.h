@@ -16,6 +16,7 @@ namespace Brickview
 
 		void release();
 		void allocate(uint32_t size);
+		void resize(uint32_t size);
 
 		operator bool() const { return Data != nullptr; }
 	};

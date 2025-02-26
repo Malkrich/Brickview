@@ -13,10 +13,13 @@ namespace Brickview
 		template<typename T>
 		void writePrimitiveType(T data)
 		{
-			m_buffer.allocate(m_buffer.Size + sizeof(T));
+			uint32_t typeSize = sizeof(T);
+			m_buffer.resize(m_buffer.Size + typeSize);
 
-			memcpy(m_buffer.Data + m_bufferPointer, &data, sizeof(T));
-			m_bufferPointer += sizeof(T);
+			void* destPtr = m_buffer.Data + m_bufferPointer;
+			memcpy(destPtr, &data, typeSize);
+
+			m_bufferPointer += typeSize;
 		}
 
 		template<typename T>
@@ -30,7 +33,7 @@ namespace Brickview
 		void writeVector(const std::vector<T>& vector)
 		{
 			uint32_t vectorSize = sizeof(T) * vector.size();
-			m_buffer.allocate(m_buffer.Size + vectorSize);
+			m_buffer.resize(m_buffer.Size + vectorSize);
 
 			memcpy(m_buffer.Data + m_bufferPointer, vector.data(), vectorSize);
 			m_bufferPointer += vectorSize;

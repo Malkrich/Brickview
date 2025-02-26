@@ -24,6 +24,18 @@ namespace Brickview
 		Size = size;
 	}
 
+	void Buffer::resize(uint32_t size)
+	{
+		// Create new buffer and copy actual data in
+		Buffer newBuffer(size);
+		memcpy(newBuffer.Data, Data, Size);
+
+		// Free current buffer memory
+		release();
+		// Assign new buffer data ans size to the current buffer
+		*this = newBuffer;
+	}
+
 	Buffer Buffer::copy(const Buffer& other)
 	{
 		BV_ASSERT(other, "Buffer source does not contain data to copy !");
