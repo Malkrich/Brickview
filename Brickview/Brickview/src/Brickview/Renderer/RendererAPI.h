@@ -20,6 +20,11 @@ namespace Brickview
 		Fill, Line, Point
 	};
 
+	enum class DepthFunction
+	{
+		Less, LessOrEqual
+	};
+
 	class RendererAPI
 	{
 	public:
@@ -30,7 +35,7 @@ namespace Brickview
 		};
 
 	public:
-		virtual ~RendererAPI() {}
+		virtual ~RendererAPI() = default;
 
 		static Scope<RendererAPI> create();
 		static API getAPI() { return s_api; }
@@ -45,6 +50,7 @@ namespace Brickview
 		// Pipeline
 		virtual void setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 		virtual void enableDepthTesting(bool enable) = 0;
+		virtual void setDepthfunction(DepthFunction function) = 0;
 		virtual void enableFaceCulling(bool enable) = 0;
 		virtual void setFaceCullingMode(FaceCullingMode mode) = 0;
 		virtual void setFaceWindingMode(FaceWindingMode mode) = 0;

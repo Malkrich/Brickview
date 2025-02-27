@@ -5,6 +5,7 @@
 #include "Core/Memory/BufferStreamWriter.h"
 #include "RendererCore.h"
 #include "RenderCommand.h"
+#include "FrameBuffer.h"
 #include "GpuBuffer.h"
 #include "UniformBuffer.h"
 #include "ShaderStorageBuffer.h"
@@ -70,8 +71,16 @@ namespace Brickview
 		Ref<GpuMesh> LightMesh = nullptr;
 
 		// HDRI
-		std::array<glm::vec3, 8> CubeMapPositions;
-		std::array<uint32_t, 6 * 2 * 3> CubeMapIndices;
+		Ref<GpuMesh> SkyboxCubeMesh = nullptr;
+		const glm::mat4 CubemapCaptureProjectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+		const std::map<CubemapFace, glm::mat4> CubemapCaptureViewMatrices = {
+			{ CubemapFace::NegativeX, glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
+			{ CubemapFace::PositiveX, glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
+			{ CubemapFace::NegativeY, glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)) },
+			{ CubemapFace::PositiveY, glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)) },
+			{ CubemapFace::NegativeZ, glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
+			{ CubemapFace::PositiveZ, glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)) }
+		};
 
 		// Meshes
 		Ref<UniformBuffer> ModelDataUbo = nullptr;
@@ -94,7 +103,8 @@ namespace Brickview
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Light.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Line.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "MeshWireframe.glsl");
-		s_rendererData->ShaderLibrary->load(shaderBaseDir / "CubeMap.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "EquirectangularToCubemap.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Skybox.glsl");
 
 		// Camera
 		UniformBufferSpecifications cameraDataSpecs;
@@ -148,8 +158,8 @@ namespace Brickview
 			{ 1, "a_normal", BufferElementType::Float3 }
 		};
 
-		// CubeMap and HDRI
-		s_rendererData->CubeMapPositions = {
+		// Skybox cube mesh
+		const std::array<glm::vec3, 8> skyboxCubeMeshVertices = {
 			glm::vec3(-0.5f, -0.5f, -0.5f),
 			glm::vec3(0.5f, -0.5f, -0.5f),
 			glm::vec3(0.5f, -0.5f,  0.5f),
@@ -159,7 +169,7 @@ namespace Brickview
 			glm::vec3(0.5f,  0.5f, -0.5f),
 			glm::vec3(0.5f,  0.5f,  0.5f)
 		};
-		s_rendererData->CubeMapIndices = {
+		const std::array<uint32_t, 6 * 2 * 3> skyboxCubeMeshIndices = {
 			1, 0, 2, 2, 0, 3,
 			5, 6, 7, 7, 4, 5,
 			3, 0, 5, 5, 4, 3,
@@ -167,6 +177,12 @@ namespace Brickview
 			1, 2, 7, 7, 6, 1,
 			0, 1, 6, 6, 5, 0
 		};
+		Layout skyboxCubeMeshLayout = {
+			{ 0, "a_position", BufferElementType::Float3 }
+		};
+		s_rendererData->SkyboxCubeMesh = createRef<GpuMesh>(
+			skyboxCubeMeshVertices.size() * sizeof(glm::vec3), skyboxCubeMeshVertices.data(), skyboxCubeMeshLayout,
+			skyboxCubeMeshIndices.size() * sizeof(uint32_t), skyboxCubeMeshIndices.data());
 
 		RenderCommand::enableDepthTesting(true);
 		RenderCommand::enableFaceCulling(true);
@@ -185,6 +201,7 @@ namespace Brickview
 		BV_ASSERT(env.PointLights.size() == env.PointLightIDs.size(), "Point light object and ID vectors do not have the same size!");
 
 		// Camera
+		s_rendererData->CameraUbo->bind();
 		s_rendererData->CameraUbo->setData(&cameraData);
 
 		// Point Lights
@@ -210,30 +227,74 @@ namespace Brickview
 		lightsDataSsboBuffer.release();
 	}
 
-	Ref<CubeMap> Renderer::createCubeMap(Ref<Texture2D> hdriTexture)
+	Ref<Cubemap> Renderer::createCubemap(Ref<Texture2D> hdriTexture)
 	{
-		Ref<VertexBuffer> cubeMapVbo = VertexBuffer::create(s_rendererData->CubeMapIndices.size() * sizeof(glm::vec3),
-			s_rendererData->CubeMapPositions.data());
-		Layout cubeMapVboLayout = {
-			{ 0, "a_position", BufferElementType::Float3 }
-		};
-		cubeMapVbo->setBufferLayout(cubeMapVboLayout);
-		Ref<IndexBuffer> cubeMapEbo = IndexBuffer::create(s_rendererData->CubeMapIndices.size() * sizeof(uint32_t),
-			s_rendererData->CubeMapIndices.data());
-
-		Ref<VertexArray> cubeMapVao = VertexArray::create();
-		cubeMapVao->addVertexBuffer(cubeMapVbo);
-		cubeMapVao->setIndexBuffer(cubeMapEbo);
-
-		Ref<Shader> cubeMapShader = s_rendererData->ShaderLibrary->get("CubeMap");
-		cubeMapShader->bind();
-		hdriTexture->bind();
-
-		RenderCommand::drawIndexed(cubeMapVao);
-
-		cubeMapVao->unbind();
+		// Frame buffer for Equirectangular to cubemap capture
+		// Contains the cubemap attachment
+		FrameBufferSpecifications cubemapCaptureFboSpecs;
+		cubemapCaptureFboSpecs.Width = 512;
+		cubemapCaptureFboSpecs.Height = 512;
+		cubemapCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
+		Ref<FrameBuffer> cubemapCaptureFbo = FrameBuffer::create(cubemapCaptureFboSpecs);
 		
-		return nullptr;
+		// Uniform buffer containing the view matrices to render each face
+		UniformBufferSpecifications cubemapDataUboSpecs;
+		cubemapDataUboSpecs.BlockName = "CubemapData";
+		cubemapDataUboSpecs.BindingPoint = 0;
+		Ref<UniformBuffer> cubemapDataUbo = UniformBuffer::create(cubemapDataUboSpecs, sizeof(glm::mat4));
+
+		cubemapCaptureFbo->bind();
+		RenderCommand::setViewportDimension(cubemapCaptureFbo->getSpecifications().Width, cubemapCaptureFbo->getSpecifications().Height);
+		{
+			// Cube geometry
+			Ref<VertexArray> cubeVao = VertexArray::create();
+			cubeVao->addVertexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryVertexBuffer());
+			cubeVao->setIndexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryIndexBuffer());
+
+			// Cube shader and textures
+			Ref<Shader> cubemapShader = s_rendererData->ShaderLibrary->get("EquirectangularToCubemap");
+			cubemapShader->bind();
+			hdriTexture->bind();
+
+			for (const auto& [face, viewMatrix] : s_rendererData->CubemapCaptureViewMatrices)
+			{
+				glm::mat4 viewProjectionMatrix = s_rendererData->CubemapCaptureProjectionMatrix * viewMatrix;
+				cubemapDataUbo->setData(&viewProjectionMatrix);
+				cubemapCaptureFbo->attachCubemapFace(0, face);
+
+				RenderCommand::clear();
+				RenderCommand::drawIndexed(cubeVao);
+			}
+			cubeVao->unbind();
+		}
+		cubemapCaptureFbo->unbind();
+
+		uint32_t cubemapSource = cubemapCaptureFbo->getColorAttachment(0);
+		CubemapSpecifications cubemapDestSpecs;
+		cubemapDestSpecs.Format = CubemapFormat::Float16;
+		cubemapDestSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
+		cubemapDestSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
+		Ref<Cubemap> cubemapDest = Cubemap::copy(cubemapDestSpecs, cubemapSource);
+		return cubemapDest;
+	}
+
+	void Renderer::renderSkybox(Ref<Cubemap> cubemap)
+	{
+		RenderCommand::setDepthFunction(DepthFunction::LessOrEqual);
+
+		Ref<VertexArray> cubeVao = VertexArray::create();
+		cubeVao->addVertexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryVertexBuffer());
+		cubeVao->setIndexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryIndexBuffer());
+
+		Ref<Shader> skyboxShader = s_rendererData->ShaderLibrary->get("Skybox");
+		cubemap->bind(0);
+		skyboxShader->bind();
+		
+		cubeVao->bind();
+		RenderCommand::drawIndexed(cubeVao);
+
+		cubeVao->unbind();
+		RenderCommand::setDepthFunction(DepthFunction::Less);
 	}
 
 	const Ref<ShaderLibrary>& Renderer::getShaderLibrary()

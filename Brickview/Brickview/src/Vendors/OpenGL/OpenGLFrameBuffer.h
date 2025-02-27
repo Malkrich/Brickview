@@ -24,6 +24,8 @@ namespace Brickview
 		virtual uint32_t getColorAttachment(uint32_t index) const override;
 		virtual void clearAttachment(uint32_t attachmentIndex, int value) override;
 
+		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face) override;
+
 	private:
 		void invalidate();
 
@@ -33,9 +35,9 @@ namespace Brickview
 		FrameBufferSpecifications m_specs;
 
 		std::vector<FrameBufferAttachmentSpecs> m_colorAttachmentsSpecs = {};
-		FrameBufferAttachmentSpecs m_depthAttachmentSpecs = FrameBufferAttachment::None;
-
 		std::vector<uint32_t> m_colorAttachments = {};
+
+		FrameBufferAttachmentSpecs m_depthAttachmentSpecs = FrameBufferAttachment::None;
 		uint32_t m_depthAttachment = 0;
 	};
 

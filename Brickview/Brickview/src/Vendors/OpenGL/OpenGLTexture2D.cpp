@@ -78,7 +78,6 @@ namespace Brickview
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
-		//glBindTextureUnit(slot, m_textureID);
 	}
 
 	void OpenGLTexture2D::invalidate(const void* data)

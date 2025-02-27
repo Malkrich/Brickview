@@ -9,6 +9,7 @@
 #include "Texture2D.h"
 #include "Primitives.h"
 #include "Lights.h"
+#include "Cubemap.h"
 #include "Lego/LegoPartMeshRegistry.h"
 #include "Scene/Components.h"
 #include "Scene/Entity.h"
@@ -122,7 +123,7 @@ namespace Brickview
 	private:
 		// Renderer internal
 		SceneRendererSettings m_rendererSettings;
-		Ref<Texture2D> m_hdriTexture = nullptr;
+		Ref<Cubemap> m_envCubemap = nullptr;
 
 		// Selected entity
 		Entity m_selectedEntity;

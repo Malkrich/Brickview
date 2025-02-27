@@ -17,6 +17,8 @@ layout (location = 6) in mat4 a_transform;
 layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
+    mat4 View;
+    mat4 Projection;
     vec3 Position;
 } cameraData;
 
@@ -86,6 +88,8 @@ in flat int f_entityID;
 layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
+    mat4 View;
+    mat4 Projection;
     vec3 Position;
 } cameraData;
 

@@ -9,7 +9,7 @@ namespace Brickview
 	public:
 		OpenGLShaderStorageBuffer(const ShaderStorageBufferSpecifications& specs, uint32_t size, const void* data);
 		OpenGLShaderStorageBuffer(const ShaderStorageBufferSpecifications& specs, uint32_t size);
-		~OpenGLShaderStorageBuffer();
+		virtual ~OpenGLShaderStorageBuffer();
 		
 		virtual uint32_t getSize() const override { return m_bufferSize; }
 

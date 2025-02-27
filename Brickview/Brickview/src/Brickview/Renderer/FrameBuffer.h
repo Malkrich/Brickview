@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Cubemap.h"
+
 #include <glm/glm.hpp>
 
 namespace Brickview
@@ -14,7 +16,11 @@ namespace Brickview
 
 		Depth24Sentil8,
 
-		Depth = Depth24Sentil8
+		CubemapFloat16,
+		CubemapFloat32,
+
+		Depth = Depth24Sentil8,
+		Cubemap = CubemapFloat16
 	};
 
 	struct FrameBufferAttachmentSpecs
@@ -55,6 +61,8 @@ namespace Brickview
 
 		virtual uint32_t getColorAttachment(uint32_t index) const = 0;
 		virtual void clearAttachment(uint32_t attachmentIndex, int value) = 0;
+
+		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face) = 0;
 	};
 
 }

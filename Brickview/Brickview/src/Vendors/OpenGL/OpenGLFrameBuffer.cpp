@@ -31,14 +31,20 @@ namespace Brickview
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, attachmentID, 0);
 		}
 
-		static void createTexture(uint32_t attachmentCount, GLuint* attachmentID)
+		static void attachCubemapTexture(uint32_t attachmentID, uint32_t width, uint32_t height, GLint internalFormat, uint32_t attachmentIndex)
 		{
-			glCreateTextures(GL_TEXTURE_2D, attachmentCount, attachmentID);
-		}
+			for (uint32_t i = 0; i < 6; i++)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+			}
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		static void bindTexture(uint32_t attachmentID)
-		{
-			glBindTexture(GL_TEXTURE_2D, attachmentID);
+			// By default we attach postive X face which is index 0
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_TEXTURE_CUBE_MAP_POSITIVE_X, attachmentID, 0);
 		}
 
 		static bool isDepthFormat(FrameBufferAttachment format)
@@ -61,6 +67,22 @@ namespace Brickview
 			}
 
 			BV_ASSERT(false, "Unknown frame buffer attahcment format!");
+			return 0;
+		}
+
+		static GLenum attahmentFormatToTextureType(FrameBufferAttachment format)
+		{
+			switch (format)
+			{
+				case FrameBufferAttachment::RedInt:
+				case FrameBufferAttachment::RGBA8:
+					return GL_TEXTURE_2D;
+				case FrameBufferAttachment::CubemapFloat16:
+				case FrameBufferAttachment::CubemapFloat32:
+					return GL_TEXTURE_CUBE_MAP;
+			}
+
+			BV_ASSERT(false, "Unknwon frame buffer attachemnt!");
 			return 0;
 		}
 
@@ -132,12 +154,13 @@ namespace Brickview
 		if (!m_colorAttachmentsSpecs.empty())
 		{
 			m_colorAttachments.resize(m_colorAttachmentsSpecs.size());
-			Utils::createTexture(m_colorAttachments.size(), m_colorAttachments.data());
+			glGenTextures(m_colorAttachmentsSpecs.size(), m_colorAttachments.data());
 
 			for (size_t i = 0; i < m_colorAttachmentsSpecs.size(); i++)
 			{
 				uint32_t attachmentID = m_colorAttachments[i];
-				Utils::bindTexture(attachmentID);
+				GLenum textureType = Utils::attahmentFormatToTextureType(m_colorAttachmentsSpecs[i].Format);
+				glBindTexture(textureType, attachmentID);
 				switch (m_colorAttachmentsSpecs[i].Format)
 				{
 					case FrameBufferAttachment::RedInt:
@@ -146,15 +169,21 @@ namespace Brickview
 					case FrameBufferAttachment::RGBA8:
 						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, GL_RGBA8, GL_RGBA, i);
 						continue;
+
+					case FrameBufferAttachment::CubemapFloat16:
+						Utils::attachCubemapTexture(attachmentID, m_specs.Width, m_specs.Height, GL_RGB16F, i);
+						break;
+					case FrameBufferAttachment::CubemapFloat32:
+						BV_ASSERT(false, "32 bits cubemap not implemented yet!");
+						break;
 				}
 			}
 		}
 
-		Utils::createTexture(1, &m_depthAttachment);
-		Utils::bindTexture(m_depthAttachment);
-
 		if (m_depthAttachmentSpecs.Format != FrameBufferAttachment::None)
 		{
+			glCreateTextures(GL_TEXTURE_2D, 1, &m_depthAttachment);
+			glBindTexture(GL_TEXTURE_2D, m_depthAttachment);
 			switch (m_depthAttachmentSpecs.Format)
 			{
 				case FrameBufferAttachment::Depth24Sentil8:
@@ -170,7 +199,7 @@ namespace Brickview
 				GL_COLOR_ATTACHMENT2,
 				GL_COLOR_ATTACHMENT3 
 			};
-			BV_ASSERT(m_colorAttachments.size() < attachmentIndices.size(), "Brickview does not support more than {} color attachments in one FBO!", attachmentIndices.size());
+			BV_ASSERT(m_colorAttachments.size() <= attachmentIndices.size(), "Brickview does not support more than {} color attachments!", attachmentIndices.size());
 			glDrawBuffers(m_colorAttachments.size(), attachmentIndices.data());
 			CHECK_GL_ERROR();
 		}
@@ -211,6 +240,17 @@ namespace Brickview
 
 		GLenum format = Utils::getGlFormatFromAttachmentFormat(specs.Format);
 		glClearTexImage(m_colorAttachments[attachmentIndex], 0, format, GL_INT, &value);
+	}
+
+	void OpenGLFrameBuffer::attachCubemapFace(uint32_t attachmentIndex, CubemapFace face)
+	{
+		BV_ASSERT(m_colorAttachmentsSpecs[attachmentIndex].Format == FrameBufferAttachment::CubemapFloat16
+			|| m_colorAttachmentsSpecs[attachmentIndex].Format == FrameBufferAttachment::CubemapFloat32, "Attachment index {} is not a cubemap attachment!", attachmentIndex);
+
+		uint32_t faceIndex = (uint32_t)face;
+		uint32_t attachmentID = m_colorAttachments[attachmentIndex];
+		glBindFramebuffer(GL_FRAMEBUFFER, m_bufferID);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, attachmentID, 0);
 	}
 
 }

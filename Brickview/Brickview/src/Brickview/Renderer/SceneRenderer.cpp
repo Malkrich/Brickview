@@ -11,6 +11,50 @@ namespace Brickview
 		init(viewportWidth, viewportHeight);
 	}
 
+	void SceneRenderer::init(uint32_t viewportWidth, uint32_t viewportHeight)
+	{
+		// Rendered frame buffer
+		FrameBufferSpecifications viewportFrameBufferSpecs;
+		viewportFrameBufferSpecs.Width = viewportWidth;
+		viewportFrameBufferSpecs.Height = viewportHeight;
+		viewportFrameBufferSpecs.Attachments = { FrameBufferAttachment::RGBA8, FrameBufferAttachment::RedInt, FrameBufferAttachment::Depth };
+		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
+
+		// Mesh instance geometry
+		m_instanceBufferLayout = {
+			{ 2, "a_entityID", BufferElementType::Int, 1 },
+			{ 3, "a_albedo", BufferElementType::Float4, 1 },
+			{ 4, "a_roughness", BufferElementType::Float, 1 },
+			{ 5, "a_metalness", BufferElementType::Float, 1 },
+			{ 6, "a_transform", BufferElementType::Mat4, 1 }
+		};
+
+		// Lines
+		BV_ASSERT(m_originLines.size() == m_originLineColors.size(), "OriginLines and OriginLineColors must be the same length!");
+		m_originLines = {
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.1f, 0.0f, 0.0f }),
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.1f, 0.0f }),
+			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.1f })
+		};
+		// Origin
+		m_originLineColors = {
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f)
+		};
+
+		// Grid
+		m_gridLines = generateGrid(m_rendererSettings.GridBound, m_rendererSettings.GridStep);
+
+		// HDRI environment
+		Texture2DSpecifications hdriTextureSpecs;
+		hdriTextureSpecs.Format = Texture2DFormat::FloatRGB;
+		hdriTextureSpecs.WrappingModeU = Texture2DWrappingMode::Clamp;
+		hdriTextureSpecs.WrappingModeV = Texture2DWrappingMode::Clamp;
+		Ref<Texture2D> hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/metro_noord_2k.hdr");
+		m_envCubemap = Renderer::createCubemap(hdriTexture);
+	}
+
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
 	{
 		return m_viewportFrameBuffer->getColorAttachment(0);
@@ -37,8 +81,10 @@ namespace Brickview
 	{
 		// Camera
 		CameraData cameraData;
-		cameraData.Position = camera.getPosition();
 		cameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
+		cameraData.View = camera.getViewMatrix();
+		cameraData.Projection = camera.getProjectionMatrix();
+		cameraData.Position = camera.getPosition();
 
 		RendererEnvironment env;
 		env.PointLights = lightsData.PointLights;
@@ -62,9 +108,12 @@ namespace Brickview
 	void SceneRenderer::render()
 	{
 		m_viewportFrameBuffer->bind();
+		RenderCommand::setViewportDimension(m_viewportFrameBuffer->getSpecifications().Width, m_viewportFrameBuffer->getSpecifications().Height);
 		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 		RenderCommand::clear();
 		m_viewportFrameBuffer->clearAttachment(1, -1);
+
+		Renderer::renderSkybox(m_envCubemap);
 
 		// Outline
 		if (m_selectedEntity && m_selectedEntity.hasComponent<TransformComponent>() && m_selectedEntity.hasComponent<MeshComponent>())
@@ -94,8 +143,6 @@ namespace Brickview
 
 		// TODO: maybe should not be handled by Renderer class but the scene renderer
 		Renderer::renderPointLights();
-		// TEMP
-		Renderer::createCubeMap(m_hdriTexture);
 
 		// Origin
 		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
@@ -152,49 +199,6 @@ namespace Brickview
 	{
 		glm::mat4 transformMatrix = transform.getTransform();
 		m_meshSubmissions.emplace_back(mesh.MeshData, transformMatrix, material.Material, entityID);
-	}
-
-	void SceneRenderer::init(uint32_t viewportWidth, uint32_t viewportHeight)
-	{
-		// Rendered frame buffer
-		FrameBufferSpecifications viewportFrameBufferSpecs;
-		viewportFrameBufferSpecs.Width = viewportWidth;
-		viewportFrameBufferSpecs.Height = viewportHeight;
-		viewportFrameBufferSpecs.Attachments = { FrameBufferAttachment::RGBA8, FrameBufferAttachment::RedInt, FrameBufferAttachment::Depth };
-		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
-
-		// Mesh instance geometry
-		m_instanceBufferLayout = {
-			{ 2, "a_entityID", BufferElementType::Int, 1 },
-			{ 3, "a_albedo", BufferElementType::Float4, 1 },
-			{ 4, "a_roughness", BufferElementType::Float, 1 },
-			{ 5, "a_metalness", BufferElementType::Float, 1 },
-			{ 6, "a_transform", BufferElementType::Mat4, 1 }
-		};
-
-		// Lines
-		BV_ASSERT(m_originLines.size() == m_originLineColors.size(), "OriginLines and OriginLineColors must be the same length!");
-		m_originLines = {
-			Line({ 0.0f, 0.0f, 0.0f }, { 0.1f, 0.0f, 0.0f }),
-			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.1f, 0.0f }),
-			Line({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.1f })
-		};
-		// Origin
-		m_originLineColors = {
-			glm::vec3(1.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 1.0f)
-		};
-
-		// Grid
-		m_gridLines = generateGrid(m_rendererSettings.GridBound, m_rendererSettings.GridStep);
-
-		// HDRI environment
-		Texture2DSpecifications hdriTextureSpecs;
-		hdriTextureSpecs.Format = Texture2DFormat::FloatRGB;
-		hdriTextureSpecs.WrappingModeU = Texture2DWrappingMode::Clamp;
-		hdriTextureSpecs.WrappingModeV = Texture2DWrappingMode::Clamp;
-		m_hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/metro_noord_2k.hdr");
 	}
 
 	void SceneRenderer::insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement)

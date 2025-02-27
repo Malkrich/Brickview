@@ -39,13 +39,25 @@ namespace Brickview
 		{
 			switch (mode)
 			{
-				case PolygonMode::Fill: return GL_FILL;
-				case PolygonMode::Line: return GL_LINE;
+				case PolygonMode::Fill:  return GL_FILL;
+				case PolygonMode::Line:  return GL_LINE;
 				case PolygonMode::Point: return GL_POINT;
 			}
 
 			BV_ASSERT(false, "Unknown polygon mode!");
 			return GL_FILL;
+		}
+
+		static GLenum internalDepthFunctionToOpenGLDepthFunction(DepthFunction function)
+		{
+			switch (function)
+			{
+				case DepthFunction::Less:        return GL_LESS;
+				case DepthFunction::LessOrEqual: return GL_LEQUAL;
+			}
+
+			BV_ASSERT(false, "Unknown depth function!");
+			return GL_LESS;
 		}
 
 	}
@@ -80,6 +92,12 @@ namespace Brickview
 			glEnable(GL_DEPTH_TEST);
 		else
 			glDisable(GL_DEPTH_TEST);
+	}
+
+	void OpenGLRendererAPI::setDepthfunction(DepthFunction function)
+	{
+		GLenum glFunction = Utils::internalDepthFunctionToOpenGLDepthFunction(function);
+		glDepthFunc(glFunction);
 	}
 
 	void OpenGLRendererAPI::enableFaceCulling(bool enable)

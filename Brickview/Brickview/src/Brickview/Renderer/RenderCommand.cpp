@@ -46,9 +46,19 @@ namespace Brickview
 		s_rendererAPI->setViewportDimension(x, y, width, height);
 	}
 
+	void RenderCommand::setViewportDimension(uint32_t width, uint32_t height)
+	{
+		RenderCommand::setViewportDimension(0, 0, width, height);
+	}
+
 	void RenderCommand::enableDepthTesting(bool enable)
 	{
 		s_rendererAPI->enableDepthTesting(enable);
+	}
+
+	void RenderCommand::setDepthFunction(DepthFunction function)
+	{
+		s_rendererAPI->setDepthfunction(function);
 	}
 
 	void RenderCommand::enableFaceCulling(bool enable)

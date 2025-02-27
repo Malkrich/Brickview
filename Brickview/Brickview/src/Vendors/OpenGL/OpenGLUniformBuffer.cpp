@@ -25,6 +25,12 @@ namespace Brickview
 		glDeleteBuffers(1, &m_bufferID);
 	}
 
+	void OpenGLUniformBuffer::bind() const
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_specs.BindingPoint, m_bufferID);
+	}
+
 	void OpenGLUniformBuffer::setData(const void* data)
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);

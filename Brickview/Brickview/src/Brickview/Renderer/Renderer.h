@@ -6,7 +6,7 @@
 #include "Lights.h"
 #include "GpuMesh.h"
 #include "Primitives.h"
-#include "CubeMap.h"
+#include "Cubemap.h"
 #include "Texture2D.h"
 
 #include <glm/glm.hpp>
@@ -17,6 +17,8 @@ namespace Brickview
 	struct CameraData
 	{
 		glm::mat4 ViewProjectionMatrix;
+		glm::mat4 View;
+		glm::mat4 Projection;
 		glm::vec3 Position;
 	};
 
@@ -38,7 +40,10 @@ namespace Brickview
 
 		// Setup environment
 		static void begin(const CameraData& cameraData, const RendererEnvironment& env);
-		static Ref<CubeMap> createCubeMap(Ref<Texture2D> hdriTexture);
+
+		// Cubemap / Skybox
+		static Ref<Cubemap> createCubemap(Ref<Texture2D> hdriTexture);
+		static void renderSkybox(Ref<Cubemap> cubemap);
 
 		// Meshes
 		static void renderMesh(Ref<Shader> shader, const RendererMaterial& material, const Ref<GpuMesh>& mesh, const glm::mat4& transform, int entityID);

@@ -18,6 +18,7 @@ namespace Brickview
 		// Pipeline
 		virtual void setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height) override;
 		virtual void enableDepthTesting(bool enable) override;
+		virtual void setDepthfunction(DepthFunction function) override;
 		virtual void enableFaceCulling(bool enable) override;
 		virtual void setFaceCullingMode(FaceCullingMode mode) override;
 		virtual void setFaceWindingMode(FaceWindingMode mode) override;

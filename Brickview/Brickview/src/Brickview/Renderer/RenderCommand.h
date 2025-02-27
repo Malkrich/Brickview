@@ -23,7 +23,9 @@ namespace Brickview
 
 		// Pipeline
 		static void setViewportDimension(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+		static void setViewportDimension(uint32_t width, uint32_t height);
 		static void enableDepthTesting(bool enable);
+		static void setDepthFunction(DepthFunction function);
 		static void enableFaceCulling(bool enable);
 		static void setFaceCullingMode(FaceCullingMode mode);
 		static void setFaceWindingMode(FaceWindingMode mode);

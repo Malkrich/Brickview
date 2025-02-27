@@ -18,6 +18,8 @@ namespace Brickview
 
 		virtual ~UniformBuffer() = default;
 
+		virtual void bind() const = 0;
+
 		virtual void setData(const void* data) = 0;
 		virtual void resize(uint32_t newSize) = 0;
 

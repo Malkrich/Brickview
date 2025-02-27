@@ -13,6 +13,8 @@ namespace Brickview
 
 		virtual ~OpenGLUniformBuffer();
 
+		virtual void bind() const override;
+
 		virtual void setData(const void* data) override;
 		virtual void resize(uint32_t newSize) override;
 

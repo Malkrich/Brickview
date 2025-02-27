@@ -3,24 +3,23 @@
 
 layout (location = 0) in vec3 a_position;
 
-out vec3 f_worldPosition;
+out vec3 f_localPosition;
 
-layout (std140, binding = 0) uniform CameraData
+layout (std140, binding = 0) uniform CubemapData
 {
     mat4 ViewProjectionMatrix;
-    vec3 Position;
-} cameraData;
+} cubemapData;
 
 void main()
 {
-    f_worldPosition = a_position;
-    gl_Position = cameraData.ViewProjectionMatrix * vec4(a_position, 1.0);
+    f_localPosition = a_position;
+    gl_Position = cubemapData.ViewProjectionMatrix * vec4(a_position, 1.0);
 }
 
 #type fragment
 #version 450 core
 
-in vec3 f_worldPosition;
+in vec3 f_localPosition;
 
 layout (binding = 0) uniform sampler2D u_equirectangularMap;
 
@@ -37,7 +36,7 @@ vec2 sampleSphericalMap(vec3 v)
 
 void main()
 {
-    vec2 uv = sampleSphericalMap(normalize(-f_worldPosition));
+    vec2 uv = sampleSphericalMap(normalize(-f_localPosition));
     vec3 color = texture(u_equirectangularMap, uv).rgb;
     o_color = vec4(color, 1.0);
 }
