@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer.h"
 #include "GpuMesh.h"
 #include "Shader/Shader.h"
 #include "RendererMaterial.h"
@@ -101,10 +102,10 @@ namespace Brickview
 		int32_t getEntityIDAt(uint32_t mouseX, uint32_t mouseY) const;
 		void resizeViewport(uint32_t width, uint32_t height);
 
-		// Submission
-		void begin(const PerspectiveCamera& camera, const SceneLightsData& env);
 		void render();
 
+		// Submission
+		void setSceneEnvironment(const PerspectiveCamera& camera, const SceneLightsData& env);
 		// Material should be found from the LegoPartComponent material (LegoMaterial -> LegoMaterialRegistry -> RendererMaterial)
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
 		void submitMesh(const MeshComponent& mesh, const TransformComponent& transform, const MaterialComponent& material, uint32_t entityID);
@@ -123,13 +124,17 @@ namespace Brickview
 	private:
 		// Renderer internal
 		SceneRendererSettings m_rendererSettings;
-		Ref<Cubemap> m_envCubemap = nullptr;
+		Ref<Cubemap> m_irradianceCubemap = nullptr;
 
 		// Selected entity
 		Entity m_selectedEntity;
 
-		// Viewport
+		// Render target
 		Ref<FrameBuffer> m_viewportFrameBuffer = nullptr;
+
+		// Environmnent
+		CameraData m_cameraData;
+		RendererEnvironment m_environment;
 
 		// Lego parts
 		std::vector<InstanceBuffer> m_instanceBuffers;

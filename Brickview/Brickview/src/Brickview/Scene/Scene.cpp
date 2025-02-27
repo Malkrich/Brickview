@@ -116,7 +116,7 @@ namespace Brickview
 				scenelightsData.PointLights.emplace_back(position, color);
 				scenelightsData.PointLightIDs.emplace_back(entityID);
 			}
-			renderer->begin(camera, scenelightsData);
+			renderer->setSceneEnvironment(camera, scenelightsData);
 		}
 
 		// Basic Meshes

@@ -144,6 +144,7 @@ namespace Brickview
 			glDeleteTextures(m_colorAttachments.size(), m_colorAttachments.data());
 			glDeleteTextures(1, &m_depthAttachment);
 
+			m_bufferID = 0;
 			m_colorAttachments.clear();
 			m_depthAttachment = 0;
 		}

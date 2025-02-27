@@ -20,6 +20,8 @@ namespace Brickview
 		glm::mat4 View;
 		glm::mat4 Projection;
 		glm::vec3 Position;
+
+		CameraData() = default;
 	};
 
 	struct RendererEnvironment
@@ -27,6 +29,9 @@ namespace Brickview
 		std::vector<PointLight> PointLights;
 		std::vector<int> PointLightIDs;
 
+		Ref<Cubemap> IrradianceMap = nullptr;
+
+		RendererEnvironment() = default;
 	};
 
 	class Renderer
@@ -40,6 +45,7 @@ namespace Brickview
 
 		// Setup environment
 		static void begin(const CameraData& cameraData, const RendererEnvironment& env);
+		static void end();
 
 		// Cubemap / Skybox
 		static Ref<Cubemap> createCubemap(Ref<Texture2D> hdriTexture);

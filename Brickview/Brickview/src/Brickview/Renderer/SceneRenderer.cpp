@@ -2,7 +2,6 @@
 #include "SceneRenderer.h"
 
 #include "RenderCommand.h"
-#include "Renderer.h"
 
 namespace Brickview
 {
@@ -52,7 +51,7 @@ namespace Brickview
 		hdriTextureSpecs.WrappingModeU = Texture2DWrappingMode::Clamp;
 		hdriTextureSpecs.WrappingModeV = Texture2DWrappingMode::Clamp;
 		Ref<Texture2D> hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/metro_noord_2k.hdr");
-		m_envCubemap = Renderer::createCubemap(hdriTexture);
+		m_environment.IrradianceMap = Renderer::createCubemap(hdriTexture);
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
@@ -77,19 +76,17 @@ namespace Brickview
 			m_viewportFrameBuffer->resize(width, height);
 	}
 
-	void SceneRenderer::begin(const PerspectiveCamera& camera, const SceneLightsData& lightsData)
+	void SceneRenderer::setSceneEnvironment(const PerspectiveCamera& camera, const SceneLightsData& lightsData)
 	{
 		// Camera
-		CameraData cameraData;
-		cameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
-		cameraData.View = camera.getViewMatrix();
-		cameraData.Projection = camera.getProjectionMatrix();
-		cameraData.Position = camera.getPosition();
+		m_cameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
+		m_cameraData.View = camera.getViewMatrix();
+		m_cameraData.Projection = camera.getProjectionMatrix();
+		m_cameraData.Position = camera.getPosition();
 
-		RendererEnvironment env;
-		env.PointLights = lightsData.PointLights;
-		env.PointLightIDs = lightsData.PointLightIDs;
-		Renderer::begin(cameraData, env);
+		// Lights
+		m_environment.PointLights = lightsData.PointLights;
+		m_environment.PointLightIDs = lightsData.PointLightIDs;
 	}
 
 	static Ref<Shader> getLegoPartShader(RendererType rendererType)
@@ -108,48 +105,48 @@ namespace Brickview
 	void SceneRenderer::render()
 	{
 		m_viewportFrameBuffer->bind();
-		RenderCommand::setViewportDimension(m_viewportFrameBuffer->getSpecifications().Width, m_viewportFrameBuffer->getSpecifications().Height);
-		RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
-		RenderCommand::clear();
-		m_viewportFrameBuffer->clearAttachment(1, -1);
-
-		Renderer::renderSkybox(m_envCubemap);
-
-		// Outline
-		if (m_selectedEntity && m_selectedEntity.hasComponent<TransformComponent>() && m_selectedEntity.hasComponent<MeshComponent>())
 		{
-			const MeshComponent& mesh = m_selectedEntity.getComponent<MeshComponent>();
-			const TransformComponent& transform = m_selectedEntity.getComponent<TransformComponent>();
+			RenderCommand::setViewportDimension(m_viewportFrameBuffer->getSpecifications().Width, m_viewportFrameBuffer->getSpecifications().Height);
+			RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
+			RenderCommand::clear();
+			m_viewportFrameBuffer->clearAttachment(1, -1);
 
-			RenderCommand::setFaceCullingMode(FaceCullingMode::Front);
-			Renderer::renderMeshWireframe(mesh.MeshData, transform.getTransform(), m_rendererSettings.OutlineWidth);
-			RenderCommand::setFaceCullingMode(FaceCullingMode::Back);
+			Renderer::begin(m_cameraData, m_environment);
+
+			// Outline
+			if (m_selectedEntity && m_selectedEntity.hasComponent<TransformComponent>() && m_selectedEntity.hasComponent<MeshComponent>())
+			{
+				const MeshComponent& mesh = m_selectedEntity.getComponent<MeshComponent>();
+				const TransformComponent& transform = m_selectedEntity.getComponent<TransformComponent>();
+
+				RenderCommand::setFaceCullingMode(FaceCullingMode::Front);
+				Renderer::renderMeshWireframe(mesh.MeshData, transform.getTransform(), m_rendererSettings.OutlineWidth);
+				RenderCommand::setFaceCullingMode(FaceCullingMode::Back);
+			}
+
+			// Lego parts rendering
+			//Ref<Shader> legoPartShader = getLegoPartShader(m_rendererSettings.RendererType);
+
+			//for (const InstanceBuffer& buffer : m_instanceBuffers)
+			//{
+			//	Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
+			//		m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
+			//}
+
+			Ref<Shader> meshShader = Renderer::getShaderLibrary()->get("PBRMesh");
+			for (const MeshSubmissionData& meshSub : m_meshSubmissions)
+			{
+				Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
+			}
+
+			// Origin
+			Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
+
+			// Grid
+			Renderer::renderLines(m_gridLines, m_rendererSettings.GridColor, 1.0f);
+
+			Renderer::end();
 		}
-
-		// Lego parts rendering
-		//Ref<Shader> legoPartShader = getLegoPartShader(m_rendererSettings.RendererType);
-
-		//for (const InstanceBuffer& buffer : m_instanceBuffers)
-		//{
-		//	Renderer::renderMeshInstances(legoPartShader, buffer.Mesh, (const void*)buffer.InstanceElements.data(),
-		//		m_instanceBufferLayout, sizeof(InstanceElement), buffer.InstanceCount);
-		//}
-
-		Ref<Shader> meshShader = Renderer::getShaderLibrary()->get("PBRMesh");
-		for (const MeshSubmissionData& meshSub : m_meshSubmissions)
-		{
-			Renderer::renderMesh(meshShader, meshSub.Material, meshSub.Mesh, meshSub.Transform, meshSub.EntityID);
-		}
-
-		// TODO: maybe should not be handled by Renderer class but the scene renderer
-		Renderer::renderPointLights();
-
-		// Origin
-		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
-
-		// Grid
-		Renderer::renderLines(m_gridLines, m_rendererSettings.GridColor, 1.0f);
-
 		m_viewportFrameBuffer->unbind();
 
 		// Lego Part instances

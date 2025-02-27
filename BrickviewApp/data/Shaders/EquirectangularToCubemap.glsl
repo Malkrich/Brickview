@@ -19,11 +19,11 @@ void main()
 #type fragment
 #version 450 core
 
+layout (location = 0) out vec4 o_color;
+
 in vec3 f_localPosition;
 
 layout (binding = 0) uniform sampler2D u_equirectangularMap;
-
-layout (location = 0) out vec4 o_color;
 
 const vec2 invAtan = vec2(0.1591, 0.3183);
 vec2 sampleSphericalMap(vec3 v)
