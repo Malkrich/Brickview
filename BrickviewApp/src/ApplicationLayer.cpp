@@ -16,6 +16,7 @@ namespace Brickview
 
 	namespace ExampleScenes
 	{
+
 		void loadSpheresAndPlaneScene(Ref<Scene> scene)
 		{
 			float xStart = -1.0f;
@@ -59,6 +60,7 @@ namespace Brickview
 				scene->createLightEntity(lightPos, lightColor);
 			}
 		}
+
 	}
 
 	ApplicationLayer::ApplicationLayer()
@@ -82,6 +84,7 @@ namespace Brickview
 		// Note: think about the dimensions, this is the native window size
 		// not the actual ImGui viewport size
 		m_renderer = createRef<SceneRenderer>(m_viewportWidth, m_viewportHeight);
+
 		// Editor camera
 		CameraControllerSpecifications cameraControlSpecs;
 		cameraControlSpecs.Width = (float)m_viewportWidth;

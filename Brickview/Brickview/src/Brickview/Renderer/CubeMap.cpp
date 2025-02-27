@@ -1,18 +1,18 @@
 #include "Pch.h"
-#include "Texture2D.h"
+#include "CubeMap.h"
 
 #include "RendererAPI.h"
-#include "Vendors/OpenGL/OpenGLTexture2D.h"
+#include "OpenGL/OpenGLCubeMap.h"
 
 namespace Brickview
 {
 
-	Ref<Texture2D> Texture2D::create(const Texture2DSpecifications specs, const std::filesystem::path& filePath)
+	Ref<CubeMap> CubeMap::create()
 	{
 		switch (RendererAPI::getAPI())
 		{
 			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;
-			case RendererAPI::API::OpenGL: return createRef<OpenGLTexture2D>(specs, filePath);
+			case RendererAPI::API::OpenGL: return createRef<OpenGLCubeMap>();
 		}
 
 		BV_ASSERT(false, "Unknown API!");

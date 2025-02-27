@@ -6,6 +6,7 @@
 #include "FrameBuffer.h"
 #include "ShaderStorageBuffer.h"
 #include "PerspectiveCamera.h"
+#include "Texture2D.h"
 #include "Primitives.h"
 #include "Lights.h"
 #include "Lego/LegoPartMeshRegistry.h"
@@ -74,10 +75,19 @@ namespace Brickview
 			, EntityID(entityID){}
 	};
 
-	struct SceneEnvironment
+	struct DirectionalLightData
+	{
+		bool Enable = false;
+		glm::vec3 Direction = { 0.0f, 0.0f, -1.0f };
+	};
+
+	struct SceneLightsData
 	{
 		std::vector<PointLight> PointLights;
 		std::vector<int> PointLightIDs;
+
+		// Not implemented yet
+		DirectionalLightData DirectionalLight;
 	};
 
 	class SceneRenderer
@@ -91,7 +101,7 @@ namespace Brickview
 		void resizeViewport(uint32_t width, uint32_t height);
 
 		// Submission
-		void begin(const PerspectiveCamera& camera, const SceneEnvironment& env);
+		void begin(const PerspectiveCamera& camera, const SceneLightsData& env);
 		void render();
 
 		// Material should be found from the LegoPartComponent material (LegoMaterial -> LegoMaterialRegistry -> RendererMaterial)
@@ -112,12 +122,13 @@ namespace Brickview
 	private:
 		// Renderer internal
 		SceneRendererSettings m_rendererSettings;
+		Ref<Texture2D> m_hdriTexture = nullptr;
 
 		// Selected entity
 		Entity m_selectedEntity;
 
 		// Viewport
-		Ref<FrameBuffer> m_viewportFrameBuffer;
+		Ref<FrameBuffer> m_viewportFrameBuffer = nullptr;
 
 		// Lego parts
 		std::vector<InstanceBuffer> m_instanceBuffers;

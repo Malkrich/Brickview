@@ -100,12 +100,12 @@ namespace Brickview
 	{
 		// Lights
 		{
-			SceneEnvironment env;
+			SceneLightsData scenelightsData;
 			// Point lights
 			auto lightEntities = m_registry.view<TransformComponent, LightComponent>();
 			size_t pointLightCount = lightEntities.size_hint();
-			env.PointLights.reserve(pointLightCount);
-			env.PointLightIDs.reserve(pointLightCount);
+			scenelightsData.PointLights.reserve(pointLightCount);
+			scenelightsData.PointLightIDs.reserve(pointLightCount);
 			for (auto e : lightEntities)
 			{
 				Entity entity = { e, this };
@@ -113,10 +113,10 @@ namespace Brickview
 				const glm::vec3& position = entity.getComponent<TransformComponent>().Translation;
 				const glm::vec3& color = entity.getComponent<LightComponent>().Color;
 
-				env.PointLights.emplace_back(position, color);
-				env.PointLightIDs.emplace_back(entityID);
+				scenelightsData.PointLights.emplace_back(position, color);
+				scenelightsData.PointLightIDs.emplace_back(entityID);
 			}
-			renderer->begin(camera, env);
+			renderer->begin(camera, scenelightsData);
 		}
 
 		// Basic Meshes

@@ -69,6 +69,10 @@ namespace Brickview
 		std::vector<int> PointLightInstancesData;
 		Ref<GpuMesh> LightMesh = nullptr;
 
+		// HDRI
+		std::array<glm::vec3, 8> CubeMapPositions;
+		std::array<uint32_t, 6 * 2 * 3> CubeMapIndices;
+
 		// Meshes
 		Ref<UniformBuffer> ModelDataUbo = nullptr;
 		Layout MeshVboLayout;
@@ -90,6 +94,7 @@ namespace Brickview
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Light.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Line.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "MeshWireframe.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "CubeMap.glsl");
 
 		// Camera
 		UniformBufferSpecifications cameraDataSpecs;
@@ -143,6 +148,26 @@ namespace Brickview
 			{ 1, "a_normal", BufferElementType::Float3 }
 		};
 
+		// CubeMap and HDRI
+		s_rendererData->CubeMapPositions = {
+			glm::vec3(-0.5f, -0.5f, -0.5f),
+			glm::vec3(0.5f, -0.5f, -0.5f),
+			glm::vec3(0.5f, -0.5f,  0.5f),
+			glm::vec3(-0.5f, -0.5f,  0.5f),
+			glm::vec3(-0.5f,  0.5f,  0.5f),
+			glm::vec3(-0.5f,  0.5f, -0.5f),
+			glm::vec3(0.5f,  0.5f, -0.5f),
+			glm::vec3(0.5f,  0.5f,  0.5f)
+		};
+		s_rendererData->CubeMapIndices = {
+			1, 0, 2, 2, 0, 3,
+			5, 6, 7, 7, 4, 5,
+			3, 0, 5, 5, 4, 3,
+			4, 7, 2, 2, 3, 4,
+			1, 2, 7, 7, 6, 1,
+			0, 1, 6, 6, 5, 0
+		};
+
 		RenderCommand::enableDepthTesting(true);
 		RenderCommand::enableFaceCulling(true);
 		RenderCommand::setFaceCullingMode(FaceCullingMode::Back);
@@ -155,21 +180,21 @@ namespace Brickview
 		s_rendererData = nullptr;
 	}
 
-	void Renderer::begin(const CameraData& cameraData, const std::vector<PointLight>& pointLights, const std::vector<int>& pLIDs)
+	void Renderer::begin(const CameraData& cameraData, const RendererEnvironment& env)
 	{
-		BV_ASSERT(pointLights.size() == pLIDs.size(), "Point light object and ID vectors do not have the same size!");
+		BV_ASSERT(env.PointLights.size() == env.PointLightIDs.size(), "Point light object and ID vectors do not have the same size!");
 
 		// Camera
 		s_rendererData->CameraUbo->setData(&cameraData);
 
 		// Point Lights
-		s_rendererData->PointLightsCount = pointLights.size();
+		s_rendererData->PointLightsCount = env.PointLights.size();
 		std::vector<GpuPointLightStruct> gpuPointLights(s_rendererData->PointLightsCount);
 		s_rendererData->PointLightInstancesData.resize(s_rendererData->PointLightsCount);
 		for (int i = 0; i < s_rendererData->PointLightsCount; i++)
 		{
-			gpuPointLights[i] = GpuPointLightStruct(pointLights[i]);
-			s_rendererData->PointLightInstancesData[i] = pLIDs[i];
+			gpuPointLights[i] = GpuPointLightStruct(env.PointLights[i]);
+			s_rendererData->PointLightInstancesData[i] = env.PointLightIDs[i];
 		}
 
 		Buffer lightsDataSsboBuffer;
@@ -183,6 +208,32 @@ namespace Brickview
 		s_rendererData->LightsDataSsbo->setData(lightsDataSsboBuffer.Data);
 
 		lightsDataSsboBuffer.release();
+	}
+
+	Ref<CubeMap> Renderer::createCubeMap(Ref<Texture2D> hdriTexture)
+	{
+		Ref<VertexBuffer> cubeMapVbo = VertexBuffer::create(s_rendererData->CubeMapIndices.size() * sizeof(glm::vec3),
+			s_rendererData->CubeMapPositions.data());
+		Layout cubeMapVboLayout = {
+			{ 0, "a_position", BufferElementType::Float3 }
+		};
+		cubeMapVbo->setBufferLayout(cubeMapVboLayout);
+		Ref<IndexBuffer> cubeMapEbo = IndexBuffer::create(s_rendererData->CubeMapIndices.size() * sizeof(uint32_t),
+			s_rendererData->CubeMapIndices.data());
+
+		Ref<VertexArray> cubeMapVao = VertexArray::create();
+		cubeMapVao->addVertexBuffer(cubeMapVbo);
+		cubeMapVao->setIndexBuffer(cubeMapEbo);
+
+		Ref<Shader> cubeMapShader = s_rendererData->ShaderLibrary->get("CubeMap");
+		cubeMapShader->bind();
+		hdriTexture->bind();
+
+		RenderCommand::drawIndexed(cubeMapVao);
+
+		cubeMapVao->unbind();
+		
+		return nullptr;
 	}
 
 	const Ref<ShaderLibrary>& Renderer::getShaderLibrary()

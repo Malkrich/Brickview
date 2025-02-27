@@ -6,6 +6,8 @@
 #include "Lights.h"
 #include "GpuMesh.h"
 #include "Primitives.h"
+#include "CubeMap.h"
+#include "Texture2D.h"
 
 #include <glm/glm.hpp>
 
@@ -18,6 +20,13 @@ namespace Brickview
 		glm::vec3 Position;
 	};
 
+	struct RendererEnvironment
+	{
+		std::vector<PointLight> PointLights;
+		std::vector<int> PointLightIDs;
+
+	};
+
 	class Renderer
 	{
 	public:
@@ -28,7 +37,8 @@ namespace Brickview
 		static const Ref<ShaderLibrary>& getShaderLibrary();
 
 		// Setup environment
-		static void begin(const CameraData& cameraData, const std::vector<PointLight>& pointLights, const std::vector<int>& pLIDs);
+		static void begin(const CameraData& cameraData, const RendererEnvironment& env);
+		static Ref<CubeMap> createCubeMap(Ref<Texture2D> hdriTexture);
 
 		// Meshes
 		static void renderMesh(Ref<Shader> shader, const RendererMaterial& material, const Ref<GpuMesh>& mesh, const glm::mat4& transform, int entityID);

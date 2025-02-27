@@ -33,14 +33,17 @@ namespace Brickview
 			m_viewportFrameBuffer->resize(width, height);
 	}
 
-	void SceneRenderer::begin(const PerspectiveCamera& camera, const SceneEnvironment& env)
+	void SceneRenderer::begin(const PerspectiveCamera& camera, const SceneLightsData& lightsData)
 	{
 		// Camera
 		CameraData cameraData;
 		cameraData.Position = camera.getPosition();
 		cameraData.ViewProjectionMatrix = camera.getViewProjectionMatrix();
 
-		Renderer::begin(cameraData, env.PointLights, env.PointLightIDs);
+		RendererEnvironment env;
+		env.PointLights = lightsData.PointLights;
+		env.PointLightIDs = lightsData.PointLightIDs;
+		Renderer::begin(cameraData, env);
 	}
 
 	static Ref<Shader> getLegoPartShader(RendererType rendererType)
@@ -91,6 +94,8 @@ namespace Brickview
 
 		// TODO: maybe should not be handled by Renderer class but the scene renderer
 		Renderer::renderPointLights();
+		// TEMP
+		Renderer::createCubeMap(m_hdriTexture);
 
 		// Origin
 		Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
@@ -183,6 +188,13 @@ namespace Brickview
 
 		// Grid
 		m_gridLines = generateGrid(m_rendererSettings.GridBound, m_rendererSettings.GridStep);
+
+		// HDRI environment
+		Texture2DSpecifications hdriTextureSpecs;
+		hdriTextureSpecs.Format = Texture2DFormat::FloatRGB;
+		hdriTextureSpecs.WrappingModeU = Texture2DWrappingMode::Clamp;
+		hdriTextureSpecs.WrappingModeV = Texture2DWrappingMode::Clamp;
+		m_hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/metro_noord_2k.hdr");
 	}
 
 	void SceneRenderer::insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement)
