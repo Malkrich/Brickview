@@ -8,13 +8,13 @@ layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 
 out vec3 f_color;
 
 void main()
 {
-    gl_Position = cameraData.ViewProjectionMatrix * vec4(a_position, 1.0);
+    gl_Position = u_cameraData.ViewProjectionMatrix * vec4(a_position, 1.0);
     f_color = a_color;
 }
 

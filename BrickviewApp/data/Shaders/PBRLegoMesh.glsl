@@ -20,7 +20,7 @@ layout (std140, binding = 0) uniform CameraData
     mat4 View;
     mat4 Projection;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 
 struct FragmentData
 {
@@ -91,7 +91,7 @@ layout (std140, binding = 0) uniform CameraData
     mat4 View;
     mat4 Projection;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 
 struct PointLight
 {
@@ -115,7 +115,7 @@ layout (std430, binding = 0) buffer LightsData
     //bool DirectionalLightEnable;
     //DirectionalLight DirectionalLightData;
     PointLight PointLights[];
-} lightsData;
+} s_lightsData;
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
 {
@@ -175,14 +175,14 @@ void main()
     vec3 lightResult = vec3(0.0);
     for (int i = 0; i < lightsData.LightCount; i++)
     {
-        vec3 lightDirection = normalize(lightsData.PointLights[i].Position - f_fragmentData.Position);
-        vec3 viewDirection = normalize(cameraData.Position - f_fragmentData.Position);
+        vec3 lightDirection = normalize(s_lightsData.PointLights[i].Position - f_fragmentData.Position);
+        vec3 viewDirection = normalize(u_cameraData.Position - f_fragmentData.Position);
         vec3 halfwayVector = normalize(lightDirection + viewDirection);
 
         // Light
-        float distance = length(lightsData.PointLights[i].Position - f_fragmentData.Position);
+        float distance = length(s_lightsData.PointLights[i].Position - f_fragmentData.Position);
         float attenuation = 1.0 / pow(distance, 2.0);
-        vec3 radiance = lightsData.PointLights[i].Color * attenuation;
+        vec3 radiance = s_lightsData.PointLights[i].Color * attenuation;
 
         vec3 brdf = BRDF(albedo, lightDirection, viewDirection, normal, halfwayVector, baseReflectivity, roughness, metalness);
         lightResult += brdf * radiance * max(dot(normal, lightDirection), 0.0);

@@ -7,7 +7,7 @@ layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 
 layout (std140, binding = 2) uniform ModelData
 {
@@ -16,12 +16,12 @@ layout (std140, binding = 2) uniform ModelData
     float Roughness;
     float Metalness;
     int EntityID;
-} modelData;
+} u_modelData;
 
 void main()
 {
-    vec4 worldPos = modelData.Transform * vec4(a_position, 1.0);
-    gl_Position = cameraData.ViewProjectionMatrix * worldPos;
+    vec4 worldPos = u_modelData.Transform * vec4(a_position, 1.0);
+    gl_Position = u_cameraData.ViewProjectionMatrix * worldPos;
 }
 
 #type fragment

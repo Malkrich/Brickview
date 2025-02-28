@@ -11,7 +11,7 @@ layout (std140, binding = 0) uniform CameraData
     mat4 View;
     mat4 Projection;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 
 layout (std140, binding = 2) uniform ModelData
 {
@@ -20,7 +20,7 @@ layout (std140, binding = 2) uniform ModelData
     float Roughness;
     float Metalness;
     int EntityID;
-} modelData;
+} u_modelData;
 
 struct FragmentData
 {
@@ -41,22 +41,22 @@ out flat int f_entityID;
 
 void main()
 {
-    vec4 worldPosition = modelData.Transform * vec4(a_position, 1.0);
-    mat3 normalTransform = transpose(inverse(mat3(modelData.Transform)));
+    vec4 worldPosition = u_modelData.Transform * vec4(a_position, 1.0);
+    mat3 normalTransform = transpose(inverse(mat3(u_modelData.Transform)));
 
     // Fragment data
     f_fragmentData.Position = worldPosition.xyz;
     f_fragmentData.Normal   = normalTransform * a_normal;
     // Material
-    f_material.Albedo    = modelData.Albedo;
-    f_material.Roughness = modelData.Roughness;
-    f_material.Metalness = modelData.Metalness;
+    f_material.Albedo    = u_modelData.Albedo;
+    f_material.Roughness = u_modelData.Roughness;
+    f_material.Metalness = u_modelData.Metalness;
 
     // Entity ID
-    f_entityID = modelData.EntityID;
+    f_entityID = u_modelData.EntityID;
 
     // GL position
-    gl_Position = cameraData.ViewProjectionMatrix * worldPosition;
+    gl_Position = u_cameraData.ViewProjectionMatrix * worldPosition;
 }
 
 #type fragment
@@ -91,7 +91,7 @@ layout (std140, binding = 0) uniform CameraData
     mat4 View;
     mat4 Projection;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 
 struct PointLight
 {
@@ -103,7 +103,7 @@ layout (std430, binding = 1) readonly buffer LightsData
 {
     uint PointLightsCount;
     PointLight PointLights[];
-} lightsData;
+} s_lightsData;
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
 {
@@ -175,16 +175,16 @@ void main()
     vec3 baseReflectivity = mix(vec3(0.04), albedo, metalness);
 
     vec3 lightResult = vec3(0.0);
-    for (uint i = 0; i < lightsData.PointLightsCount; i++)
+    for (uint i = 0; i < s_lightsData.PointLightsCount; i++)
     {
-        vec3 lightDirection = normalize(lightsData.PointLights[i].Position - f_fragmentData.Position);
-        vec3 viewDirection = normalize(cameraData.Position - f_fragmentData.Position);
+        vec3 lightDirection = normalize(s_lightsData.PointLights[i].Position - f_fragmentData.Position);
+        vec3 viewDirection = normalize(u_cameraData.Position - f_fragmentData.Position);
         vec3 halfwayVector = normalize(lightDirection + viewDirection);
 
         // Light
-        float distance = length(lightsData.PointLights[i].Position - f_fragmentData.Position);
+        float distance = length(s_lightsData.PointLights[i].Position - f_fragmentData.Position);
         float attenuation = 1.0 / pow(distance, 2.0);
-        vec3 radiance = lightsData.PointLights[i].Color * attenuation;
+        vec3 radiance = s_lightsData.PointLights[i].Color * attenuation;
 
         vec3 brdf = BRDF(albedo, lightDirection, viewDirection, normal, halfwayVector, baseReflectivity, roughness, metalness);
         lightResult += brdf * radiance * max(dot(normal, lightDirection), 0.0);

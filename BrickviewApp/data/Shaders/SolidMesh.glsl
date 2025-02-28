@@ -13,7 +13,7 @@ layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 
 out vec3 f_currentPosition;
 out vec3 f_normal;
@@ -28,7 +28,7 @@ void main()
     f_normal = normalTransform * a_normal;
     f_albedo = a_albedo;
     f_entityID = a_entityID;
-    gl_Position = cameraData.ViewProjectionMatrix * worldPosition;
+    gl_Position = u_cameraData.ViewProjectionMatrix * worldPosition;
 }
 
 
@@ -47,7 +47,7 @@ layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 //uniform bool u_showNormals;
 
 void main()
@@ -55,7 +55,7 @@ void main()
     float ambient = 0.15;
     vec3 renderedColor = vec3(0.6) * f_albedo.xyz;
     
-    vec3 viewDirection = normalize(cameraData.Position - f_currentPosition);
+    vec3 viewDirection = normalize(u_cameraData.Position - f_currentPosition);
     float facingFactor = dot(viewDirection, f_normal);
     //vec3 normalColor   = facingFactor >= 0.0 ? vec3(0.0, 0.6, 0.1) : vec3(0.8, 0.1, 0.1);
     

@@ -370,6 +370,7 @@ namespace Brickview
 		vao->setIndexBuffer(mesh->getGeometryIndexBuffer());
 
 		shader->bind();
+		s_rendererData->Cubemaps.EnvironmentMap->bind(0);
 		RenderCommand::drawIndexed(vao);
 		vao->unbind();
 	}

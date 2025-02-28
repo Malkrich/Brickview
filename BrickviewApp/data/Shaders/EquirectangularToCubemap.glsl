@@ -8,12 +8,12 @@ out vec3 f_localPosition;
 layout (std140, binding = 0) uniform CubemapData
 {
     mat4 ViewProjectionMatrix;
-} cubemapData;
+} u_cubemapData;
 
 void main()
 {
     f_localPosition = a_position;
-    gl_Position = cubemapData.ViewProjectionMatrix * vec4(a_position, 1.0);
+    gl_Position = u_cubemapData.ViewProjectionMatrix * vec4(a_position, 1.0);
 }
 
 #type fragment

@@ -9,7 +9,7 @@ layout (std140, binding = 0) uniform CameraData
     mat4 View;
     mat4 Projection;
     vec3 Position;
-} cameraData;
+} u_cameraData;
 
 out vec3 f_localPosition;
 
@@ -18,8 +18,8 @@ void main()
     f_localPosition = a_pos;
 
     // remove translation from the view matrix
-    mat4 rotView = mat4(mat3(cameraData.View));
-    vec4 clipPos = cameraData.Projection * rotView * vec4(f_localPosition, 1.0);
+    mat4 rotView = mat4(mat3(u_cameraData.View));
+    vec4 clipPos = u_cameraData.Projection * rotView * vec4(f_localPosition, 1.0);
     gl_Position = clipPos.xyww;
 }
 
