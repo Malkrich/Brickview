@@ -74,12 +74,18 @@ namespace Brickview
 		Ref<GpuMesh> SkyboxCubeMesh = nullptr;
 		const glm::mat4 CubemapCaptureProjectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		const std::map<CubemapFace, glm::mat4> CubemapCaptureViewMatrices = {
-			{ CubemapFace::NegativeX, glm::lookAt(glm::vec3(0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
-			{ CubemapFace::PositiveX, glm::lookAt(glm::vec3(0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
-			{ CubemapFace::NegativeY, glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)) },
-			{ CubemapFace::PositiveY, glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)) },
-			{ CubemapFace::NegativeZ, glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
-			{ CubemapFace::PositiveZ, glm::lookAt(glm::vec3(0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)) }
+			{ CubemapFace::PositiveX,
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
+			{ CubemapFace::NegativeX,
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
+			{ CubemapFace::PositiveY,
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)) },
+			{ CubemapFace::NegativeY,
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)) },
+			{ CubemapFace::PositiveZ,
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)) },
+			{ CubemapFace::NegativeZ,
+			glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)) }
 		};
 		Ref<Cubemap> IrradianceMap = nullptr;
 
@@ -254,18 +260,18 @@ namespace Brickview
 		cubemapDataUboSpecs.BindingPoint = 0;
 		Ref<UniformBuffer> cubemapDataUbo = UniformBuffer::create(cubemapDataUboSpecs, sizeof(glm::mat4));
 
-		cubemapCaptureFbo->bind();
-		RenderCommand::setViewportDimension(cubemapCaptureFbo->getSpecifications().Width, cubemapCaptureFbo->getSpecifications().Height);
-		{
-			// Cube geometry
-			Ref<VertexArray> cubeVao = VertexArray::create();
-			cubeVao->addVertexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryVertexBuffer());
-			cubeVao->setIndexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryIndexBuffer());
+		// Cube geometry
+		Ref<VertexArray> cubeVao = VertexArray::create();
+		cubeVao->addVertexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryVertexBuffer());
+		cubeVao->setIndexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryIndexBuffer());
 
-			// Cubemap generation pass
-			// Cube shader and textures
-			Ref<Shader> cubemapShader = s_rendererData->ShaderLibrary->get("EquirectangularToCubemap");
-			cubemapShader->bind();
+		// Equirectangular to cubemap shader pass
+		Ref<Cubemap> environmentMap = nullptr;
+		RenderCommand::setViewportDimension(cubemapCaptureFbo->getSpecifications().Width, cubemapCaptureFbo->getSpecifications().Height);
+		cubemapCaptureFbo->bind();
+		{
+			Ref<Shader> equirectangularToCubemapShader = s_rendererData->ShaderLibrary->get("EquirectangularToCubemap");
+			equirectangularToCubemapShader->bind();
 			hdriTexture->bind();
 			for (const auto& [face, viewMatrix] : s_rendererData->CubemapCaptureViewMatrices)
 			{
@@ -277,19 +283,24 @@ namespace Brickview
 				RenderCommand::drawIndexed(cubeVao);
 			}
 			// Copy cubemap color attachment to new texture
-			uint32_t cubemapSourceID = cubemapCaptureFbo->getColorAttachment(0);
-			CubemapSpecifications cubemapRawSpecs;
-			cubemapRawSpecs.Format = CubemapFormat::Float16;
-			cubemapRawSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
-			cubemapRawSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
-			Ref<Cubemap> cubemapRaw = Cubemap::copy(cubemapRawSpecs, cubemapSourceID);
+			uint32_t environmentMapSourceID = cubemapCaptureFbo->getColorAttachment(0);
+			CubemapSpecifications environmentMapSpecs;
+			environmentMapSpecs.Format = CubemapFormat::Float16;
+			environmentMapSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
+			environmentMapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
+			environmentMap = Cubemap::copy(environmentMapSpecs, environmentMapSourceID);
+		}
+		cubemapCaptureFbo->unbind();
 
-			// Irradiance map pass
-			cubemapCaptureFbo->resize(32, 32);
-			RenderCommand::setViewportDimension(32, 32);
+		// Irradiance map pass
+		Ref<Cubemap> irradianceMap = nullptr;
+		cubemapCaptureFbo->resize(32, 32);
+		RenderCommand::setViewportDimension(32, 32);
+		cubemapCaptureFbo->bind();
+		{
 			Ref<Shader> irradianceMapShader = s_rendererData->ShaderLibrary->get("IrradianceMap");
 			irradianceMapShader->bind();
-			cubemapRaw->bind();
+			environmentMap->bind();
 			for (const auto& [face, viewMatrix] : s_rendererData->CubemapCaptureViewMatrices)
 			{
 				glm::mat4 viewProjectionMatrix = s_rendererData->CubemapCaptureProjectionMatrix * viewMatrix;
@@ -301,17 +312,18 @@ namespace Brickview
 				RenderCommand::drawIndexed(cubeVao);
 			}
 
-			cubeVao->unbind();
+			uint32_t irradianceMapSourceID = cubemapCaptureFbo->getColorAttachment(0);
+			CubemapSpecifications irradianceMapSpecs;
+			irradianceMapSpecs.Format = CubemapFormat::Float16;
+			irradianceMapSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
+			irradianceMapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
+			irradianceMap = Cubemap::copy(irradianceMapSpecs, irradianceMapSourceID);
+
 		}
 		cubemapCaptureFbo->unbind();
+		cubeVao->unbind();
 
-		uint32_t cubemapSourceID = cubemapCaptureFbo->getColorAttachment(0);
-		CubemapSpecifications irradianceCubemapSpecs;
-		irradianceCubemapSpecs.Format = CubemapFormat::Float16;
-		irradianceCubemapSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
-		irradianceCubemapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
-		Ref<Cubemap> irradianceCubemap = Cubemap::copy(irradianceCubemapSpecs, cubemapSourceID);
-		return irradianceCubemap;
+		return irradianceMap;
 	}
 
 	void Renderer::renderSkybox(Ref<Cubemap> cubemap)

@@ -78,7 +78,7 @@ namespace Brickview
 		// Scene
 		m_scene = createRef<Scene>();
 
-		ExampleScenes::loadSpheresAndPlaneScene(m_scene);
+		//ExampleScenes::loadSpheresAndPlaneScene(m_scene);
 
 		// Renderer
 		// Note: think about the dimensions, this is the native window size

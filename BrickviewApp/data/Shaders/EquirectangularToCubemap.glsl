@@ -36,7 +36,7 @@ vec2 sampleSphericalMap(vec3 v)
 
 void main()
 {
-    vec2 uv = sampleSphericalMap(normalize(-f_localPosition));
+    vec2 uv = sampleSphericalMap(normalize(f_localPosition));
     vec3 color = texture(u_equirectangularMap, uv).rgb;
     o_color = vec4(color, 1.0);
 }

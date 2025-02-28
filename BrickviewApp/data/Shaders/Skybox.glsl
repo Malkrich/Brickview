@@ -17,7 +17,8 @@ void main()
 {
     f_localPosition = a_pos;
 
-    mat4 rotView = mat4(mat3(cameraData.View)); // remove translation from the view matrix
+    // remove translation from the view matrix
+    mat4 rotView = mat4(mat3(cameraData.View));
     vec4 clipPos = cameraData.Projection * rotView * vec4(f_localPosition, 1.0);
     gl_Position = clipPos.xyww;
 }

@@ -35,11 +35,8 @@ namespace Brickview
 	{
 		Ref<OpenGLCubemap> cubemap = createRef<OpenGLCubemap>(specs);
 
-		for (uint32_t faceIndex = 0; faceIndex < 6; faceIndex++)
-		{
-			glCopyImageSubData(textureID, GL_TEXTURE_CUBE_MAP, 0, 0, 0, faceIndex,
-				cubemap->m_textureID, GL_TEXTURE_CUBE_MAP, 0, 0, 0, faceIndex, specs.Width, specs.Height, 1);
-		}
+		glCopyImageSubData(textureID, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
+			cubemap->m_textureID, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0, specs.Width, specs.Height, 6);
 		return cubemap;
 	}
 
