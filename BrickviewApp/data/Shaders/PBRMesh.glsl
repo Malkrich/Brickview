@@ -105,10 +105,17 @@ layout (std430, binding = 1) readonly buffer LightsData
     PointLight PointLights[];
 } s_lightsData;
 
+layout (binding = 0) uniform samplerCube u_irrdianceMap;
+
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
 {
     float cosTheta = max(dot(halfwayVector, viewDirection), 0.0);
     return baseReflectivity + (1.0 - baseReflectivity) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+vec3 fesnelSchlickRoughness(float cosTheta, vec3 baseReflectivity, float roughness)
+{
+    return baseReflectivity + (max(vec3(1.0 - roughness), baseReflectivity) - baseReflectivity) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 float distributionGGX(vec3 normal, vec3 halfwayVector, float roughness)
@@ -156,19 +163,11 @@ vec3 cookTorrance(vec3 viewDirection, vec3 lightDirection, vec3 normal, vec3 hal
     return numerator / denominator;
 }
 
-vec3 BRDF(vec3 albedo, vec3 lightDirection, vec3 viewDirection, vec3 normal, vec3 halfwayVector, vec3 baseReflectivity, float roughness, float metalness)
-{
-    vec3 specular = cookTorrance(viewDirection, lightDirection, normal, halfwayVector, baseReflectivity, roughness);
-    vec3 ks = fresnelSchlick(baseReflectivity, viewDirection, halfwayVector);
-    vec3 kd = vec3(1.0) - ks;
-    kd *= 1.0 - metalness;
-
-    return kd * albedo / PI + specular;
-}
-
 void main()
 {
     vec3 normal = normalize(f_fragmentData.Normal);
+    vec3 viewDirection = normalize(u_cameraData.Position - f_fragmentData.Position);
+
     float roughness = f_material.Roughness;
     float metalness = f_material.Metalness;
     vec3 albedo = f_material.Albedo.xyz;
@@ -178,7 +177,6 @@ void main()
     for (uint i = 0; i < s_lightsData.PointLightsCount; i++)
     {
         vec3 lightDirection = normalize(s_lightsData.PointLights[i].Position - f_fragmentData.Position);
-        vec3 viewDirection = normalize(u_cameraData.Position - f_fragmentData.Position);
         vec3 halfwayVector = normalize(lightDirection + viewDirection);
 
         // Light
@@ -186,12 +184,20 @@ void main()
         float attenuation = 1.0 / pow(distance, 2.0);
         vec3 radiance = s_lightsData.PointLights[i].Color * attenuation;
 
-        vec3 brdf = BRDF(albedo, lightDirection, viewDirection, normal, halfwayVector, baseReflectivity, roughness, metalness);
-        lightResult += brdf * radiance * max(dot(normal, lightDirection), 0.0);
+        vec3 specular = cookTorrance(viewDirection, lightDirection, normal, halfwayVector, baseReflectivity, roughness);
+        vec3 ks = fresnelSchlick(baseReflectivity, viewDirection, halfwayVector);
+        vec3 kd = vec3(1.0) - ks;
+        kd *= 1.0 - metalness;
+        
+        lightResult += (kd * albedo / PI + specular) * radiance * max(dot(normal, lightDirection), 0.0);
     }
 
     // Ambiant lighting
-    vec3 ambient = vec3(0.03) * albedo;
+    vec3 ks = fesnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), baseReflectivity, roughness);
+    vec3 kd = 1.0 - ks;
+    vec3 irradiance = texture(u_irrdianceMap, normal).rgb;
+    vec3 diffuse = irradiance * albedo;
+    vec3 ambient = ks * diffuse;
     vec3 finalColor = ambient + lightResult;
 
     // Tone Mapping

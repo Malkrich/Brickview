@@ -241,7 +241,7 @@ namespace Brickview
 	void Renderer::end()
 	{
 		renderPointLights();
-		renderSkybox(s_rendererData->Cubemaps.IrradianceMap);
+		renderSkybox(s_rendererData->Cubemaps.EnvironmentMap);
 	}
 
 	CubemapTextures Renderer::createCubemapTextures(Ref<Texture2D> hdriTexture)
@@ -370,7 +370,7 @@ namespace Brickview
 		vao->setIndexBuffer(mesh->getGeometryIndexBuffer());
 
 		shader->bind();
-		s_rendererData->Cubemaps.EnvironmentMap->bind(0);
+		s_rendererData->Cubemaps.IrradianceMap->bind(0);
 		RenderCommand::drawIndexed(vao);
 		vao->unbind();
 	}
