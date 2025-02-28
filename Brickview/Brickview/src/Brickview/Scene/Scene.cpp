@@ -96,7 +96,7 @@ namespace Brickview
 		m_registry.destroy((entt::entity)e);
 	}
 
-	void Scene::onRender(const PerspectiveCamera& camera, Ref<SceneRenderer> renderer)
+	void Scene::submitToRenderer(const PerspectiveCamera& camera, Ref<SceneRenderer> renderer)
 	{
 		// Lights
 		{
@@ -147,8 +147,6 @@ namespace Brickview
 				renderer->submitLegoPart(legoPart, m_legoPartMeshRegistry, transform, material, (uint32_t)e);
 			}
 		}
-
-		renderer->render();
 	}
 
 }

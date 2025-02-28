@@ -78,7 +78,7 @@ namespace Brickview
 		// Scene
 		m_scene = createRef<Scene>();
 
-		//ExampleScenes::loadSpheresAndPlaneScene(m_scene);
+		ExampleScenes::loadSpheresAndPlaneScene(m_scene);
 
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
@@ -175,7 +175,8 @@ namespace Brickview
 			m_cameraControl->onUpdate();
 
 		const PerspectiveCamera& camera = m_cameraControl->getCamera();
-		m_scene->onRender(camera, m_renderer);
+		m_scene->submitToRenderer(camera, m_renderer);
+		m_renderer->render();
 	}
 
 	void ApplicationLayer::onGuiRender()
