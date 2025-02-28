@@ -23,6 +23,7 @@ namespace Brickview
 		virtual void setFaceCullingMode(FaceCullingMode mode) override;
 		virtual void setFaceWindingMode(FaceWindingMode mode) override;
 		virtual void setPolygonMode(PolygonMode mode) override;
+		virtual void enableCubemapSeamless(bool enable) override;
 
 		// Elements
 		virtual void drawIndexed(const Ref<VertexArray>& vertexArray) override;

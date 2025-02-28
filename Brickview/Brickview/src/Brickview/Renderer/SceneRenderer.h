@@ -124,7 +124,6 @@ namespace Brickview
 	private:
 		// Renderer internal
 		SceneRendererSettings m_rendererSettings;
-		Ref<Cubemap> m_irradianceCubemap = nullptr;
 
 		// Selected entity
 		Entity m_selectedEntity;

@@ -81,6 +81,11 @@ namespace Brickview
 		s_rendererAPI->setPolygonMode(mode);
 	}
 
+	void RenderCommand::enableCubemapSeamless(bool enable)
+	{
+		s_rendererAPI->enableCubemapSeamless(enable);
+	}
+
 	void RenderCommand::drawIndexed(const Ref<VertexArray>& vertexArray)
 	{
 		s_rendererAPI->drawIndexed(vertexArray);

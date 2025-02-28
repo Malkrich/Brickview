@@ -51,7 +51,7 @@ namespace Brickview
 		hdriTextureSpecs.WrappingModeU = Texture2DWrappingMode::Clamp;
 		hdriTextureSpecs.WrappingModeV = Texture2DWrappingMode::Clamp;
 		Ref<Texture2D> hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/metro_noord_2k.hdr");
-		m_environment.IrradianceMap = Renderer::createCubemap(hdriTexture);
+		m_environment.Cubemaps = Renderer::createCubemapTextures(hdriTexture);
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const

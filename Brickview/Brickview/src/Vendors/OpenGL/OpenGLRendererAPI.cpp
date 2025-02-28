@@ -126,6 +126,14 @@ namespace Brickview
 		glPolygonMode(GL_FRONT_AND_BACK, glMode);
 	}
 
+	void OpenGLRendererAPI::enableCubemapSeamless(bool enable)
+	{
+		if (enable)
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		else
+			glDisable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	}
+
 	void OpenGLRendererAPI::drawIndexed(const Ref<VertexArray>& vertexArray)
 	{
 		vertexArray->bind();

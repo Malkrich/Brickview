@@ -24,12 +24,20 @@ namespace Brickview
 		CameraData() = default;
 	};
 
+	struct CubemapTextures
+	{
+		Ref<Cubemap> EnvironmentMap = nullptr;
+		Ref<Cubemap> IrradianceMap = nullptr;
+
+		CubemapTextures() = default;
+	};
+
 	struct RendererEnvironment
 	{
-		std::vector<PointLight> PointLights;
-		std::vector<int> PointLightIDs;
+		std::vector<PointLight> PointLights = {};
+		std::vector<int> PointLightIDs = {};
 
-		Ref<Cubemap> IrradianceMap = nullptr;
+		CubemapTextures Cubemaps;
 
 		RendererEnvironment() = default;
 	};
@@ -48,7 +56,7 @@ namespace Brickview
 		static void end();
 
 		// Cubemap / Skybox
-		static Ref<Cubemap> createCubemap(Ref<Texture2D> hdriTexture);
+		static CubemapTextures createCubemapTextures(Ref<Texture2D> hdriTexture);
 		static void renderSkybox(Ref<Cubemap> cubemap);
 
 		// Meshes

@@ -30,6 +30,7 @@ namespace Brickview
 		static void setFaceCullingMode(FaceCullingMode mode);
 		static void setFaceWindingMode(FaceWindingMode mode);
 		static void setPolygonMode(PolygonMode mode);
+		static void enableCubemapSeamless(bool enable);
 
 		// Elements drawing
 		static void drawIndexed(const Ref<VertexArray>& vertexArray);

@@ -43,11 +43,9 @@ void main()
         for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta)
         {
             // spherical to cartesian (in tangent space)
-            vec3 tangentSpaceSample = cos(phi) * right + sin(phi) * up;
-            //vec3 tangentSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
+            vec3 tangentSpaceSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
             // tangent space to world
             vec3 sampleVector = cos(theta) * normal + sin(theta) * tangentSpaceSample;
-            //vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal; 
 
             irradiance += texture(u_environmentMap, sampleVector).rgb * cos(theta) * sin(theta);
             sampleCount++;

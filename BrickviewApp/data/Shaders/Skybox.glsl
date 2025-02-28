@@ -34,7 +34,9 @@ in vec3 f_localPosition;
 
 void main()
 {
-    vec3 environmentColor = texture(u_environmentCubemap, f_localPosition).rgb;
+    vec3 normal = normalize(-f_localPosition);
+    
+    vec3 environmentColor = texture(u_environmentCubemap, normal).rgb;
 
     // Tone mapping
     environmentColor = environmentColor / (environmentColor + vec3(1.0));
