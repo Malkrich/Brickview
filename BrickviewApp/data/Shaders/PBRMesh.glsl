@@ -173,6 +173,7 @@ void main()
     vec3 albedo = f_material.Albedo.xyz;
     vec3 baseReflectivity = mix(vec3(0.04), albedo, metalness);
 
+    // Direct lighting
     vec3 lightResult = vec3(0.0);
     for (uint i = 0; i < s_lightsData.PointLightsCount; i++)
     {
@@ -192,12 +193,14 @@ void main()
         lightResult += (kd * albedo / PI + specular) * radiance * max(dot(normal, lightDirection), 0.0);
     }
 
-    // Ambiant lighting
+    // Irradiance map
     vec3 ks = fesnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), baseReflectivity, roughness);
     vec3 kd = 1.0 - ks;
     vec3 irradiance = texture(u_irrdianceMap, normal).rgb;
     vec3 diffuse = irradiance * albedo;
-    vec3 ambient = ks * diffuse;
+    vec3 ambient = kd * diffuse;
+
+    // Final color
     vec3 finalColor = ambient + lightResult;
 
     // Tone Mapping

@@ -38,9 +38,9 @@ void main()
     
     vec3 environmentColor = texture(u_environmentCubemap, normal).rgb;
 
-    // Tone mapping
-    environmentColor = environmentColor / (environmentColor + vec3(1.0));
-    // Gamma correction
+    // No tone mapping needed as it is already done in the 
+    // equirectangular to cubemap shader
+    // Therefore we only compute the gamma correction:
     environmentColor = pow(environmentColor, vec3(1.0/2.2));
 
     o_color = vec4(environmentColor, 1.0);

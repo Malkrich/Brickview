@@ -56,7 +56,7 @@ namespace Brickview
 		static void end();
 
 		// Cubemap / Skybox
-		static CubemapTextures createCubemapTextures(Ref<Texture2D> hdriTexture);
+		static CubemapTextures createCubemapTextures(Ref<Texture2D> hdriTexture, uint32_t environmentMapDimXY, uint32_t irradianceMapDimXY);
 		static void renderSkybox(Ref<Cubemap> cubemap);
 
 		// Meshes

@@ -12,6 +12,9 @@
 
 #include "Vendors/OpenGL/OpenGLError.h"
 
+// TEMP
+#include <glad/glad.h>
+
 namespace Brickview
 {
 
@@ -244,7 +247,7 @@ namespace Brickview
 		renderSkybox(s_rendererData->Cubemaps.EnvironmentMap);
 	}
 
-	CubemapTextures Renderer::createCubemapTextures(Ref<Texture2D> hdriTexture)
+	CubemapTextures Renderer::createCubemapTextures(Ref<Texture2D> hdriTexture, uint32_t environmentMapDimXY, uint32_t irradianceMapDimXY)
 	{
 		// Data to return
 		CubemapTextures cubemapsResults;
@@ -252,8 +255,8 @@ namespace Brickview
 		// Frame buffer for Equirectangular to cubemap capture
 		// Contains the cubemap attachment
 		FrameBufferSpecifications cubemapCaptureFboSpecs;
-		cubemapCaptureFboSpecs.Width = 512;
-		cubemapCaptureFboSpecs.Height = 512;
+		cubemapCaptureFboSpecs.Width = environmentMapDimXY;
+		cubemapCaptureFboSpecs.Height = environmentMapDimXY;
 		cubemapCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
 		Ref<FrameBuffer> cubemapCaptureFbo = FrameBuffer::create(cubemapCaptureFboSpecs);
 		
@@ -284,6 +287,7 @@ namespace Brickview
 				RenderCommand::clear();
 				RenderCommand::drawIndexed(cubeVao);
 			}
+
 			// Copy cubemap color attachment to new texture
 			uint32_t environmentMapSourceID = cubemapCaptureFbo->getColorAttachment(0);
 			CubemapSpecifications environmentMapSpecs;
@@ -292,11 +296,12 @@ namespace Brickview
 			environmentMapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
 			cubemapsResults.EnvironmentMap = Cubemap::copy(environmentMapSpecs, environmentMapSourceID);
 		}
+		cubeVao->unbind();
 		cubemapCaptureFbo->unbind();
 
 		// Irradiance map pass
-		cubemapCaptureFbo->resize(32, 32);
-		RenderCommand::setViewportDimension(32, 32);
+		RenderCommand::setViewportDimension(irradianceMapDimXY, irradianceMapDimXY);
+		cubemapCaptureFbo->resize(irradianceMapDimXY, irradianceMapDimXY);
 		cubemapCaptureFbo->bind();
 		{
 			Ref<Shader> irradianceMapShader = s_rendererData->ShaderLibrary->get("IrradianceMap");
@@ -319,10 +324,9 @@ namespace Brickview
 			irradianceMapSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
 			irradianceMapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
 			cubemapsResults.IrradianceMap = Cubemap::copy(irradianceMapSpecs, irradianceMapSourceID);
-
 		}
-		cubemapCaptureFbo->unbind();
 		cubeVao->unbind();
+		cubemapCaptureFbo->unbind();
 
 		return cubemapsResults;
 	}
@@ -364,13 +368,15 @@ namespace Brickview
 		modelData.EntityID = entityID;
 		s_rendererData->ModelDataUbo->setData(&modelData);
 
+		// Irradiance map
+		s_rendererData->Cubemaps.IrradianceMap->bind(0);
+
 		// Mesh geometry
 		Ref<VertexArray> vao = VertexArray::create();
 		vao->addVertexBuffer(mesh->getGeometryVertexBuffer());
 		vao->setIndexBuffer(mesh->getGeometryIndexBuffer());
 
 		shader->bind();
-		s_rendererData->Cubemaps.IrradianceMap->bind(0);
 		RenderCommand::drawIndexed(vao);
 		vao->unbind();
 	}
