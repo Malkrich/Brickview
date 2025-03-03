@@ -19,7 +19,7 @@ void main()
 #type fragment
 #version 450 core
 
-layout (location = 0) out vec4 o_color;
+layout (location = 0) out vec3 o_color;
 
 in vec3 f_localPosition;
 
@@ -44,5 +44,5 @@ void main()
     // Tone mapping so we make sure all values are between 0 and ~1
     color = color / (color + vec3(1.0));
     
-    o_color = vec4(color, 1.0);
+    o_color = color;
 }

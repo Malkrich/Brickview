@@ -21,7 +21,7 @@ void main()
 
 #define PI 3.1415926538
 
-layout (location = 0) out vec4 o_color;
+layout (location = 0) out vec3 o_color;
 
 in vec3 f_localPosition;
 
@@ -52,5 +52,5 @@ void main()
     }
 
     irradiance = PI * irradiance * (1.0 / float(sampleCount));
-    o_color = vec4(irradiance, 1.0);
+    o_color = irradiance;
 }
