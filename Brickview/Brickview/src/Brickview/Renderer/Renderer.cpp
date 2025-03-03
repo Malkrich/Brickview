@@ -12,9 +12,6 @@
 
 #include "Vendors/OpenGL/OpenGLError.h"
 
-// TEMP
-#include <glad/glad.h>
-
 namespace Brickview
 {
 
