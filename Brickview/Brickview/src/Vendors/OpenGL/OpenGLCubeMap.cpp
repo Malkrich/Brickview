@@ -2,28 +2,12 @@
 #include "OpenGLCubemap.h"
 
 #include "OpenGLError.h"
+#include "OpenGLTextureUtils.h"
 
 #include <glad/glad.h>
 
 namespace Brickview
 {
-
-	namespace Utils
-	{
-
-		static GLenum cubemapFormatToOpenGLInternalFormat(CubemapFormat format)
-		{
-			switch (format)
-			{
-				case CubemapFormat::Float16: return GL_RGB16F;
-				case CubemapFormat::Float32: return GL_RGB32F;
-			}
-
-			BV_ASSERT(false, "Unknown cubemap format!");
-			return 0;
-		}
-
-	}
 
 	OpenGLCubemap::OpenGLCubemap(const CubemapSpecifications& specs)
 		: m_specs(specs)
@@ -61,7 +45,7 @@ namespace Brickview
 		glGenTextures(1, &m_textureID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 
-		GLenum internalFormat = Utils::cubemapFormatToOpenGLInternalFormat(m_specs.Format);
+		GLenum internalFormat = TextureUtils::textureFormatToOpenGLInternalFormat(m_specs.Format);
 		for (uint32_t faceIndex = 0; faceIndex < 6; faceIndex++)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, 0, internalFormat, m_specs.Width, m_specs.Height, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -69,8 +53,14 @@ namespace Brickview
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		GLenum minFilter = TextureUtils::textureFilterToOpenGLFilter(m_specs.MinFilter);
+		GLenum magFilter = TextureUtils::textureFilterToOpenGLFilter(m_specs.MagFilter);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, minFilter);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, magFilter);
+
+		if (m_specs.MinFilter == TextureFilter::LinearMipmapLinear)
+			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 		CHECK_GL_ERROR();
 	}

@@ -7,7 +7,7 @@
 namespace Brickview
 {
 
-	Ref<Cubemap> create(const CubemapSpecifications& specs)
+	Ref<Cubemap> Cubemap::create(const CubemapSpecifications& specs)
 	{
 		switch (RendererAPI::getAPI())
 		{

@@ -1,32 +1,19 @@
 #pragma once
 
+#include "TextureSpecifications.h"
+
 #include <filesystem>
 
 namespace Brickview
 {
 
-	enum class Texture2DFormat
-	{
-		RGB, RGBA, FloatRGB
-	};
-
-	enum class Texture2DFilter
-	{
-		Linear, Nearest
-	};
-
-	enum class Texture2DWrappingMode
-	{
-		Repeat, Clamp
-	};
-
 	struct Texture2DSpecifications
 	{
-		Texture2DFormat Format = Texture2DFormat::RGB;
-		Texture2DWrappingMode WrappingModeU = Texture2DWrappingMode::Repeat;
-		Texture2DWrappingMode WrappingModeV = Texture2DWrappingMode::Repeat;
-		Texture2DFilter FilterMin = Texture2DFilter::Linear;
-		Texture2DFilter FilterMag = Texture2DFilter::Linear;
+		TextureFormat Format = TextureFormat::RGB;
+		TextureWrapMode WrappingModeU = TextureWrapMode::Repeat;
+		TextureWrapMode WrappingModeV = TextureWrapMode::Repeat;
+		TextureFilter FilterMin = TextureFilter::Linear;
+		TextureFilter FilterMag = TextureFilter::Linear;
 
 		Texture2DSpecifications() = default;
 	};

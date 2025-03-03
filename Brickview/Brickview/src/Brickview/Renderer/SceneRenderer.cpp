@@ -2,6 +2,7 @@
 #include "SceneRenderer.h"
 
 #include "RenderCommand.h"
+#include "TextureSpecifications.h"
 
 namespace Brickview
 {
@@ -47,9 +48,9 @@ namespace Brickview
 
 		// HDRI environment
 		Texture2DSpecifications hdriTextureSpecs;
-		hdriTextureSpecs.Format = Texture2DFormat::FloatRGB;
-		hdriTextureSpecs.WrappingModeU = Texture2DWrappingMode::Clamp;
-		hdriTextureSpecs.WrappingModeV = Texture2DWrappingMode::Clamp;
+		hdriTextureSpecs.Format = TextureFormat::RGBFloat16;
+		hdriTextureSpecs.WrappingModeU = TextureWrapMode::ClampToEdge;
+		hdriTextureSpecs.WrappingModeV = TextureWrapMode::ClampToEdge;
 		Ref<Texture2D> hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/bambanani_sunset_2k.hdr");
 		m_environment.Cubemaps = Renderer::createCubemapTextures(hdriTexture, 512, 32);
 	}

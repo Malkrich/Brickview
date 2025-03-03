@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TextureSpecifications.h"
+
 namespace Brickview
 {
 
@@ -10,15 +12,13 @@ namespace Brickview
 		PositiveZ = 4, NegativeZ = 5,
 	};
 
-	enum class CubemapFormat
-	{
-		Float16, Float32
-	};
-
 	struct CubemapSpecifications
 	{
 		uint32_t Width = 0, Height = 0;
-		CubemapFormat Format = CubemapFormat::Float16;
+		uint32_t Levels = 1;
+		TextureFormat Format = TextureFormat::RGBFloat16;
+		TextureFilter MinFilter = TextureFilter::Linear;
+		TextureFilter MagFilter = TextureFilter::Linear;
 
 		CubemapSpecifications() = default;
 	};

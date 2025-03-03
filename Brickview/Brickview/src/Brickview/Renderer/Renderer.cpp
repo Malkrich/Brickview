@@ -291,7 +291,7 @@ namespace Brickview
 			// Copy cubemap color attachment to new texture
 			uint32_t environmentMapSourceID = cubemapCaptureFbo->getColorAttachment(0);
 			CubemapSpecifications environmentMapSpecs;
-			environmentMapSpecs.Format = CubemapFormat::Float16;
+			environmentMapSpecs.Format = TextureFormat::RGBFloat16;
 			environmentMapSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
 			environmentMapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
 			cubemapsResults.EnvironmentMap = Cubemap::copy(environmentMapSpecs, environmentMapSourceID);
@@ -320,13 +320,21 @@ namespace Brickview
 
 			uint32_t irradianceMapSourceID = cubemapCaptureFbo->getColorAttachment(0);
 			CubemapSpecifications irradianceMapSpecs;
-			irradianceMapSpecs.Format = CubemapFormat::Float16;
+			irradianceMapSpecs.Format = TextureFormat::RGBFloat16;
 			irradianceMapSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
 			irradianceMapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
 			cubemapsResults.IrradianceMap = Cubemap::copy(irradianceMapSpecs, irradianceMapSourceID);
 		}
 		cubeVao->unbind();
 		cubemapCaptureFbo->unbind();
+
+		// Pre filtered environment map pass
+		CubemapSpecifications preFilteredEnvMapSpecs;
+		preFilteredEnvMapSpecs.Width = 128;
+		preFilteredEnvMapSpecs.Height = 128;
+		preFilteredEnvMapSpecs.MinFilter = TextureFilter::LinearMipmapLinear;
+		preFilteredEnvMapSpecs.MagFilter = TextureFilter::Linear;
+		Ref<Cubemap> preFilteredEnvMap = Cubemap::create(preFilteredEnvMapSpecs);
 
 		return cubemapsResults;
 	}

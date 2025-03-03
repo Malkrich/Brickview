@@ -2,6 +2,7 @@
 #include "OpenGLTexture2D.h"
 
 #include "OpenGLError.h"
+#include "OpenGLTextureUtils.h"
 
 #include "stb_image.h"
 
@@ -9,35 +10,6 @@
 
 namespace Brickview
 {
-
-	namespace Utils
-	{
-
-		static GLenum Texture2DWrapModeToOpenGLWrapMode(Texture2DWrappingMode mode)
-		{
-			switch (mode)
-			{
-				case Texture2DWrappingMode::Repeat: return GL_REPEAT;
-				case Texture2DWrappingMode::Clamp:  return GL_CLAMP;
-			}
-
-			BV_ASSERT(false, "Unknown texture 2D wrap mode!");
-			return GL_REPEAT;
-		}
-
-		static GLenum Texture2DFilterToOpenGLFilter(Texture2DFilter filter)
-		{
-			switch (filter)
-			{
-				case Texture2DFilter::Linear:  return GL_LINEAR;
-				case Texture2DFilter::Nearest: return GL_NEAREST;
-			}
-
-			BV_ASSERT(false, "Unknown texture 2D filter!");
-			return GL_LINEAR;
-		}
-
-	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const Texture2DSpecifications& specs, const std::filesystem::path& filePath)
 		: m_specs(specs)
@@ -49,11 +21,11 @@ namespace Brickview
 			int width, height, channels;
 			switch (m_specs.Format)
 			{
-				case Texture2DFormat::RGB:
-				case Texture2DFormat::RGBA:
+				case TextureFormat::RGB:
+				case TextureFormat::RGBA:
 					imageData = (void*)stbi_load(strPath.c_str(), &width, &height, &channels, 0);
 					break;
-				case Texture2DFormat::FloatRGB:
+				case TextureFormat::RGBFloat16:
 					imageData = (void*)stbi_loadf(strPath.c_str(), &width, &height, &channels, 0);
 					break;
 			}
@@ -87,21 +59,24 @@ namespace Brickview
 
 		switch(m_specs.Format)
 		{
-			case Texture2DFormat::RGB:
+			case TextureFormat::RGB:
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				break;
-			case Texture2DFormat::RGBA:
+			case TextureFormat::RGBA:
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 				break;
-			case Texture2DFormat::FloatRGB:
+			case TextureFormat::RGBFloat16:
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_width, m_height, 0, GL_RGB, GL_FLOAT, data);
+				break;
+			default:
+				BV_ASSERT(false, "Texture format not implemented!");
 				break;
 		}
 
-		GLenum wrapSParam = Utils::Texture2DWrapModeToOpenGLWrapMode(m_specs.WrappingModeU);
-		GLenum wrapTParam = Utils::Texture2DWrapModeToOpenGLWrapMode(m_specs.WrappingModeV);
-		GLenum filterMinParam = Utils::Texture2DFilterToOpenGLFilter(m_specs.FilterMin);
-		GLenum filterMagParam = Utils::Texture2DFilterToOpenGLFilter(m_specs.FilterMag);
+		GLenum wrapSParam = TextureUtils::textureWrapModeToOpenGLWrapMode(m_specs.WrappingModeU);
+		GLenum wrapTParam = TextureUtils::textureWrapModeToOpenGLWrapMode(m_specs.WrappingModeV);
+		GLenum filterMinParam = TextureUtils::textureFilterToOpenGLFilter(m_specs.FilterMin);
+		GLenum filterMagParam = TextureUtils::textureFilterToOpenGLFilter(m_specs.FilterMag);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapSParam);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapTParam);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMinParam);

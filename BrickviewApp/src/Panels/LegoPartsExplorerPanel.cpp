@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include "Renderer/TextureSpecifications.h"
+
 namespace Brickview
 {
 
@@ -9,7 +11,7 @@ namespace Brickview
 		: m_legoPartsDirectory(partsDirectory)
 	{
 		Texture2DSpecifications legoPartIconSpecs;
-		legoPartIconSpecs.Format = Texture2DFormat::RGBA;
+		legoPartIconSpecs.Format = TextureFormat::RGBA;
 		m_defaultLegoPartIcon = Texture2D::create(legoPartIconSpecs, "./data/Icons/legoPartIcon.png");
 	}
 
