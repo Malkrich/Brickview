@@ -173,10 +173,10 @@ namespace Brickview
 
 					case FrameBufferAttachment::CubemapFloat16:
 						Utils::attachCubemapTexture(attachmentID, m_specs.Width, m_specs.Height, GL_RGB16F, i);
-						break;
+						continue;
 					case FrameBufferAttachment::CubemapFloat32:
 						BV_ASSERT(false, "32 bits cubemap not implemented yet!");
-						break;
+						continue;
 				}
 			}
 		}
