@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-#include "Brickview/Renderer/Mesh.h"
+#include "Brickview/Geometry/Mesh.h"
 
 namespace Brickview
 {

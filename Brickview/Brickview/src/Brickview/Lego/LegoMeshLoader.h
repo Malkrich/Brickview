@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Brickview/Renderer/Mesh.h"
+#include "Brickview/Geometry/Mesh.h"
 
 #include <tuple>
 #include <filesystem>
