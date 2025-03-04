@@ -24,7 +24,7 @@ namespace Brickview
 		virtual uint32_t getColorAttachment(uint32_t index) const override;
 		virtual void clearAttachment(uint32_t attachmentIndex, int value) override;
 
-		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face) override;
+		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face, uint32_t mipmapLevel = 0) override;
 
 	private:
 		void invalidate();

@@ -326,6 +326,14 @@ namespace Brickview
 		cubemapCaptureFbo->unbind();
 
 		// Pre filtered environment map pass
+		FrameBufferSpecifications specularMapCaptureFboSpecs;
+		specularMapCaptureFboSpecs.Width = 128;
+		specularMapCaptureFboSpecs.Height = 128;
+		specularMapCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
+		specularMapCaptureFboSpecs.Attachments[1].MinFilter = TextureFilter::LinearMipmapLinear;
+		specularMapCaptureFboSpecs.Attachments[1].MipmapLevels = 5;
+		Ref<FrameBuffer> specularMapCaptureFbo = FrameBuffer::create(specularMapCaptureFboSpecs);
+
 		CubemapSpecifications preFilteredEnvMapSpecs;
 		preFilteredEnvMapSpecs.Width = 128;
 		preFilteredEnvMapSpecs.Height = 128;

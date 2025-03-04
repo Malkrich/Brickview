@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TextureSpecifications.h"
 #include "Cubemap.h"
 
 #include <glm/glm.hpp>
@@ -26,6 +27,9 @@ namespace Brickview
 	struct FrameBufferAttachmentSpecs
 	{
 		FrameBufferAttachment Format = FrameBufferAttachment::None;
+		TextureFilter MinFilter = TextureFilter::Linear;
+		TextureFilter MagFilter = TextureFilter::Linear;
+		uint32_t MipmapLevels = 1;
 		bool Clear = true;
 
 		FrameBufferAttachmentSpecs() = default;
@@ -62,7 +66,7 @@ namespace Brickview
 		virtual uint32_t getColorAttachment(uint32_t index) const = 0;
 		virtual void clearAttachment(uint32_t attachmentIndex, int value) = 0;
 
-		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face) = 0;
+		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face, uint32_t mipmapLevel = 0) = 0;
 	};
 
 }
