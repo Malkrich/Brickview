@@ -3,7 +3,7 @@
 #include "Core/Time.h"
 #include "Renderer/PerspectiveCamera.h"
 #include "Renderer/RendererMaterial.h"
-#include "Renderer/Mesh.h"
+#include "Geometry/Mesh.h"
 #include "Lego/LegoPart.h"
 #include "Lego/LegoPartMeshRegistry.h"
 

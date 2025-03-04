@@ -2,7 +2,7 @@
 
 #include "Renderer/Camera.h"
 #include "Renderer/Lights.h"
-#include "Renderer/Mesh.h"
+#include "Geometry/Mesh.h"
 #include "Renderer/RendererMaterial.h"
 #include "Lego/LegoPart.h"
 #include "Lego/LegoMaterial.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Mesh.h"
+#include "Geometry/Mesh.h"
 #include "Renderer/GpuMesh.h"
 #include "LegoPart.h"
 

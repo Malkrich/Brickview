@@ -26,7 +26,7 @@
 #include "Renderer/PerspectiveCamera.h"
 #include "Renderer/CameraController.h"
 #include "Renderer/Lights.h"
-#include "Renderer/Mesh.h"
+#include "Geometry/Mesh.h"
 
 // Scene
 #include "Scene/Scene.h"
