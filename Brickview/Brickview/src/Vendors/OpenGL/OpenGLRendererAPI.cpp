@@ -65,6 +65,10 @@ namespace Brickview
 	void OpenGLRendererAPI::init()
 	{
 		enableDepthTesting(true);
+
+		// TODO: remove from dist build
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(openGLMessageCallback, nullptr);
 	}
 
 	void OpenGLRendererAPI::shutdown()
