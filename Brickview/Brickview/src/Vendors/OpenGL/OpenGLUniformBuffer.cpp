@@ -36,7 +36,6 @@ namespace Brickview
 		glBindBuffer(GL_UNIFORM_BUFFER, m_bufferID);
 		glBufferData(GL_UNIFORM_BUFFER, m_bufferSize, data, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
 		CHECK_GL_ERROR();
 	}
 	

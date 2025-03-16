@@ -30,7 +30,7 @@ namespace Brickview
 		TextureFilter MinFilter = TextureFilter::Linear;
 		TextureFilter MagFilter = TextureFilter::Linear;
 		uint32_t MipmapLevels = 1;
-		bool Clear = true;
+		bool Resizable = true;
 
 		FrameBufferAttachmentSpecs() = default;
 		FrameBufferAttachmentSpecs(FrameBufferAttachment attachment)

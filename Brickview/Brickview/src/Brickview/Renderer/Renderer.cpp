@@ -113,6 +113,7 @@ namespace Brickview
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "EquirectangularToCubemap.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Skybox.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "IrradianceMap.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PreFilteredMap.glsl");
 
 		// Camera
 		UniformBufferSpecifications cameraDataSpecs;
@@ -249,13 +250,17 @@ namespace Brickview
 		// Data to return
 		CubemapTextures cubemapsResults;
 
-		// Frame buffer for Equirectangular to cubemap capture
-		// Contains the cubemap attachment
-		FrameBufferSpecifications cubemapCaptureFboSpecs;
-		cubemapCaptureFboSpecs.Width = environmentMapDimXY;
-		cubemapCaptureFboSpecs.Height = environmentMapDimXY;
-		cubemapCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
-		Ref<FrameBuffer> cubemapCaptureFbo = FrameBuffer::create(cubemapCaptureFboSpecs);
+		// Skybox cube geometry
+		Ref<VertexArray> cubeVao = VertexArray::create();
+		cubeVao->addVertexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryVertexBuffer());
+		cubeVao->setIndexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryIndexBuffer());
+
+		// Diffuse IBL pre process
+		FrameBufferSpecifications diffuseCaptureFboSpecs;
+		diffuseCaptureFboSpecs.Width = environmentMapDimXY;
+		diffuseCaptureFboSpecs.Height = environmentMapDimXY;
+		diffuseCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
+		Ref<FrameBuffer> diffuseCaptureFbo = FrameBuffer::create(diffuseCaptureFboSpecs);
 		
 		// Uniform buffer containing the view matrices to render each face
 		UniformBufferSpecifications cubemapDataUboSpecs;
@@ -263,14 +268,9 @@ namespace Brickview
 		cubemapDataUboSpecs.BindingPoint = 0;
 		Ref<UniformBuffer> cubemapDataUbo = UniformBuffer::create(cubemapDataUboSpecs, sizeof(glm::mat4));
 
-		// Cube geometry
-		Ref<VertexArray> cubeVao = VertexArray::create();
-		cubeVao->addVertexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryVertexBuffer());
-		cubeVao->setIndexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryIndexBuffer());
-
 		// Equirectangular to cubemap shader pass
-		RenderCommand::setViewportDimension(cubemapCaptureFbo->getSpecifications().Width, cubemapCaptureFbo->getSpecifications().Height);
-		cubemapCaptureFbo->bind();
+		RenderCommand::setViewportDimension(diffuseCaptureFbo->getSpecifications().Width, diffuseCaptureFbo->getSpecifications().Height);
+		diffuseCaptureFbo->bind();
 		{
 			Ref<Shader> equirectangularToCubemapShader = s_rendererData->ShaderLibrary->get("EquirectangularToCubemap");
 			equirectangularToCubemapShader->bind();
@@ -278,28 +278,28 @@ namespace Brickview
 			for (const auto& [face, viewMatrix] : s_rendererData->CubemapCaptureViewMatrices)
 			{
 				glm::mat4 viewProjectionMatrix = s_rendererData->CubemapCaptureProjectionMatrix * viewMatrix;
-				cubemapDataUbo->setData(&viewProjectionMatrix);
-				cubemapCaptureFbo->attachCubemapFace(0, face);
+				cubemapDataUbo->setData(glm::value_ptr(viewProjectionMatrix));
+				diffuseCaptureFbo->attachCubemapFace(0, face);
 
 				RenderCommand::clear();
 				RenderCommand::drawIndexed(cubeVao);
 			}
 
 			// Copy cubemap color attachment to new texture
-			uint32_t environmentMapSourceID = cubemapCaptureFbo->getColorAttachment(0);
+			uint32_t environmentMapSourceID = diffuseCaptureFbo->getColorAttachment(0);
 			CubemapSpecifications environmentMapSpecs;
 			environmentMapSpecs.Format = TextureFormat::RGBFloat16;
-			environmentMapSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
-			environmentMapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
+			environmentMapSpecs.Width = diffuseCaptureFbo->getSpecifications().Width;
+			environmentMapSpecs.Height = diffuseCaptureFbo->getSpecifications().Height;
 			cubemapsResults.EnvironmentMap = Cubemap::copy(environmentMapSpecs, environmentMapSourceID);
 		}
 		cubeVao->unbind();
-		cubemapCaptureFbo->unbind();
+		diffuseCaptureFbo->unbind();
 
 		// Irradiance map pass
 		RenderCommand::setViewportDimension(irradianceMapDimXY, irradianceMapDimXY);
-		cubemapCaptureFbo->resize(irradianceMapDimXY, irradianceMapDimXY);
-		cubemapCaptureFbo->bind();
+		diffuseCaptureFbo->resize(irradianceMapDimXY, irradianceMapDimXY);
+		diffuseCaptureFbo->bind();
 		{
 			Ref<Shader> irradianceMapShader = s_rendererData->ShaderLibrary->get("IrradianceMap");
 			irradianceMapShader->bind();
@@ -308,38 +308,76 @@ namespace Brickview
 			{
 				glm::mat4 viewProjectionMatrix = s_rendererData->CubemapCaptureProjectionMatrix * viewMatrix;
 				
-				cubemapDataUbo->setData(&viewProjectionMatrix);
-				cubemapCaptureFbo->attachCubemapFace(0, face);
+				cubemapDataUbo->setData(glm::value_ptr(viewProjectionMatrix));
+				diffuseCaptureFbo->attachCubemapFace(0, face);
 
 				RenderCommand::clear();
 				RenderCommand::drawIndexed(cubeVao);
 			}
 
-			uint32_t irradianceMapSourceID = cubemapCaptureFbo->getColorAttachment(0);
+			uint32_t irradianceMapSourceID = diffuseCaptureFbo->getColorAttachment(0);
 			CubemapSpecifications irradianceMapSpecs;
 			irradianceMapSpecs.Format = TextureFormat::RGBFloat16;
-			irradianceMapSpecs.Width = cubemapCaptureFbo->getSpecifications().Width;
-			irradianceMapSpecs.Height = cubemapCaptureFbo->getSpecifications().Height;
+			irradianceMapSpecs.Width = diffuseCaptureFbo->getSpecifications().Width;
+			irradianceMapSpecs.Height = diffuseCaptureFbo->getSpecifications().Height;
 			cubemapsResults.IrradianceMap = Cubemap::copy(irradianceMapSpecs, irradianceMapSourceID);
 		}
 		cubeVao->unbind();
-		cubemapCaptureFbo->unbind();
+		diffuseCaptureFbo->unbind();
 
-		// Pre filtered environment map pass
-		FrameBufferSpecifications specularMapCaptureFboSpecs;
-		specularMapCaptureFboSpecs.Width = 128;
-		specularMapCaptureFboSpecs.Height = 128;
-		specularMapCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
-		specularMapCaptureFboSpecs.Attachments[1].MinFilter = TextureFilter::LinearMipmapLinear;
-		specularMapCaptureFboSpecs.Attachments[1].MipmapLevels = 5;
-		Ref<FrameBuffer> specularMapCaptureFbo = FrameBuffer::create(specularMapCaptureFboSpecs);
+		// Specular IBL pre process
+		uint32_t mipmapLevelCount = 5;
+		uint32_t preFilteredMapDimXY = 128;
+
+		// Specular map uniform block
+		UniformBufferSpecifications specularMapDataUboSpecs;
+		specularMapDataUboSpecs.BlockName = "SpecularMapData";
+		specularMapDataUboSpecs.BindingPoint = 1;
+		Ref<UniformBuffer> specularMapDataUbo = UniformBuffer::create(specularMapDataUboSpecs, sizeof(float));
+
+		FrameBufferSpecifications specularCaptureFboSpecs;
+		specularCaptureFboSpecs.Width = preFilteredMapDimXY;
+		specularCaptureFboSpecs.Height = preFilteredMapDimXY;
+		specularCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
+		specularCaptureFboSpecs.Attachments[1].MinFilter = TextureFilter::LinearMipmapLinear;
+		specularCaptureFboSpecs.Attachments[1].MipmapLevels = mipmapLevelCount;
+		specularCaptureFboSpecs.Attachments[1].Resizable = false;
+		Ref<FrameBuffer> specularCaptureFbo = FrameBuffer::create(specularCaptureFboSpecs);
 
 		CubemapSpecifications preFilteredEnvMapSpecs;
-		preFilteredEnvMapSpecs.Width = 128;
-		preFilteredEnvMapSpecs.Height = 128;
+		preFilteredEnvMapSpecs.Width = preFilteredMapDimXY;
+		preFilteredEnvMapSpecs.Height = preFilteredMapDimXY;
 		preFilteredEnvMapSpecs.MinFilter = TextureFilter::LinearMipmapLinear;
 		preFilteredEnvMapSpecs.MagFilter = TextureFilter::Linear;
 		Ref<Cubemap> preFilteredEnvMap = Cubemap::create(preFilteredEnvMapSpecs);
+
+		// Pre filtered environment map pass
+		Ref<Shader> preFilteredMapShader = s_rendererData->ShaderLibrary->get("PreFilteredMap");
+		preFilteredMapShader->bind();
+		{
+			for (uint32_t mipmapLevel = 0; mipmapLevel < mipmapLevelCount; mipmapLevel++)
+			{
+				uint32_t mipmapDimXY = preFilteredMapDimXY * glm::pow(0.5, mipmapLevel);
+				specularCaptureFbo->resize(mipmapDimXY, mipmapDimXY);
+				RenderCommand::setViewportDimension(mipmapDimXY, mipmapDimXY);
+
+				float roughness = (float)mipmapLevel / (float)mipmapLevelCount;
+				specularMapDataUbo->setData(&roughness);
+
+				specularCaptureFbo->bind();
+				for (const auto& [face, viewMatrix] : s_rendererData->CubemapCaptureViewMatrices)
+				{
+					glm::mat4 viewProjectionMatrix = s_rendererData->CubemapCaptureProjectionMatrix * viewMatrix;
+					cubemapDataUbo->setData(glm::value_ptr(viewProjectionMatrix));
+					diffuseCaptureFbo->attachCubemapFace(0, face, mipmapLevel);
+
+					RenderCommand::clear();
+					RenderCommand::drawIndexed(cubeVao);
+					cubeVao->unbind();
+				}
+			}
+		}
+		specularCaptureFbo->unbind();
 
 		return cubemapsResults;
 	}

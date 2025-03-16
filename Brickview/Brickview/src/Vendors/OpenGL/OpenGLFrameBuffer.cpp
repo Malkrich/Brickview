@@ -12,7 +12,7 @@ namespace Brickview
 	namespace Utils
 	{
 
-		static void attachColorTexture(uint32_t attachmentID, uint32_t width, uint32_t height, uint32_t mipmapLevels, GLint internalFormat, GLenum format, GLenum minFilter, GLenum magFilter, uint32_t attachmentIndex)
+		static void attachColorTexture(uint32_t attachmentID, uint32_t width, uint32_t height, GLint internalFormat, GLenum format, GLenum minFilter, GLenum magFilter, uint32_t attachmentIndex)
 		{
 			// no deals with multisampling yet
 			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
@@ -32,7 +32,7 @@ namespace Brickview
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, attachmentID, 0);
 		}
 
-		static void attachCubemapTexture(uint32_t attachmentID, uint32_t width, uint32_t height, uint32_t mipmapLevels, GLint internalFormat, GLenum minFilter, GLenum magFilter, uint32_t attachmentIndex)
+		static void attachCubemapTexture(uint32_t attachmentID, uint32_t width, uint32_t height, GLint internalFormat, GLenum minFilter, GLenum magFilter, uint32_t attachmentIndex)
 		{
 			for (uint32_t i = 0; i < 6; i++)
 			{
@@ -51,6 +51,8 @@ namespace Brickview
 			// By default we attach postive X face which is index 0
 			// We also attach mipmap level 0 by default
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_TEXTURE_CUBE_MAP_POSITIVE_X, attachmentID, 0);
+
+			CHECK_GL_ERROR();
 		}
 
 		static bool isDepthFormat(FrameBufferAttachment format)
@@ -105,6 +107,8 @@ namespace Brickview
 				m_colorAttachmentsSpecs.push_back(attachment);
 		}
 
+		glCreateFramebuffers(1, &m_bufferID);
+
 		invalidate();
 	}
 
@@ -146,27 +150,36 @@ namespace Brickview
 	{
 		if (m_bufferID)
 		{
-			glDeleteFramebuffers(1, &m_bufferID);
-			glDeleteTextures(m_colorAttachments.size(), m_colorAttachments.data());
-			glDeleteTextures(1, &m_depthAttachment);
-
-			m_bufferID = 0;
-			m_colorAttachments.clear();
-			m_depthAttachment = 0;
+			for (size_t i = 0; i < m_colorAttachments.size(); i++)
+			{
+				if (m_colorAttachmentsSpecs[i].Resizable)
+				{
+					glDeleteTextures(1, &m_colorAttachments[i]);
+					m_colorAttachments[i] = 0;
+				}
+			}
+			if (m_depthAttachmentSpecs.Resizable)
+			{
+				glDeleteTextures(1, &m_depthAttachment);
+				m_depthAttachment = 0;
+			}
 		}
 
-		glCreateFramebuffers(1, &m_bufferID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_bufferID);
 
 		if (!m_colorAttachmentsSpecs.empty())
 		{
 			m_colorAttachments.resize(m_colorAttachmentsSpecs.size());
-			glGenTextures(m_colorAttachmentsSpecs.size(), m_colorAttachments.data());
 
 			for (size_t i = 0; i < m_colorAttachmentsSpecs.size(); i++)
 			{
 				const FrameBufferAttachmentSpecs& colorAttachmentSpecs = m_colorAttachmentsSpecs[i];
-				uint32_t attachmentID = m_colorAttachments[i];
+				uint32_t& attachmentID = m_colorAttachments[i];
+
+				if (!colorAttachmentSpecs.Resizable && attachmentID)
+					continue;
+
+				glGenTextures(1, &attachmentID);
 				GLenum textureType = Utils::attahmentFormatToTextureType(colorAttachmentSpecs.Format);
 				GLenum minFilter = TextureUtils::textureFilterToOpenGLFilter(colorAttachmentSpecs.MinFilter);
 				GLenum magFilter = TextureUtils::textureFilterToOpenGLFilter(colorAttachmentSpecs.MagFilter);
@@ -175,14 +188,14 @@ namespace Brickview
 				switch (m_colorAttachmentsSpecs[i].Format)
 				{
 					case FrameBufferAttachment::RedInt:
-						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, mipmapLevels, GL_R32I, GL_RED_INTEGER, minFilter, magFilter, i);
+						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, GL_R32I, GL_RED_INTEGER, minFilter, magFilter, i);
 						continue;
 					case FrameBufferAttachment::RGBA8:
-						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, mipmapLevels, GL_RGBA8, GL_RGBA, minFilter, magFilter, i);
+						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, GL_RGBA8, GL_RGBA, minFilter, magFilter, i);
 						continue;
 
 					case FrameBufferAttachment::CubemapFloat16:
-						Utils::attachCubemapTexture(attachmentID, m_specs.Width, m_specs.Height, mipmapLevels, GL_RGB16F, minFilter, magFilter, i);
+						Utils::attachCubemapTexture(attachmentID, m_specs.Width, m_specs.Height, GL_RGB16F, minFilter, magFilter, i);
 						continue;
 					case FrameBufferAttachment::CubemapFloat32:
 						BV_ASSERT(false, "32 bits cubemap not implemented yet!");
@@ -204,7 +217,9 @@ namespace Brickview
 
 		if (!m_colorAttachments.empty())
 		{
-			static constexpr std::array<GLenum, 4> attachmentIndices = {
+			// TODO: review verification
+			// and memory managment of attachmentIndices
+			static std::array<GLenum, 4> attachmentIndices = {
 				GL_COLOR_ATTACHMENT0,
 				GL_COLOR_ATTACHMENT1,
 				GL_COLOR_ATTACHMENT2,
@@ -247,7 +262,7 @@ namespace Brickview
 
 		const FrameBufferAttachmentSpecs& specs = m_colorAttachmentsSpecs[attachmentIndex];
 
-		BV_ASSERT(specs.Format == FrameBufferAttachment::RedInt, "Wrong frame bfufer attachment format!");
+		BV_ASSERT(specs.Format == FrameBufferAttachment::RedInt, "Wrong frame buffer attachment format!");
 
 		GLenum format = Utils::getGlFormatFromAttachmentFormat(specs.Format);
 		glClearTexImage(m_colorAttachments[attachmentIndex], 0, format, GL_INT, &value);
@@ -262,6 +277,8 @@ namespace Brickview
 		uint32_t attachmentID = m_colorAttachments[attachmentIndex];
 		glBindFramebuffer(GL_FRAMEBUFFER, m_bufferID);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, attachmentID, mipmapLevel);
+
+		CHECK_GL_ERROR();
 	}
 
 }
