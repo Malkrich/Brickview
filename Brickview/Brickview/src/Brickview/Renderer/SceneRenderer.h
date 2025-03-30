@@ -25,22 +25,6 @@ namespace Brickview
 		Solid, LightedPhong, LightedPBR
 	};
 
-	struct SceneRendererSettings
-	{
-		// Global
-		RendererType RendererType = RendererType::LightedPBR;
-
-		// Grid
-		float GridBound = 1.0f;
-		float GridStep = 0.1f;
-		glm::vec3 GridColor = glm::vec3(0.0f, 0.0f, 0.0f);
-
-		// Wireframe
-		float OutlineWidth = 3.5f;
-
-		SceneRendererSettings() = default;
-	};
-
 	struct InstanceElement
 	{
 		int EntityID = -1;
@@ -92,8 +76,37 @@ namespace Brickview
 		DirectionalLightData DirectionalLight;
 	};
 
+	enum class SkyboxType
+	{
+		// TODO: ClearColor = 0,
+		EnvironmentMap,
+		IrradianceMap,
+		PreFilteredMap
+	};
+
 	class SceneRenderer
 	{
+	public:
+		struct Settings
+		{
+			// Global
+			RendererType RendererType = RendererType::LightedPBR;
+
+			// Grid
+			float GridBound = 1.0f;
+			float GridStep = 0.1f;
+			glm::vec3 GridColor = glm::vec3(0.0f, 0.0f, 0.0f);
+
+			// Wireframe
+			float OutlineWidth = 3.5f;
+
+			// Skybox
+			SkyboxType Skybox = SkyboxType::PreFilteredMap;
+			float SkyboxMipLevel = 0.0f;
+
+			Settings() = default;
+		};
+
 	public:
 		SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight);
 
@@ -110,7 +123,7 @@ namespace Brickview
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
 		void submitMesh(const MeshComponent& mesh, const TransformComponent& transform, const MaterialComponent& material, uint32_t entityID);
 
-		SceneRendererSettings& getRendererSettings() { return m_rendererSettings; }
+		Settings& getRendererSettings() { return m_rendererSettings; }
 
 		void setSelectedEntity(Entity e) { m_selectedEntity = e; }
 
@@ -121,9 +134,11 @@ namespace Brickview
 
 		std::vector<Line> generateGrid(float gridBound, float gridStep);
 
+		Ref<Cubemap> getSkyboxToRender();
+
 	private:
 		// Renderer internal
-		SceneRendererSettings m_rendererSettings;
+		Settings m_rendererSettings;
 
 		// Selected entity
 		Entity m_selectedEntity;

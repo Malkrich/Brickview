@@ -314,7 +314,7 @@ namespace Brickview
 
 		ImGui::Columns(2);
 		{
-			SceneRendererSettings& rendererSettings = m_renderer->getRendererSettings();
+			SceneRenderer::Settings& rendererSettings = m_renderer->getRendererSettings();
 
 			// Render mode
 			ImGui::Text("Renderer Type");
@@ -346,6 +346,43 @@ namespace Brickview
 			ImGui::NextColumn();
 			ImGui::SliderFloat("##outlineWidthSlider", &rendererSettings.OutlineWidth, 1.0f, 10.0f);
 			ImGui::NextColumn();
+
+			// Skybox type
+			ImGui::Text("Skybox Type");
+			ImGui::NextColumn();
+			SkyboxType skyboxType = rendererSettings.Skybox;
+			const char* skyboxTypeStrings[] = { "Environment Map", "Irradiance Map", "PreFiltered Map" };
+			const char* selectedSkyboxTypeString = skyboxTypeStrings[(int32_t)skyboxType];
+			if (ImGui::BeginCombo("##skyboxType", selectedSkyboxTypeString))
+			{
+				for (int i = 0; i < 3; i++)
+				{
+					bool isSelected = selectedSkyboxTypeString == skyboxTypeStrings[i];
+					if (ImGui::Selectable(skyboxTypeStrings[i], isSelected))
+					{
+						selectedSkyboxTypeString = rendererTypeStrings[i];
+						rendererSettings.Skybox = (SkyboxType)i;
+					}
+
+					if (isSelected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndCombo();
+			}
+			ImGui::NextColumn();
+
+			// Specular skybox mipmap level
+			bool isPreFilteredMap = rendererSettings.Skybox == SkyboxType::PreFilteredMap;
+			if (!isPreFilteredMap)
+				rendererSettings.SkyboxMipLevel = 0.0f;
+
+			ImGui::BeginDisabled(!isPreFilteredMap);
+			ImGui::Text("Skybox Mip Level:");
+			ImGui::NextColumn();
+			ImGui::SliderFloat("##skyboxMipLevel", &rendererSettings.SkyboxMipLevel, 0.0f, 1.0f);
+			ImGui::NextColumn();
+			ImGui::EndDisabled();
 		}
 		ImGui::Columns(1);
 

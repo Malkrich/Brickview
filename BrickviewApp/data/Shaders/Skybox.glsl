@@ -28,7 +28,11 @@ void main()
 
 layout (location = 0) out vec4 o_color;
 
-layout (binding = 0) uniform samplerCube u_environmentCubemap;
+layout (binding = 0) uniform samplerCube u_cubeMap;
+layout (std140, binding = 1) uniform SkyboxParam
+{
+    float mipLevel;
+} skyboxParam;
 
 in vec3 f_localPosition;
 
@@ -36,7 +40,7 @@ void main()
 {
     vec3 normal = normalize(-f_localPosition);
     
-    vec3 environmentColor = texture(u_environmentCubemap, normal).rgb;
+    vec3 environmentColor = textureLod(u_cubeMap, normal, skyboxParam.mipLevel).rgb;
 
     // No tone mapping needed as it is already done in the 
     // equirectangular to cubemap shader

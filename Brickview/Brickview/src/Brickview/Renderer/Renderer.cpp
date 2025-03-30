@@ -9,6 +9,7 @@
 #include "GpuBuffer.h"
 #include "UniformBuffer.h"
 #include "ShaderStorageBuffer.h"
+#include "TextureUtils.h"
 
 #include "Vendors/OpenGL/OpenGLError.h"
 
@@ -55,6 +56,13 @@ namespace Brickview
 		int EntityID = -1;
 	};
 
+	struct SkyboxParamUboBlock
+	{
+		float MipLevel = 0.0f;
+
+		SkyboxParamUboBlock() = default;
+	};
+
 	struct RendererData
 	{
 		// Shaders
@@ -72,6 +80,9 @@ namespace Brickview
 
 		// Environment lighting
 		CubemapTextures Cubemaps;
+		Ref<Cubemap> RenderedSkyboxHandle = nullptr;
+		float RenderedSkyboxMipLevel = 0.0f;
+		Ref<UniformBuffer> SkyboxParamUbo = nullptr;
 		Ref<GpuMesh> SkyboxCubeMesh = nullptr;
 		const glm::mat4 CubemapCaptureProjectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		const std::map<CubemapFace, glm::mat4> CubemapCaptureViewMatrices = {
@@ -192,6 +203,10 @@ namespace Brickview
 		s_rendererData->SkyboxCubeMesh = createRef<GpuMesh>(
 			skyboxCubeMeshVertices.size() * sizeof(glm::vec3), skyboxCubeMeshVertices.data(), skyboxCubeMeshLayout,
 			skyboxCubeMeshIndices.size() * sizeof(uint32_t), skyboxCubeMeshIndices.data());
+		UniformBufferSpecifications skyboxParamUboSpecs;
+		skyboxParamUboSpecs.BlockName = "SkyboxParam";
+		skyboxParamUboSpecs.BindingPoint = 1;
+		s_rendererData->SkyboxParamUbo = UniformBuffer::create(skyboxParamUboSpecs, sizeof(SkyboxParamUboBlock));
 
 		RenderCommand::enableDepthTesting(true);
 		RenderCommand::enableFaceCulling(true);
@@ -215,6 +230,8 @@ namespace Brickview
 
 		// Environment map
 		s_rendererData->Cubemaps = env.Cubemaps;
+		s_rendererData->RenderedSkyboxHandle = env.RenderedSkyboxHandle;
+		s_rendererData->RenderedSkyboxMipLevel = env.RenderedSkyboxMipLevel;
 
 		// Point Lights
 		s_rendererData->PointLightsCount = env.PointLights.size();
@@ -242,7 +259,9 @@ namespace Brickview
 	void Renderer::end()
 	{
 		renderPointLights();
-		renderSkybox(s_rendererData->Cubemaps.EnvironmentMap);
+
+		if (s_rendererData->RenderedSkyboxHandle)
+			renderSkybox(s_rendererData->RenderedSkyboxHandle);
 	}
 
 	CubemapTextures Renderer::createCubemapTextures(Ref<Texture2D> hdriTexture, uint32_t environmentMapDimXY, uint32_t irradianceMapDimXY)
@@ -344,24 +363,18 @@ namespace Brickview
 		specularCaptureFboSpecs.Attachments[1].Resizable = false;
 		Ref<FrameBuffer> specularCaptureFbo = FrameBuffer::create(specularCaptureFboSpecs);
 
-		CubemapSpecifications preFilteredEnvMapSpecs;
-		preFilteredEnvMapSpecs.Width = preFilteredMapDimXY;
-		preFilteredEnvMapSpecs.Height = preFilteredMapDimXY;
-		preFilteredEnvMapSpecs.MinFilter = TextureFilter::LinearMipmapLinear;
-		preFilteredEnvMapSpecs.MagFilter = TextureFilter::Linear;
-		Ref<Cubemap> preFilteredEnvMap = Cubemap::create(preFilteredEnvMapSpecs);
-
 		// Pre filtered environment map pass
 		Ref<Shader> preFilteredMapShader = s_rendererData->ShaderLibrary->get("PreFilteredMap");
 		preFilteredMapShader->bind();
+		cubemapsResults.EnvironmentMap->bind(0);
 		{
 			for (uint32_t mipmapLevel = 0; mipmapLevel < mipmapLevelCount; mipmapLevel++)
 			{
-				uint32_t mipmapDimXY = preFilteredMapDimXY * glm::pow(0.5, mipmapLevel);
+				uint32_t mipmapDimXY = TextureUtils::computeWidthOrHeightFromMipLevel(mipmapLevel, preFilteredMapDimXY);
 				specularCaptureFbo->resize(mipmapDimXY, mipmapDimXY);
 				RenderCommand::setViewportDimension(mipmapDimXY, mipmapDimXY);
 
-				float roughness = (float)mipmapLevel / (float)mipmapLevelCount;
+				float roughness = (float)mipmapLevel / (float)(mipmapLevelCount-1);
 				specularMapDataUbo->setData(&roughness);
 
 				specularCaptureFbo->bind();
@@ -369,13 +382,23 @@ namespace Brickview
 				{
 					glm::mat4 viewProjectionMatrix = s_rendererData->CubemapCaptureProjectionMatrix * viewMatrix;
 					cubemapDataUbo->setData(glm::value_ptr(viewProjectionMatrix));
-					diffuseCaptureFbo->attachCubemapFace(0, face, mipmapLevel);
+					specularCaptureFbo->attachCubemapFace(0, face, mipmapLevel);
 
 					RenderCommand::clear();
 					RenderCommand::drawIndexed(cubeVao);
 					cubeVao->unbind();
 				}
 			}
+
+
+			uint32_t preFilteredAttachment = specularCaptureFbo->getColorAttachment(0);
+			CubemapSpecifications preFilteredEnvMapSpecs;
+			preFilteredEnvMapSpecs.Width = preFilteredMapDimXY;
+			preFilteredEnvMapSpecs.Height = preFilteredMapDimXY;
+			preFilteredEnvMapSpecs.MinFilter = TextureFilter::LinearMipmapLinear;
+			preFilteredEnvMapSpecs.MagFilter = TextureFilter::Linear;
+			preFilteredEnvMapSpecs.Levels = mipmapLevelCount;
+			cubemapsResults.PreFilteredEnvMap = Cubemap::copy(preFilteredEnvMapSpecs, preFilteredAttachment);
 		}
 		specularCaptureFbo->unbind();
 
@@ -390,6 +413,11 @@ namespace Brickview
 		Ref<VertexArray> cubeVao = VertexArray::create();
 		cubeVao->addVertexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryVertexBuffer());
 		cubeVao->setIndexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryIndexBuffer());
+
+		SkyboxParamUboBlock skyboxParam;
+		skyboxParam.MipLevel = s_rendererData->RenderedSkyboxMipLevel;
+		s_rendererData->SkyboxParamUbo->bind();
+		s_rendererData->SkyboxParamUbo->setData(&skyboxParam);
 
 		Ref<Shader> skyboxShader = s_rendererData->ShaderLibrary->get("Skybox");
 		cubemap->bind(0);
@@ -417,6 +445,7 @@ namespace Brickview
 		modelData.Transform = transform;
 		modelData.Material = material;
 		modelData.EntityID = entityID;
+		s_rendererData->ModelDataUbo->bind();
 		s_rendererData->ModelDataUbo->setData(&modelData);
 
 		// Irradiance map

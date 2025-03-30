@@ -1,7 +1,9 @@
 #include "Pch.h"
 #include "OpenGLTextureUtils.h"
 
-namespace Brickview::TextureUtils
+#include <glm/glm.hpp>
+
+namespace Brickview::OpenGLTextureUtils
 {
 
 	GLenum textureFormatToOpenGLInternalFormat(TextureFormat format)

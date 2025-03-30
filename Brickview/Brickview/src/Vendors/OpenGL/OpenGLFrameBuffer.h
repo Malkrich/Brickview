@@ -18,6 +18,8 @@ namespace Brickview
 		virtual void resize(uint32_t width, uint32_t height) override;
 
 		virtual const FrameBufferSpecifications& getSpecifications() const override { return m_specs; }
+		virtual const FrameBufferAttachmentSpecs& getColorAttachmentSpecs(uint32_t attachmentIndex) const override { return m_colorAttachmentsSpecs[attachmentIndex]; }
+		virtual const FrameBufferAttachmentSpecs& getDepthAttachmentSpecs() const override { return m_depthAttachmentSpecs; }
 
 		virtual int32_t readPixel(uint32_t attachmentIndex, uint32_t mouseX, uint32_t mouseY) const override;
 

@@ -4,7 +4,7 @@
 
 #include <glad/glad.h>
 
-namespace Brickview::TextureUtils
+namespace Brickview::OpenGLTextureUtils
 {
 
 	GLenum textureFormatToOpenGLInternalFormat(TextureFormat format);

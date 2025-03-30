@@ -28,9 +28,12 @@ namespace Brickview
 	{
 		Ref<Cubemap> EnvironmentMap = nullptr;
 		Ref<Cubemap> IrradianceMap = nullptr;
+		Ref<Cubemap> PreFilteredEnvMap = nullptr;
 
 		CubemapTextures() = default;
 	};
+
+	enum class SkyboxType;
 
 	struct RendererEnvironment
 	{
@@ -38,6 +41,8 @@ namespace Brickview
 		std::vector<int> PointLightIDs = {};
 
 		CubemapTextures Cubemaps;
+		Ref<Cubemap> RenderedSkyboxHandle = nullptr;
+		float RenderedSkyboxMipLevel;
 
 		RendererEnvironment() = default;
 	};

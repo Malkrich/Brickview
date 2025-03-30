@@ -60,6 +60,8 @@ namespace Brickview
 		virtual void resize(uint32_t width, uint32_t height) = 0;
 
 		virtual const FrameBufferSpecifications& getSpecifications() const = 0;
+		virtual const FrameBufferAttachmentSpecs& getColorAttachmentSpecs(uint32_t attachmentIndex) const = 0;
+		virtual const FrameBufferAttachmentSpecs& getDepthAttachmentSpecs() const = 0;
 
 		virtual int32_t readPixel(uint32_t attachmentIndex, uint32_t mouseX, uint32_t mouseY) const = 0;
 

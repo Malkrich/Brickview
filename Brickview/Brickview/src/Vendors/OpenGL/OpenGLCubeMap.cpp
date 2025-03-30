@@ -1,6 +1,7 @@
 #include "Pch.h"
 #include "OpenGLCubemap.h"
 
+#include "Renderer/TextureUtils.h"
 #include "OpenGLError.h"
 #include "OpenGLTextureUtils.h"
 
@@ -19,8 +20,15 @@ namespace Brickview
 	{
 		Ref<OpenGLCubemap> cubemap = createRef<OpenGLCubemap>(specs);
 
-		glCopyImageSubData(textureID, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0,
-			cubemap->m_textureID, GL_TEXTURE_CUBE_MAP, 0, 0, 0, 0, specs.Width, specs.Height, 6);
+		for (uint32_t mipLevel = 0; mipLevel < specs.Levels; mipLevel++)
+		{
+			uint32_t width  = TextureUtils::computeWidthOrHeightFromMipLevel(mipLevel, specs.Width);
+			uint32_t height = TextureUtils::computeWidthOrHeightFromMipLevel(mipLevel, specs.Height);
+
+			glCopyImageSubData(textureID, GL_TEXTURE_CUBE_MAP, mipLevel, 0, 0, 0,
+				cubemap->m_textureID, GL_TEXTURE_CUBE_MAP, mipLevel, 0, 0, 0, width, height, 6);
+		}
+
 		return cubemap;
 	}
 
@@ -45,7 +53,7 @@ namespace Brickview
 		glGenTextures(1, &m_textureID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 
-		GLenum internalFormat = TextureUtils::textureFormatToOpenGLInternalFormat(m_specs.Format);
+		GLenum internalFormat = OpenGLTextureUtils::textureFormatToOpenGLInternalFormat(m_specs.Format);
 		for (uint32_t faceIndex = 0; faceIndex < 6; faceIndex++)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, 0, internalFormat, m_specs.Width, m_specs.Height, 0, GL_RGB, GL_FLOAT, nullptr);
@@ -54,8 +62,8 @@ namespace Brickview
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-		GLenum minFilter = TextureUtils::textureFilterToOpenGLFilter(m_specs.MinFilter);
-		GLenum magFilter = TextureUtils::textureFilterToOpenGLFilter(m_specs.MagFilter);
+		GLenum minFilter = OpenGLTextureUtils::textureFilterToOpenGLFilter(m_specs.MinFilter);
+		GLenum magFilter = OpenGLTextureUtils::textureFilterToOpenGLFilter(m_specs.MagFilter);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, minFilter);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, magFilter);
 

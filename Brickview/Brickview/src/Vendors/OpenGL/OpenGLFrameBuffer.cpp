@@ -181,8 +181,8 @@ namespace Brickview
 
 				glGenTextures(1, &attachmentID);
 				GLenum textureType = Utils::attahmentFormatToTextureType(colorAttachmentSpecs.Format);
-				GLenum minFilter = TextureUtils::textureFilterToOpenGLFilter(colorAttachmentSpecs.MinFilter);
-				GLenum magFilter = TextureUtils::textureFilterToOpenGLFilter(colorAttachmentSpecs.MagFilter);
+				GLenum minFilter = OpenGLTextureUtils::textureFilterToOpenGLFilter(colorAttachmentSpecs.MinFilter);
+				GLenum magFilter = OpenGLTextureUtils::textureFilterToOpenGLFilter(colorAttachmentSpecs.MagFilter);
 				uint32_t mipmapLevels = colorAttachmentSpecs.MipmapLevels;
 				glBindTexture(textureType, attachmentID);
 				switch (m_colorAttachmentsSpecs[i].Format)

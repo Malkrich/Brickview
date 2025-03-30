@@ -6,6 +6,13 @@
 
 namespace Brickview
 {
+	namespace Utils
+	{
+
+
+
+	}
+
 	SceneRenderer::SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
 		init(viewportWidth, viewportHeight);
@@ -88,6 +95,10 @@ namespace Brickview
 		// Lights
 		m_environment.PointLights = lightsData.PointLights;
 		m_environment.PointLightIDs = lightsData.PointLightIDs;
+
+		// Skybox
+		m_environment.RenderedSkyboxHandle = getSkyboxToRender();
+		m_environment.RenderedSkyboxMipLevel = m_rendererSettings.SkyboxMipLevel;
 	}
 
 	static Ref<Shader> getLegoPartShader(RendererType rendererType)
@@ -141,7 +152,7 @@ namespace Brickview
 			}
 
 			// Origin
-			Renderer::renderLines(m_originLines, m_originLineColors, 2.0f);
+			Renderer::renderLines(m_originLines, m_originLineColors, 1.0f);
 
 			// Grid
 			Renderer::renderLines(m_gridLines, m_rendererSettings.GridColor, 1.0f);
@@ -233,4 +244,18 @@ namespace Brickview
 
 		return gridLines;
 	}
+
+	Ref<Cubemap> SceneRenderer::getSkyboxToRender()
+	{
+		switch (m_rendererSettings.Skybox)
+		{
+			case SkyboxType::EnvironmentMap: return m_environment.Cubemaps.EnvironmentMap;
+			case SkyboxType::IrradianceMap:  return m_environment.Cubemaps.IrradianceMap;
+			case SkyboxType::PreFilteredMap: return m_environment.Cubemaps.PreFilteredEnvMap;
+		}
+
+		BV_ASSERT(false, "Unknown SkyboxType!");
+		return m_environment.Cubemaps.EnvironmentMap;
+	}
+
 }

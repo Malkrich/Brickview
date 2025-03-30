@@ -73,10 +73,10 @@ namespace Brickview
 				break;
 		}
 
-		GLenum wrapSParam = TextureUtils::textureWrapModeToOpenGLWrapMode(m_specs.WrappingModeU);
-		GLenum wrapTParam = TextureUtils::textureWrapModeToOpenGLWrapMode(m_specs.WrappingModeV);
-		GLenum filterMinParam = TextureUtils::textureFilterToOpenGLFilter(m_specs.FilterMin);
-		GLenum filterMagParam = TextureUtils::textureFilterToOpenGLFilter(m_specs.FilterMag);
+		GLenum wrapSParam = OpenGLTextureUtils::textureWrapModeToOpenGLWrapMode(m_specs.WrappingModeU);
+		GLenum wrapTParam = OpenGLTextureUtils::textureWrapModeToOpenGLWrapMode(m_specs.WrappingModeV);
+		GLenum filterMinParam = OpenGLTextureUtils::textureFilterToOpenGLFilter(m_specs.FilterMin);
+		GLenum filterMagParam = OpenGLTextureUtils::textureFilterToOpenGLFilter(m_specs.FilterMag);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapSParam);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapTParam);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMinParam);
