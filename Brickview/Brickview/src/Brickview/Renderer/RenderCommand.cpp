@@ -51,6 +51,11 @@ namespace Brickview
 		RenderCommand::setViewportDimension(0, 0, width, height);
 	}
 
+	void RenderCommand::setViewportDimension(uint32_t dimXY)
+	{
+		RenderCommand::setViewportDimension(dimXY, dimXY);
+	}
+
 	void RenderCommand::enableDepthTesting(bool enable)
 	{
 		s_rendererAPI->enableDepthTesting(enable);

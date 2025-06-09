@@ -8,11 +8,13 @@
 namespace Brickview
 {
 
+	// TODO: rename to FrameBufferAttachmentType
 	enum class FrameBufferAttachment
 	{
 		None = 0,
 
 		RedInt,
+		RGFloat16,
 		RGBA8,
 
 		Depth24Sentil8,
@@ -31,6 +33,7 @@ namespace Brickview
 		TextureFilter MagFilter = TextureFilter::Linear;
 		uint32_t MipmapLevels = 1;
 		bool Resizable = true;
+		bool GenerateMipmapOnConstruction = false;
 
 		FrameBufferAttachmentSpecs() = default;
 		FrameBufferAttachmentSpecs(FrameBufferAttachment attachment)
@@ -69,6 +72,7 @@ namespace Brickview
 		virtual void clearAttachment(uint32_t attachmentIndex, int value) = 0;
 
 		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face, uint32_t mipmapLevel = 0) = 0;
+		virtual void generateCubemapMipmap(uint32_t attachmentIndex) = 0;
 	};
 
 }

@@ -22,6 +22,8 @@ namespace Brickview
 	{
 	public:
 		static Ref<Texture2D> create(const Texture2DSpecifications specs, const std::filesystem::path& filePath);
+		static Ref<Texture2D> create(const Texture2DSpecifications specs, uint32_t width, uint32_t height);
+		static Ref<Texture2D> create(const Texture2DSpecifications specs, uint32_t dimensions);
 
 		virtual ~Texture2D() = default;
 

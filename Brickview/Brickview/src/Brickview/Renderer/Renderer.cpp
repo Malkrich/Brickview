@@ -71,6 +71,10 @@ namespace Brickview
 		// Camera
 		Ref<UniformBuffer> CameraUbo = nullptr;
 
+		// Geometry
+		Ref<GpuMesh> FullScreenQuad = nullptr;
+		Ref<GpuMesh> SkyboxCubeMesh = nullptr;
+
 		// Point Lights
 		uint32_t PointLightsCount = 0;
 		Ref<ShaderStorageBuffer> LightsDataSsbo = nullptr;
@@ -83,7 +87,6 @@ namespace Brickview
 		Ref<Cubemap> RenderedSkyboxHandle = nullptr;
 		float RenderedSkyboxMipLevel = 0.0f;
 		Ref<UniformBuffer> SkyboxParamUbo = nullptr;
-		Ref<GpuMesh> SkyboxCubeMesh = nullptr;
 		const glm::mat4 CubemapCaptureProjectionMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
 		const std::map<CubemapFace, glm::mat4> CubemapCaptureViewMatrices = {
 			{ CubemapFace::PositiveX,
@@ -125,6 +128,7 @@ namespace Brickview
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "Skybox.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "IrradianceMap.glsl");
 		s_rendererData->ShaderLibrary->load(shaderBaseDir / "PreFilteredMap.glsl");
+		s_rendererData->ShaderLibrary->load(shaderBaseDir / "BrdfLUTMap.glsl");
 
 		// Camera
 		UniformBufferSpecifications cameraDataSpecs;
@@ -178,6 +182,24 @@ namespace Brickview
 			{ 1, "a_normal", BufferElementType::Float3 }
 		};
 
+		// Full screen quad
+		const std::array<glm::vec2, 4> fullScreenQuadVertices = {
+			glm::vec2(-0.5f, -0.5f),
+			glm::vec2( 0.5f, -0.5f),
+			glm::vec2( 0.5f,  0.5f),
+			glm::vec2(-0.5f,  0.5f)
+		};
+		Layout fullScreenQuadLayout = {
+			{ 0, "a_position", BufferElementType::Float2 }
+		};
+		const std::array<int, 6> fullScreenQuadIndices = {
+			0, 1, 2,
+			2, 3, 4
+		};
+		s_rendererData->FullScreenQuad = createRef<GpuMesh>(
+			fullScreenQuadVertices.size() * sizeof(glm::vec2), fullScreenQuadVertices.data(), fullScreenQuadLayout,
+			fullScreenQuadIndices.size() * sizeof(uint32_t), fullScreenQuadVertices.data());
+
 		// Skybox cube mesh
 		const std::array<glm::vec3, 8> skyboxCubeMeshVertices = {
 			glm::vec3(-0.5f, -0.5f, -0.5f),
@@ -229,7 +251,7 @@ namespace Brickview
 		s_rendererData->CameraUbo->setData(&cameraData);
 
 		// Environment map
-		s_rendererData->Cubemaps = env.Cubemaps;
+		s_rendererData->Cubemaps = env.EnvironmentCubemaps;
 		s_rendererData->RenderedSkyboxHandle = env.RenderedSkyboxHandle;
 		s_rendererData->RenderedSkyboxMipLevel = env.RenderedSkyboxMipLevel;
 
@@ -264,8 +286,14 @@ namespace Brickview
 			renderSkybox(s_rendererData->RenderedSkyboxHandle);
 	}
 
-	CubemapTextures Renderer::createCubemapTextures(Ref<Texture2D> hdriTexture, uint32_t environmentMapDimXY, uint32_t irradianceMapDimXY)
+	CubemapTextures Renderer::createEnvironmentCubemaps(Ref<Texture2D> hdriTexture, const CubemapsCreationInfo& cubemapsCreationInfo)
 	{
+		uint32_t environmentMapDimXY = cubemapsCreationInfo.EnvironmentMapDimXY;
+		uint32_t irradianceMapDimXY = cubemapsCreationInfo.IrradianceMapDimXY;
+		uint32_t preFilteredMapDimXY = cubemapsCreationInfo.PreFilteredMapDimXY;
+		uint32_t preFilteredMapMipMapLevelCount = cubemapsCreationInfo.PreFilteredMapMipMapLevelCount;
+		uint32_t brdfLUTMapDimXY = cubemapsCreationInfo.BrdfLUTMapDimXY;
+
 		// Data to return
 		CubemapTextures cubemapsResults;
 
@@ -274,11 +302,17 @@ namespace Brickview
 		cubeVao->addVertexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryVertexBuffer());
 		cubeVao->setIndexBuffer(s_rendererData->SkyboxCubeMesh->getGeometryIndexBuffer());
 
+		// Full screen quad geoemtry
+		Ref<VertexArray> fullScreenQuandVao = VertexArray::create();
+		fullScreenQuandVao->addVertexBuffer(s_rendererData->FullScreenQuad->getGeometryVertexBuffer());
+		fullScreenQuandVao->setIndexBuffer(s_rendererData->FullScreenQuad->getGeometryIndexBuffer());
+
 		// Diffuse IBL pre process
 		FrameBufferSpecifications diffuseCaptureFboSpecs;
 		diffuseCaptureFboSpecs.Width = environmentMapDimXY;
 		diffuseCaptureFboSpecs.Height = environmentMapDimXY;
 		diffuseCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
+		//diffuseCaptureFboSpecs.Attachments[1].MinFilter = TextureFilter::LinearMipmapLinear;
 		Ref<FrameBuffer> diffuseCaptureFbo = FrameBuffer::create(diffuseCaptureFboSpecs);
 		
 		// Uniform buffer containing the view matrices to render each face
@@ -311,12 +345,13 @@ namespace Brickview
 			environmentMapSpecs.Width = diffuseCaptureFbo->getSpecifications().Width;
 			environmentMapSpecs.Height = diffuseCaptureFbo->getSpecifications().Height;
 			cubemapsResults.EnvironmentMap = Cubemap::copy(environmentMapSpecs, environmentMapSourceID);
+			diffuseCaptureFbo->generateCubemapMipmap(0);
 		}
 		cubeVao->unbind();
 		diffuseCaptureFbo->unbind();
 
 		// Irradiance map pass
-		RenderCommand::setViewportDimension(irradianceMapDimXY, irradianceMapDimXY);
+		RenderCommand::setViewportDimension(irradianceMapDimXY);
 		diffuseCaptureFbo->resize(irradianceMapDimXY, irradianceMapDimXY);
 		diffuseCaptureFbo->bind();
 		{
@@ -345,36 +380,33 @@ namespace Brickview
 		diffuseCaptureFbo->unbind();
 
 		// Specular IBL pre process
-		uint32_t mipmapLevelCount = 5;
-		uint32_t preFilteredMapDimXY = 128;
+		UniformBufferSpecifications preFilteredMapDataUboSpecs;
+		preFilteredMapDataUboSpecs.BlockName = "PreFilteredMapData";
+		preFilteredMapDataUboSpecs.BindingPoint = 1;
+		Ref<UniformBuffer> specularMapDataUbo = UniformBuffer::create(preFilteredMapDataUboSpecs, sizeof(float));
 
-		// Specular map uniform block
-		UniformBufferSpecifications specularMapDataUboSpecs;
-		specularMapDataUboSpecs.BlockName = "SpecularMapData";
-		specularMapDataUboSpecs.BindingPoint = 1;
-		Ref<UniformBuffer> specularMapDataUbo = UniformBuffer::create(specularMapDataUboSpecs, sizeof(float));
-
-		FrameBufferSpecifications specularCaptureFboSpecs;
-		specularCaptureFboSpecs.Width = preFilteredMapDimXY;
-		specularCaptureFboSpecs.Height = preFilteredMapDimXY;
-		specularCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
-		specularCaptureFboSpecs.Attachments[1].MinFilter = TextureFilter::LinearMipmapLinear;
-		specularCaptureFboSpecs.Attachments[1].MipmapLevels = mipmapLevelCount;
-		specularCaptureFboSpecs.Attachments[1].Resizable = false;
-		Ref<FrameBuffer> specularCaptureFbo = FrameBuffer::create(specularCaptureFboSpecs);
+		FrameBufferSpecifications preFilteredCaptureFboSpecs;
+		preFilteredCaptureFboSpecs.Width = preFilteredMapDimXY;
+		preFilteredCaptureFboSpecs.Height = preFilteredMapDimXY;
+		preFilteredCaptureFboSpecs.Attachments = { FrameBufferAttachment::Depth, FrameBufferAttachment::Cubemap };
+		preFilteredCaptureFboSpecs.Attachments[1].MinFilter = TextureFilter::LinearMipmapLinear;
+		preFilteredCaptureFboSpecs.Attachments[1].MipmapLevels = preFilteredMapMipMapLevelCount;
+		preFilteredCaptureFboSpecs.Attachments[1].Resizable = false;
+		preFilteredCaptureFboSpecs.Attachments[1].GenerateMipmapOnConstruction = true;
+		Ref<FrameBuffer> specularCaptureFbo = FrameBuffer::create(preFilteredCaptureFboSpecs);
 
 		// Pre filtered environment map pass
-		Ref<Shader> preFilteredMapShader = s_rendererData->ShaderLibrary->get("PreFilteredMap");
-		preFilteredMapShader->bind();
 		cubemapsResults.EnvironmentMap->bind(0);
 		{
-			for (uint32_t mipmapLevel = 0; mipmapLevel < mipmapLevelCount; mipmapLevel++)
+			Ref<Shader> preFilteredMapShader = s_rendererData->ShaderLibrary->get("PreFilteredMap");
+			preFilteredMapShader->bind();
+			for (uint32_t mipmapLevel = 0; mipmapLevel < preFilteredMapMipMapLevelCount; mipmapLevel++)
 			{
 				uint32_t mipmapDimXY = TextureUtils::computeWidthOrHeightFromMipLevel(mipmapLevel, preFilteredMapDimXY);
 				specularCaptureFbo->resize(mipmapDimXY, mipmapDimXY);
-				RenderCommand::setViewportDimension(mipmapDimXY, mipmapDimXY);
+				RenderCommand::setViewportDimension(mipmapDimXY);
 
-				float roughness = (float)mipmapLevel / (float)(mipmapLevelCount-1);
+				float roughness = (float)mipmapLevel / (float)(preFilteredMapMipMapLevelCount - 1);
 				specularMapDataUbo->setData(&roughness);
 
 				specularCaptureFbo->bind();
@@ -390,17 +422,43 @@ namespace Brickview
 				}
 			}
 
-
 			uint32_t preFilteredAttachment = specularCaptureFbo->getColorAttachment(0);
 			CubemapSpecifications preFilteredEnvMapSpecs;
 			preFilteredEnvMapSpecs.Width = preFilteredMapDimXY;
 			preFilteredEnvMapSpecs.Height = preFilteredMapDimXY;
 			preFilteredEnvMapSpecs.MinFilter = TextureFilter::LinearMipmapLinear;
 			preFilteredEnvMapSpecs.MagFilter = TextureFilter::Linear;
-			preFilteredEnvMapSpecs.Levels = mipmapLevelCount;
+			preFilteredEnvMapSpecs.Levels = preFilteredMapMipMapLevelCount;
 			cubemapsResults.PreFilteredEnvMap = Cubemap::copy(preFilteredEnvMapSpecs, preFilteredAttachment);
 		}
 		specularCaptureFbo->unbind();
+
+		//// BRDF LUT texture pass
+		//Texture2DSpecifications brdfLUTMapSpecs;
+		//brdfLUTMapSpecs.Format = TextureFormat::RGFloat16;
+		//brdfLUTMapSpecs.WrappingModeU = TextureWrapMode::ClampToEdge;
+		//brdfLUTMapSpecs.WrappingModeV = TextureWrapMode::ClampToEdge;
+
+		//FrameBufferSpecifications brdfLUTMapFboSpecs;
+		//brdfLUTMapFboSpecs.Width = brdfLUTMapDimXY;
+		//brdfLUTMapFboSpecs.Height = brdfLUTMapDimXY;
+		//brdfLUTMapFboSpecs.Attachments.resize(1);
+		//brdfLUTMapFboSpecs.Attachments[0].Format = FrameBufferAttachment::RGFloat16;
+		//Ref<FrameBuffer> brdfLUTMapFbo = FrameBuffer::create(brdfLUTMapFboSpecs);
+
+		//Ref<Texture2D> brdfLUTTexture = Texture2D::create(brdfLUTMapSpecs, brdfLUTMapDimXY);
+		//brdfLUTTexture->bind();
+		//brdfLUTMapFbo->bind();
+		//{
+		//	Ref<Shader> brdfLUTMapShader = s_rendererData->ShaderLibrary->get("BrdfLUTMap");
+		//	brdfLUTMapShader->bind();
+		//	RenderCommand::setViewportDimension(brdfLUTMapDimXY);
+
+		//	RenderCommand::clear();
+		//	RenderCommand::drawIndexed(fullScreenQuandVao);
+		//	fullScreenQuandVao->unbind();
+		//}
+		//brdfLUTMapFbo->unbind();
 
 		return cubemapsResults;
 	}

@@ -59,7 +59,13 @@ namespace Brickview
 		hdriTextureSpecs.WrappingModeU = TextureWrapMode::ClampToEdge;
 		hdriTextureSpecs.WrappingModeV = TextureWrapMode::ClampToEdge;
 		Ref<Texture2D> hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/bambanani_sunset_2k.hdr");
-		m_environment.Cubemaps = Renderer::createCubemapTextures(hdriTexture, 512, 32);
+		CubemapsCreationInfo cubemapsCreationInfo;
+		cubemapsCreationInfo.EnvironmentMapDimXY = 512;
+		cubemapsCreationInfo.IrradianceMapDimXY = 512;
+		cubemapsCreationInfo.PreFilteredMapDimXY= 128;
+		cubemapsCreationInfo.PreFilteredMapMipMapLevelCount = 5;
+		cubemapsCreationInfo.BrdfLUTMapDimXY = 512;
+		m_environment.EnvironmentCubemaps = Renderer::createEnvironmentCubemaps(hdriTexture, cubemapsCreationInfo);
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
@@ -249,13 +255,13 @@ namespace Brickview
 	{
 		switch (m_rendererSettings.Skybox)
 		{
-			case SkyboxType::EnvironmentMap: return m_environment.Cubemaps.EnvironmentMap;
-			case SkyboxType::IrradianceMap:  return m_environment.Cubemaps.IrradianceMap;
-			case SkyboxType::PreFilteredMap: return m_environment.Cubemaps.PreFilteredEnvMap;
+			case SkyboxType::EnvironmentMap: return m_environment.EnvironmentCubemaps.EnvironmentMap;
+			case SkyboxType::IrradianceMap:  return m_environment.EnvironmentCubemaps.IrradianceMap;
+			case SkyboxType::PreFilteredMap: return m_environment.EnvironmentCubemaps.PreFilteredEnvMap;
 		}
 
 		BV_ASSERT(false, "Unknown SkyboxType!");
-		return m_environment.Cubemaps.EnvironmentMap;
+		return m_environment.EnvironmentCubemaps.EnvironmentMap;
 	}
 
 }

@@ -24,6 +24,17 @@ namespace Brickview
 		CameraData() = default;
 	};
 
+	struct CubemapsCreationInfo
+	{
+		uint32_t EnvironmentMapDimXY = 512;
+		uint32_t IrradianceMapDimXY = 512;
+		uint32_t PreFilteredMapDimXY = 128;
+		uint32_t PreFilteredMapMipMapLevelCount = 5;
+		uint32_t BrdfLUTMapDimXY = 512;
+
+		CubemapsCreationInfo() = default;
+	};
+
 	struct CubemapTextures
 	{
 		Ref<Cubemap> EnvironmentMap = nullptr;
@@ -33,14 +44,12 @@ namespace Brickview
 		CubemapTextures() = default;
 	};
 
-	enum class SkyboxType;
-
 	struct RendererEnvironment
 	{
 		std::vector<PointLight> PointLights = {};
 		std::vector<int> PointLightIDs = {};
 
-		CubemapTextures Cubemaps;
+		CubemapTextures EnvironmentCubemaps;
 		Ref<Cubemap> RenderedSkyboxHandle = nullptr;
 		float RenderedSkyboxMipLevel;
 
@@ -61,7 +70,7 @@ namespace Brickview
 		static void end();
 
 		// Cubemap / Skybox
-		static CubemapTextures createCubemapTextures(Ref<Texture2D> hdriTexture, uint32_t environmentMapDimXY, uint32_t irradianceMapDimXY);
+		static CubemapTextures createEnvironmentCubemaps(Ref<Texture2D> hdriTexture, const CubemapsCreationInfo& cubemapsCreationInfo);
 		static void renderSkybox(Ref<Cubemap> cubemap);
 
 		// Meshes

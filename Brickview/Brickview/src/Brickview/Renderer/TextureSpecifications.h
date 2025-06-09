@@ -5,8 +5,13 @@ namespace Brickview
 
 	enum class TextureFormat
 	{
-		RGB, RGBA,
-		RGBFloat16, RGBFLoat32
+		RGBInt32, RGBAInt32,
+		RGFloat16,
+		RGBFloat16, RGBFLoat32,
+
+		// Defaults
+		RGB = RGBInt32,
+		RGBA = RGBAInt32
 	};
 
 	enum class TextureFilter
