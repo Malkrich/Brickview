@@ -10,8 +10,9 @@ namespace Brickview::OpenGLTextureUtils
 	{
 		switch (format)
 		{
-		case TextureFormat::RGBFloat16: return GL_RGB16F;
-		case TextureFormat::RGBFLoat32: return GL_RGB32F;
+			case TextureFormat::RGFloat16: return GL_RG16;
+			case TextureFormat::RGBFloat16: return GL_RGB16F;
+			case TextureFormat::RGBFLoat32: return GL_RGB32F;
 		}
 
 		BV_ASSERT(false, "Unknown texture format!");

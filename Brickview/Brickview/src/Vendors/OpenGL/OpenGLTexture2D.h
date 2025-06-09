@@ -9,6 +9,7 @@ namespace Brickview
 	{
 	public:
 		OpenGLTexture2D(const Texture2DSpecifications& specs, const std::filesystem::path& filePath);
+		OpenGLTexture2D(const Texture2DSpecifications& specs, uint32_t width, uint32_t height);
 
 		virtual ~OpenGLTexture2D();
 
@@ -29,7 +30,6 @@ namespace Brickview
 
 		uint32_t m_width;
 		uint32_t m_height;
-		uint8_t m_channels;
 
 		Texture2DSpecifications m_specs;
 	};
