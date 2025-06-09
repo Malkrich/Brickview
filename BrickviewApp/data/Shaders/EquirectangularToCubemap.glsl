@@ -41,8 +41,8 @@ void main()
     vec2 uv = sampleSphericalMap(normal);
     vec3 color = texture(u_equirectangularMap, uv).rgb;
 
-    // Tone mapping so we make sure all values are between 0 and ~1
+    // Tone mapping
     color = color / (color + vec3(1.0));
-    
+
     o_color = color;
 }

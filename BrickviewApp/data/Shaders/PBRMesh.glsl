@@ -105,7 +105,8 @@ layout (std430, binding = 1) readonly buffer LightsData
     PointLight PointLights[];
 } s_lightsData;
 
-layout (binding = 0) uniform samplerCube u_irrdianceMap;
+layout (binding = 0) uniform samplerCube u_irradianceMap;
+layout (binding = 1) uniform samplerCube u_preFilteredMap;
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
 {
@@ -196,7 +197,7 @@ void main()
     // Irradiance map
     vec3 ks = fesnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), baseReflectivity, roughness);
     vec3 kd = 1.0 - ks;
-    vec3 irradiance = texture(u_irrdianceMap, normal).rgb;
+    vec3 irradiance = texture(u_irradianceMap, normal).rgb;
     vec3 diffuse = irradiance * albedo;
     vec3 ambient = kd * diffuse;
 

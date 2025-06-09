@@ -24,10 +24,10 @@ layout (location = 0) out vec3 o_color;
 
 in vec3 f_localPosition;
 
-layout (std140, binding = 1) uniform SpecularMapData
+layout (std140, binding = 1) uniform PreFilteredMapData
 {
     float Roughness;
-} specularMapData;
+} preFilteredMapData;
 
 layout (binding = 0) uniform samplerCube u_environmentMap;
 
@@ -67,12 +67,12 @@ vec3 importanceSampleGGX(vec2 Xi, vec3 N, float roughness)
 	
     vec3 sampleVec = tangent * H.x + bitangent * H.y + N * H.z;
     return normalize(sampleVec);
-}  
+}
 
 void main()
 {
-    float roughness = specularMapData.Roughness;
-    
+    float roughness = preFilteredMapData.Roughness;
+
     vec3 N = normalize(f_localPosition);
     vec3 V = N;
 
