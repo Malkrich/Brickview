@@ -7,8 +7,14 @@
 namespace Brickview::OpenGLTextureUtils
 {
 
-	GLenum textureFormatToOpenGLInternalFormat(TextureFormat format);
+	GLenum textureFormatToOpenGLTextureInternalFormat(TextureFormat format);
+
+	GLenum textureFormatToOpenGLTextureFormat(TextureFormat format);
+
+	GLenum textureFormatToOpenGLTextureType(TextureFormat format);
+
 	GLenum textureWrapModeToOpenGLWrapMode(TextureWrapMode mode);
+
 	GLenum textureFilterToOpenGLFilter(TextureFilter filter);
 
 }

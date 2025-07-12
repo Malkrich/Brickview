@@ -11,6 +11,8 @@ namespace Brickview
 		OpenGLTexture2D(const Texture2DSpecifications& specs, const std::filesystem::path& filePath);
 		OpenGLTexture2D(const Texture2DSpecifications& specs, uint32_t width, uint32_t height);
 
+		static Ref<OpenGLTexture2D> copy(const Texture2DSpecifications& specs, uint32_t textureSource, uint32_t width, uint32_t height);
+
 		virtual ~OpenGLTexture2D();
 
 		virtual void bind(uint32_t slot = 0) const override;

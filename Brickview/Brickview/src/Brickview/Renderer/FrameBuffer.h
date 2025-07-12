@@ -72,7 +72,6 @@ namespace Brickview
 		virtual void clearAttachment(uint32_t attachmentIndex, int value) = 0;
 
 		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face, uint32_t mipmapLevel = 0) = 0;
-		virtual void generateCubemapMipmap(uint32_t attachmentIndex) = 0;
 	};
 
 }

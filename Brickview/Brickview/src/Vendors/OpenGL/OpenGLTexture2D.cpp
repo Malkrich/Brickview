@@ -48,6 +48,16 @@ namespace Brickview
 		invalidate(nullptr);
 	}
 
+	Ref<OpenGLTexture2D> OpenGLTexture2D::copy(const Texture2DSpecifications& specs, uint32_t textureSource, uint32_t width, uint32_t height)
+	{
+		Ref<OpenGLTexture2D> texture = createRef<OpenGLTexture2D>(specs, width, height);
+
+		glCopyImageSubData(textureSource, GL_TEXTURE_2D, 0, 0, 0, 0,
+			texture->m_textureID, GL_TEXTURE_2D, 0, 0, 0, 0, width, height, 1);
+
+		return texture;
+	}
+
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 		glDeleteTextures(1, &m_textureID);
@@ -64,15 +74,20 @@ namespace Brickview
 		glGenTextures(1, &m_textureID);
 		glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-		switch(m_specs.Format)
+		//GLenum internalFormat = OpenGLTextureUtils::textureFormatToOpenGLTextureInternalFormat(m_specs.Format);
+		//GLenum format = OpenGLTextureUtils::textureFormatToOpenGLTextureFormat(m_specs.Format);
+		//GLenum type = OpenGLTextureUtils::textureFormatToOpenGLTextureType(m_specs.Format);
+		//glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, m_width, m_height, 0, format, type, data);
+
+		switch (m_specs.Format)
 		{
 			case TextureFormat::RGFloat16:
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, m_width, m_height, 0, GL_RG, GL_FLOAT, data);
 				break;
-			case TextureFormat::RGBInt32:
+			case TextureFormat::RGB:
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				break;
-			case TextureFormat::RGBAInt32:
+			case TextureFormat::RGBA:
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 				break;
 			case TextureFormat::RGBFloat16:

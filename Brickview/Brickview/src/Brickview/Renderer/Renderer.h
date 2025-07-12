@@ -27,7 +27,7 @@ namespace Brickview
 	struct CubemapsCreationInfo
 	{
 		uint32_t EnvironmentMapDimXY = 512;
-		uint32_t IrradianceMapDimXY = 512;
+		uint32_t IrradianceMapDimXY = 32;
 		uint32_t PreFilteredMapDimXY = 128;
 		uint32_t PreFilteredMapMipMapLevelCount = 5;
 		uint32_t BrdfLUTMapDimXY = 512;
@@ -40,6 +40,8 @@ namespace Brickview
 		Ref<Cubemap> EnvironmentMap = nullptr;
 		Ref<Cubemap> IrradianceMap = nullptr;
 		Ref<Cubemap> PreFilteredEnvMap = nullptr;
+
+		Ref<Texture2D> BrdfLUTTexture = nullptr;
 
 		CubemapTextures() = default;
 	};

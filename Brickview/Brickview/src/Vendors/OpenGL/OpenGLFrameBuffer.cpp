@@ -47,7 +47,8 @@ namespace Brickview
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-			if (generateMipMaps)
+			//if (generateMipMaps)
+			if (minFilter == GL_LINEAR_MIPMAP_LINEAR)
 				glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
 			// By default we attach postive X face which is index 0
@@ -80,7 +81,7 @@ namespace Brickview
 			return 0;
 		}
 
-		static GLenum attahmentFormatToTextureType(FrameBufferAttachment format)
+		static GLenum attachmentFormatToTextureType(FrameBufferAttachment format)
 		{
 			switch (format)
 			{
@@ -183,7 +184,7 @@ namespace Brickview
 					continue;
 
 				glGenTextures(1, &attachmentID);
-				GLenum textureType = Utils::attahmentFormatToTextureType(colorAttachmentSpecs.Format);
+				GLenum textureType = Utils::attachmentFormatToTextureType(colorAttachmentSpecs.Format);
 				GLenum minFilter = OpenGLTextureUtils::textureFilterToOpenGLFilter(colorAttachmentSpecs.MinFilter);
 				GLenum magFilter = OpenGLTextureUtils::textureFilterToOpenGLFilter(colorAttachmentSpecs.MagFilter);
 				uint32_t mipmapLevels = colorAttachmentSpecs.MipmapLevels;
@@ -194,7 +195,7 @@ namespace Brickview
 						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, GL_R32I, GL_RED_INTEGER, minFilter, magFilter, i);
 						continue;
 					case FrameBufferAttachment::RGFloat16:
-						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, GL_RG32F, GL_RG, minFilter, magFilter, i);
+						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, GL_RG16F, GL_RG, minFilter, magFilter, i);
 						continue;
 					case FrameBufferAttachment::RGBA8:
 						Utils::attachColorTexture(attachmentID, m_specs.Width, m_specs.Height, GL_RGBA8, GL_RGBA, minFilter, magFilter, i);
@@ -283,17 +284,6 @@ namespace Brickview
 		uint32_t attachmentID = m_colorAttachments[attachmentIndex];
 		glBindFramebuffer(GL_FRAMEBUFFER, m_bufferID);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, attachmentID, mipmapLevel);
-	}
-
-	void OpenGLFrameBuffer::generateCubemapMipmap(uint32_t attachmentIndex)
-	{
-		BV_ASSERT(m_colorAttachmentsSpecs[attachmentIndex].Format == FrameBufferAttachment::CubemapFloat16
-			|| m_colorAttachmentsSpecs[attachmentIndex].Format == FrameBufferAttachment::CubemapFloat32, "Attachment index {} is not a cubemap attachment!", attachmentIndex);
-
-		uint32_t attachmentID = m_colorAttachments[attachmentIndex];
-		glBindFramebuffer(GL_FRAMEBUFFER, m_bufferID);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, attachmentID);
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 	}
 
 }

@@ -60,11 +60,6 @@ namespace Brickview
 		hdriTextureSpecs.WrappingModeV = TextureWrapMode::ClampToEdge;
 		Ref<Texture2D> hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/bambanani_sunset_2k.hdr");
 		CubemapsCreationInfo cubemapsCreationInfo;
-		cubemapsCreationInfo.EnvironmentMapDimXY = 512;
-		cubemapsCreationInfo.IrradianceMapDimXY = 512;
-		cubemapsCreationInfo.PreFilteredMapDimXY= 128;
-		cubemapsCreationInfo.PreFilteredMapMipMapLevelCount = 5;
-		cubemapsCreationInfo.BrdfLUTMapDimXY = 512;
 		m_environment.EnvironmentCubemaps = Renderer::createEnvironmentCubemaps(hdriTexture, cubemapsCreationInfo);
 	}
 

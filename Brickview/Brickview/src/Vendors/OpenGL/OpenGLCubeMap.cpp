@@ -53,7 +53,7 @@ namespace Brickview
 		glGenTextures(1, &m_textureID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 
-		GLenum internalFormat = OpenGLTextureUtils::textureFormatToOpenGLInternalFormat(m_specs.Format);
+		GLenum internalFormat = OpenGLTextureUtils::textureFormatToOpenGLTextureInternalFormat(m_specs.Format);
 		for (uint32_t faceIndex = 0; faceIndex < 6; faceIndex++)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, 0, internalFormat, m_specs.Width, m_specs.Height, 0, GL_RGB, GL_FLOAT, nullptr);
