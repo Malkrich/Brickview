@@ -107,6 +107,7 @@ layout (std430, binding = 1) readonly buffer LightsData
 
 layout (binding = 0) uniform samplerCube u_irradianceMap;
 layout (binding = 1) uniform samplerCube u_preFilteredMap;
+layout (binding = 2) uniform sampler2D u_brdfLUTMap;
 
 vec3 fresnelSchlick(vec3 baseReflectivity, vec3 viewDirection, vec3 halfwayVector)
 {
@@ -197,9 +198,18 @@ void main()
     // Irradiance map
     vec3 ks = fesnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), baseReflectivity, roughness);
     vec3 kd = 1.0 - ks;
+    vec3 F = ks;
     vec3 irradiance = texture(u_irradianceMap, normal).rgb;
     vec3 diffuse = irradiance * albedo;
-    vec3 ambient = kd * diffuse;
+
+    // PreFiltered map and brdf LUT
+    const float maxLOD = 4.0;
+    vec3 reflectViewDirection = reflect(-viewDirection, normal);
+    vec3 preFilteredColor = textureLod(u_preFilteredMap, reflectViewDirection, roughness * maxLOD).rgb;
+    vec2 envBRDF = texture(u_brdfLUTMap, vec2(max(dot(normal, viewDirection), 0.0), roughness)).rg;
+    vec3 specular = preFilteredColor * (F * envBRDF.x + envBRDF.y);
+
+    vec3 ambient = kd * diffuse + specular;
 
     // Final color
     vec3 finalColor = ambient + lightResult;

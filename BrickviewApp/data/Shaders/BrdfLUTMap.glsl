@@ -7,7 +7,7 @@ out vec2 f_textCoord;
 
 void main()
 {
-    f_textCoord = a_position;
+    f_textCoord = a_position * 0.5 + 0.5;
     gl_Position = vec4(a_position, 0.0, 1.0);
 }
 
@@ -125,6 +125,6 @@ vec2 integrateBRDF(float NdotV, float roughness)
 //----------------------------------------------------------------------------
 void main()
 {
-    vec2 integratedBRDF = integrateBRDF(f_textCoord.x, f_textCoord.y);
+    vec2 integratedBRDF = integrateBRDF(max(f_textCoord.x, 0.0001), f_textCoord.y);
     o_color = integratedBRDF;
 }

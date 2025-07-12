@@ -7,6 +7,8 @@ layout (location = 1) in vec3 a_color;
 layout (std140, binding = 0) uniform CameraData
 {
     mat4 ViewProjectionMatrix;
+    mat4 View;
+    mat4 Projection;
     vec3 Position;
 } u_cameraData;
 
