@@ -52,15 +52,6 @@ namespace Brickview
 
 		// Grid
 		m_gridLines = generateGrid(m_rendererSettings.GridBound, m_rendererSettings.GridStep);
-
-		// HDRI environment
-		Texture2DSpecifications hdriTextureSpecs;
-		hdriTextureSpecs.Format = TextureFormat::RGBFloat16;
-		hdriTextureSpecs.WrappingModeU = TextureWrapMode::ClampToEdge;
-		hdriTextureSpecs.WrappingModeV = TextureWrapMode::ClampToEdge;
-		Ref<Texture2D> hdriTexture = Texture2D::create(hdriTextureSpecs, "./data/HDRI/bambanani_sunset_2k.hdr");
-		CubemapsCreationInfo cubemapsCreationInfo;
-		m_environment.EnvironmentCubemaps = Renderer::createEnvironmentCubemaps(hdriTexture, cubemapsCreationInfo);
 	}
 
 	uint32_t SceneRenderer::getSceneRenderAttachment() const
@@ -169,6 +160,11 @@ namespace Brickview
 		m_meshSubmissions.clear();
 	}
 
+	void SceneRenderer::setHdriTexture(Ref<Texture2D> hdriTexture)
+	{
+		computeHdriEnvironmentPass(hdriTexture);
+	}
+
 	void SceneRenderer::submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent & transform, const MaterialComponent& materialComponent, uint32_t entityID)
 	{
 		LegoPartID id = legoPart.ID;
@@ -244,6 +240,12 @@ namespace Brickview
 		}
 
 		return gridLines;
+	}
+
+	void SceneRenderer::computeHdriEnvironmentPass(Ref<Texture2D> hdriTexture)
+	{
+		CubemapsCreationInfo cubemapsCreationInfo;
+		m_environment.EnvironmentCubemaps = Renderer::createEnvironmentCubemaps(hdriTexture, cubemapsCreationInfo);
 	}
 
 	Ref<Cubemap> SceneRenderer::getSkyboxToRender()

@@ -117,10 +117,15 @@ namespace Brickview
 
 		void render();
 
+		void setHdriTexture(Ref<Texture2D> hdriTexture);
+
 		// Submission
+		// Environment
 		void setSceneEnvironment(const PerspectiveCamera& camera, const SceneLightsData& env);
 		// Material should be found from the LegoPartComponent material (LegoMaterial -> LegoMaterialRegistry -> RendererMaterial)
+		// Lego parts
 		void submitLegoPart(const LegoPartComponent& legoPart, const LegoPartMeshRegistry& legoPartMeshRegistry, const TransformComponent& transform, const MaterialComponent& materialComponent, uint32_t entityID);
+		// Meshes
 		void submitMesh(const MeshComponent& mesh, const TransformComponent& transform, const MaterialComponent& material, uint32_t entityID);
 
 		Settings& getRendererSettings() { return m_rendererSettings; }
@@ -133,6 +138,8 @@ namespace Brickview
 		void insertNewInstanceBuffer(LegoPartID id, const Ref<GpuMesh>& mesh, const InstanceElement& firstInstanceElement);
 
 		std::vector<Line> generateGrid(float gridBound, float gridStep);
+
+		void computeHdriEnvironmentPass(Ref<Texture2D> hdriTexture);
 
 		Ref<Cubemap> getSkyboxToRender();
 

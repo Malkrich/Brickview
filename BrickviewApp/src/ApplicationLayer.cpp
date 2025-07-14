@@ -104,6 +104,9 @@ namespace Brickview
 		});
 		m_scenePartsListPanel = createScope<ScenePartsListPanel>(m_scene);
 		m_legoPartPropertiesPanel = createScope<LegoPartPropertiesPanel>();
+
+		m_hdriFilePath = "./data/HDRI/bambanani_sunset_2k.hdr";
+		importHdriFile();
 	}
 
 	void ApplicationLayer::onDetach()
@@ -348,6 +351,19 @@ namespace Brickview
 			ImGui::NextColumn();
 
 			// Skybox type
+			ImGui::Text("HDR image: ");
+			ImGui::NextColumn();
+			std::string strHdriFilePath = m_hdriFilePath.string();
+			if (ImGui::InputText("##hdrImagePath", (char*)strHdriFilePath.c_str(), strHdriFilePath.capacity() + 1))
+				m_hdriFilePath = strHdriFilePath;
+			ImGui::NextColumn();
+			ImGui::Columns(1);
+			if (ImGui::Button("Import texture"))
+			{
+				importHdriFile();
+			}
+			ImGui::Columns(2);
+
 			ImGui::Text("Skybox Type");
 			ImGui::NextColumn();
 			SkyboxType skyboxType = rendererSettings.Skybox;
@@ -458,6 +474,17 @@ namespace Brickview
 	{
 		TransformComponent& transform = entity.getComponent<TransformComponent>();
 		m_cameraControl->setTargetPoint(transform.Translation);
+	}
+
+	void ApplicationLayer::importHdriFile()
+	{
+		// HDRI environment
+		Texture2DSpecifications hdriTextureSpecs;
+		hdriTextureSpecs.Format = TextureFormat::RGBFloat16;
+		hdriTextureSpecs.WrappingModeU = TextureWrapMode::ClampToEdge;
+		hdriTextureSpecs.WrappingModeV = TextureWrapMode::ClampToEdge;
+		Ref<Texture2D> hdriTexture = Texture2D::create(hdriTextureSpecs, m_hdriFilePath);
+		m_renderer->setHdriTexture(hdriTexture);
 	}
 
 }

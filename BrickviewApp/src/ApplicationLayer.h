@@ -43,6 +43,8 @@ namespace Brickview
 
 		void onFocusEntity(Entity entity);
 
+		void importHdriFile();
+
 	private:
 		// Scene
 		Ref<Scene> m_scene = nullptr;
@@ -50,6 +52,7 @@ namespace Brickview
 		// Render
 		Ref<SceneRenderer> m_renderer = nullptr;
 		uint32_t m_viewportWidth, m_viewportHeight;
+		std::filesystem::path m_hdriFilePath;
 
 		Scope<CameraController> m_cameraControl = nullptr;
 		bool m_laptopMode = false;
