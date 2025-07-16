@@ -1,30 +1,30 @@
 #include "Pch.h"
-#include "Cubemap.h"
+#include "TextureCubemap.h"
 
 #include "RendererAPI.h"
-#include "OpenGL/OpenGLCubemap.h"
+#include "Vendors/OpenGL/OpenGLTextureCubemap.h"
 
 namespace Brickview
 {
 
-	Ref<Cubemap> Cubemap::create(const CubemapSpecifications& specs)
+	Ref<TextureCubemap> TextureCubemap::create(const TextureCubemapSpecifications& specs)
 	{
 		switch (RendererAPI::getAPI())
 		{
 			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;
-			case RendererAPI::API::OpenGL: return createRef<OpenGLCubemap>(specs);
+			case RendererAPI::API::OpenGL: return createRef<OpenGLTextureCubemap>(specs);
 		}
 
 		BV_ASSERT(false, "Unknown API!");
 		return nullptr;
 	}
 
-	Ref<Cubemap> Cubemap::copy(const CubemapSpecifications& specs, uint32_t textureID)
+	Ref<TextureCubemap> TextureCubemap::copy(const TextureCubemapSpecifications& specs, uint32_t textureID)
 	{
 		switch (RendererAPI::getAPI())
 		{
 			case RendererAPI::API::None:   BV_ASSERT(false, "Brickview does not support RendererAPI::None!");  return nullptr;
-			case RendererAPI::API::OpenGL: return OpenGLCubemap::copy(specs, textureID);
+			case RendererAPI::API::OpenGL: return OpenGLTextureCubemap::copy(specs, textureID);
 		}
 
 		BV_ASSERT(false, "Unknown API!");

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Texture.h"
 #include "TextureSpecifications.h"
 
 namespace Brickview
@@ -12,7 +13,7 @@ namespace Brickview
 		PositiveZ = 4, NegativeZ = 5,
 	};
 
-	struct CubemapSpecifications
+	struct TextureCubemapSpecifications
 	{
 		uint32_t Width = 0, Height = 0;
 		uint32_t Levels = 1;
@@ -20,18 +21,18 @@ namespace Brickview
 		TextureFilter MinFilter = TextureFilter::Linear;
 		TextureFilter MagFilter = TextureFilter::Linear;
 
-		CubemapSpecifications() = default;
+		TextureCubemapSpecifications() = default;
 	};
 
-	class Cubemap
+	class TextureCubemap : public Texture
 	{
 	public:
-		static Ref<Cubemap> create(const CubemapSpecifications& specs);
-		static Ref<Cubemap> copy(const CubemapSpecifications& specs, uint32_t textureID);
+		static Ref<TextureCubemap> create(const TextureCubemapSpecifications& specs);
+		static Ref<TextureCubemap> copy(const TextureCubemapSpecifications& specs, uint32_t textureID);
 
 		virtual void bind(uint32_t slot = 0) const = 0;
 
-		virtual ~Cubemap() = default;
+		virtual const TextureCubemapSpecifications& getSpecifications() const = 0;
 	};
 
 }

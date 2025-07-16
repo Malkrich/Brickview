@@ -1,5 +1,5 @@
 #include "Pch.h"
-#include "OpenGLCubemap.h"
+#include "OpenGLTextureCubemap.h"
 
 #include "Renderer/TextureUtils.h"
 #include "OpenGLError.h"
@@ -10,15 +10,15 @@
 namespace Brickview
 {
 
-	OpenGLCubemap::OpenGLCubemap(const CubemapSpecifications& specs)
+	OpenGLTextureCubemap::OpenGLTextureCubemap(const TextureCubemapSpecifications& specs)
 		: m_specs(specs)
 	{
 		invalidate();
 	}
 
-	Ref<OpenGLCubemap> OpenGLCubemap::copy(const CubemapSpecifications& specs, uint32_t textureID)
+	Ref<OpenGLTextureCubemap> OpenGLTextureCubemap::copy(const TextureCubemapSpecifications& specs, uint32_t textureID)
 	{
-		Ref<OpenGLCubemap> cubemap = createRef<OpenGLCubemap>(specs);
+		Ref<OpenGLTextureCubemap> cubemap = createRef<OpenGLTextureCubemap>(specs);
 
 		for (uint32_t mipLevel = 0; mipLevel < specs.Levels; mipLevel++)
 		{
@@ -32,18 +32,18 @@ namespace Brickview
 		return cubemap;
 	}
 
-	OpenGLCubemap::~OpenGLCubemap()
+	OpenGLTextureCubemap::~OpenGLTextureCubemap()
 	{
 		glDeleteTextures(1, &m_textureID);
 	}
 
-	void OpenGLCubemap::bind(uint32_t slot) const
+	void OpenGLTextureCubemap::bind(uint32_t slot) const
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 	}
 
-	void OpenGLCubemap::invalidate()
+	void OpenGLTextureCubemap::invalidate()
 	{
 		if (m_textureID)
 		{

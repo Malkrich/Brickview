@@ -19,7 +19,7 @@
 #include "Renderer/SceneRenderer.h"
 #include "Renderer/TextureSpecifications.h"
 #include "Renderer/Texture2D.h"
-#include "Renderer/Cubemap.h"
+#include "Renderer/TextureCubemap.h"
 #include "Renderer/Shader/Shader.h"
 #include "Renderer/Shader/ShaderLibrary.h"
 #include "Renderer/Camera.h"

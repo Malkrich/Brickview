@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Texture.h"
 #include "TextureSpecifications.h"
 
 #include <filesystem>
@@ -18,7 +19,7 @@ namespace Brickview
 		Texture2DSpecifications() = default;
 	};
 
-	class Texture2D
+	class Texture2D : public Texture
 	{
 	public:
 		static Ref<Texture2D> create(const Texture2DSpecifications specs, const std::filesystem::path& filePath);
@@ -28,16 +29,9 @@ namespace Brickview
 		static Ref<Texture2D> copy(const Texture2DSpecifications& specs, uint32_t sourceTexture, uint32_t width, uint32_t height);
 		static Ref<Texture2D> copy(const Texture2DSpecifications& specs, uint32_t sourceTexture, uint32_t dimensions);
 
-		virtual ~Texture2D() = default;
-
 		virtual void bind(uint32_t slot = 0) const = 0;
 
 		virtual const Texture2DSpecifications& getSpecifications() const = 0;
-
-		virtual uint32_t getWidth() const = 0;
-		virtual uint32_t getHeight() const = 0;
-
-		virtual uint32_t getTextureID() const = 0;
 	};
 
 }

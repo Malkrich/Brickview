@@ -29,23 +29,24 @@ namespace Brickview
 					imageData = (void*)stbi_loadf(strPath.c_str(), &width, &height, nullptr, 0);
 					break;
 			}
+			BV_ASSERT(imageData, "Unable to load image data from {}", filePath.string());
+
 			m_width = width;
 			m_height = height;
-			BV_ASSERT(imageData, "Unable to load image data from {}", filePath.string());
-		}
-
-		if (imageData)
 			invalidate(imageData);
 
-		stbi_image_free(imageData);
+			stbi_image_free(imageData);
+		}
+
+
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(const Texture2DSpecifications& specs, uint32_t width, uint32_t height)
+	OpenGLTexture2D::OpenGLTexture2D(const Texture2DSpecifications& specs, uint32_t width, uint32_t height, void* data)
 		: m_specs(specs)
 		, m_width(width)
 		, m_height(height)
 	{
-		invalidate(nullptr);
+		invalidate(data);
 	}
 
 	Ref<OpenGLTexture2D> OpenGLTexture2D::copy(const Texture2DSpecifications& specs, uint32_t textureSource, uint32_t width, uint32_t height)

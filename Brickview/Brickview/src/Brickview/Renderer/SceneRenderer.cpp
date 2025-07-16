@@ -6,13 +6,6 @@
 
 namespace Brickview
 {
-	namespace Utils
-	{
-
-
-
-	}
-
 	SceneRenderer::SceneRenderer(uint32_t viewportWidth, uint32_t viewportHeight)
 	{
 		init(viewportWidth, viewportHeight);
@@ -24,7 +17,7 @@ namespace Brickview
 		FrameBufferSpecifications viewportFrameBufferSpecs;
 		viewportFrameBufferSpecs.Width = viewportWidth;
 		viewportFrameBufferSpecs.Height = viewportHeight;
-		viewportFrameBufferSpecs.Attachments = { FrameBufferAttachment::RGBA8, FrameBufferAttachment::RedInt, FrameBufferAttachment::Depth };
+		viewportFrameBufferSpecs.Attachments = { ColorAttachmentFormat::RGBA8, ColorAttachmentFormat::RedInt, ColorAttachmentFormat::Depth };
 		m_viewportFrameBuffer = FrameBuffer::create(viewportFrameBufferSpecs);
 
 		// Mesh instance geometry
@@ -69,8 +62,8 @@ namespace Brickview
 
 	void SceneRenderer::resizeViewport(uint32_t width, uint32_t height)
 	{
-		uint32_t currentWidth = m_viewportFrameBuffer->getSpecifications().Width;
-		uint32_t currentHeight = m_viewportFrameBuffer->getSpecifications().Height;
+		uint32_t currentWidth = m_viewportFrameBuffer->getWidth();
+		uint32_t currentHeight = m_viewportFrameBuffer->getHeight();
 
 		if (width != currentWidth || height != currentHeight)
 			m_viewportFrameBuffer->resize(width, height);
@@ -110,7 +103,7 @@ namespace Brickview
 	{
 		m_viewportFrameBuffer->bind();
 		{
-			RenderCommand::setViewportDimension(m_viewportFrameBuffer->getSpecifications().Width, m_viewportFrameBuffer->getSpecifications().Height);
+			RenderCommand::setViewportDimension(m_viewportFrameBuffer->getWidth(), m_viewportFrameBuffer->getHeight());
 			RenderCommand::setClearColor(0.2f, 0.2f, 0.2f);
 			RenderCommand::clear();
 			m_viewportFrameBuffer->clearAttachment(1, -1);
@@ -244,21 +237,21 @@ namespace Brickview
 
 	void SceneRenderer::computeHdriEnvironmentPass(Ref<Texture2D> hdriTexture)
 	{
-		CubemapsCreationInfo cubemapsCreationInfo;
-		m_environment.EnvironmentCubemaps = Renderer::createEnvironmentCubemaps(hdriTexture, cubemapsCreationInfo);
+		EnvironmentImagesParameters imagesParameters; // use default params for the moment
+		m_environment.Images = Renderer::createEnvironmentImages(hdriTexture, imagesParameters);
 	}
 
-	Ref<Cubemap> SceneRenderer::getSkyboxToRender()
+	Ref<TextureCubemap> SceneRenderer::getSkyboxToRender()
 	{
 		switch (m_rendererSettings.Skybox)
 		{
-			case SkyboxType::EnvironmentMap: return m_environment.EnvironmentCubemaps.EnvironmentMap;
-			case SkyboxType::IrradianceMap:  return m_environment.EnvironmentCubemaps.IrradianceMap;
-			case SkyboxType::PreFilteredMap: return m_environment.EnvironmentCubemaps.PreFilteredEnvMap;
+			case SkyboxType::EnvironmentMap: return m_environment.Images.EnvironmentMap;
+			case SkyboxType::IrradianceMap:  return m_environment.Images.IrradianceMap;
+			case SkyboxType::PreFilteredMap: return m_environment.Images.PreFilteredEnvMap;
 		}
 
 		BV_ASSERT(false, "Unknown SkyboxType!");
-		return m_environment.EnvironmentCubemaps.EnvironmentMap;
+		return m_environment.Images.EnvironmentMap;
 	}
 
 }

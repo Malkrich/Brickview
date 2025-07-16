@@ -6,7 +6,7 @@
 #include "Lights.h"
 #include "GpuMesh.h"
 #include "Primitives.h"
-#include "Cubemap.h"
+#include "TextureCubemap.h"
 #include "Texture2D.h"
 
 #include <glm/glm.hpp>
@@ -24,7 +24,7 @@ namespace Brickview
 		CameraData() = default;
 	};
 
-	struct CubemapsCreationInfo
+	struct EnvironmentImagesParameters
 	{
 		uint32_t EnvironmentMapDimXY = 512;
 		uint32_t IrradianceMapDimXY = 32;
@@ -32,18 +32,18 @@ namespace Brickview
 		uint32_t PreFilteredMapMipMapLevelCount = 5;
 		uint32_t BrdfLUTMapDimXY = 512;
 
-		CubemapsCreationInfo() = default;
+		EnvironmentImagesParameters() = default;
 	};
 
-	struct CubemapTextures
+	struct EnvironmentImages
 	{
-		Ref<Cubemap> EnvironmentMap = nullptr;
-		Ref<Cubemap> IrradianceMap = nullptr;
-		Ref<Cubemap> PreFilteredEnvMap = nullptr;
+		Ref<TextureCubemap> EnvironmentMap = nullptr;
+		Ref<TextureCubemap> IrradianceMap = nullptr;
+		Ref<TextureCubemap> PreFilteredEnvMap = nullptr;
 
 		Ref<Texture2D> BrdfLUTTexture = nullptr;
 
-		CubemapTextures() = default;
+		EnvironmentImages() = default;
 	};
 
 	struct RendererEnvironment
@@ -51,8 +51,8 @@ namespace Brickview
 		std::vector<PointLight> PointLights = {};
 		std::vector<int> PointLightIDs = {};
 
-		CubemapTextures EnvironmentCubemaps;
-		Ref<Cubemap> RenderedSkyboxHandle = nullptr;
+		EnvironmentImages Images;
+		Ref<TextureCubemap> RenderedSkyboxHandle = nullptr;
 		float RenderedSkyboxMipLevel;
 
 		RendererEnvironment() = default;
@@ -72,8 +72,8 @@ namespace Brickview
 		static void end();
 
 		// Cubemap / Skybox
-		static CubemapTextures createEnvironmentCubemaps(Ref<Texture2D> hdriTexture, const CubemapsCreationInfo& cubemapsCreationInfo);
-		static void renderSkybox(Ref<Cubemap> cubemap);
+		static EnvironmentImages createEnvironmentImages(Ref<Texture2D> hdriTexture, const EnvironmentImagesParameters& cubemapsCreationInfo);
+		static void renderSkybox(Ref<TextureCubemap> cubemap);
 
 		// Meshes
 		static void renderMesh(Ref<Shader> shader, const RendererMaterial& material, const Ref<GpuMesh>& mesh, const glm::mat4& transform, int entityID);

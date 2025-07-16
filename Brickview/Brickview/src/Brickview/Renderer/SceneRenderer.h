@@ -10,7 +10,7 @@
 #include "Texture2D.h"
 #include "Primitives.h"
 #include "Lights.h"
-#include "Cubemap.h"
+#include "TextureCubemap.h"
 #include "Lego/LegoPartMeshRegistry.h"
 #include "Scene/Components.h"
 #include "Scene/Entity.h"
@@ -101,7 +101,7 @@ namespace Brickview
 			float OutlineWidth = 3.5f;
 
 			// Skybox
-			SkyboxType Skybox = SkyboxType::PreFilteredMap;
+			SkyboxType Skybox = SkyboxType::EnvironmentMap;
 			float SkyboxMipLevel = 0.0f;
 
 			Settings() = default;
@@ -141,7 +141,7 @@ namespace Brickview
 
 		void computeHdriEnvironmentPass(Ref<Texture2D> hdriTexture);
 
-		Ref<Cubemap> getSkyboxToRender();
+		Ref<TextureCubemap> getSkyboxToRender();
 
 	private:
 		// Renderer internal

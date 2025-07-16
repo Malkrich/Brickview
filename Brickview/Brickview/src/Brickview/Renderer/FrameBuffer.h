@@ -1,15 +1,15 @@
 #pragma once
 
 #include "TextureSpecifications.h"
-#include "Cubemap.h"
+#include "TextureCubemap.h"
+#include "Texture2D.h"
 
 #include <glm/glm.hpp>
 
 namespace Brickview
 {
 
-	// TODO: rename to FrameBufferAttachmentType
-	enum class FrameBufferAttachment
+	enum class ColorAttachmentFormat
 	{
 		None = 0,
 
@@ -28,15 +28,17 @@ namespace Brickview
 
 	struct FrameBufferAttachmentSpecs
 	{
-		FrameBufferAttachment Format = FrameBufferAttachment::None;
+		ColorAttachmentFormat Format = ColorAttachmentFormat::None;
 		TextureFilter MinFilter = TextureFilter::Linear;
 		TextureFilter MagFilter = TextureFilter::Linear;
 		uint32_t MipmapLevels = 1;
+
 		bool Resizable = true;
-		bool GenerateMipmapOnConstruction = false;
+
+		Ref<Texture> ExistingAttachment = nullptr;
 
 		FrameBufferAttachmentSpecs() = default;
-		FrameBufferAttachmentSpecs(FrameBufferAttachment attachment)
+		FrameBufferAttachmentSpecs(ColorAttachmentFormat attachment)
 			: Format(attachment)
 		{}
 	};
@@ -62,13 +64,16 @@ namespace Brickview
 
 		virtual void resize(uint32_t width, uint32_t height) = 0;
 
-		virtual const FrameBufferSpecifications& getSpecifications() const = 0;
+		virtual uint32_t getWidth() const = 0;
+		virtual uint32_t getHeight() const = 0;
+
 		virtual const FrameBufferAttachmentSpecs& getColorAttachmentSpecs(uint32_t attachmentIndex) const = 0;
 		virtual const FrameBufferAttachmentSpecs& getDepthAttachmentSpecs() const = 0;
 
 		virtual int32_t readPixel(uint32_t attachmentIndex, uint32_t mouseX, uint32_t mouseY) const = 0;
 
 		virtual uint32_t getColorAttachment(uint32_t index) const = 0;
+		virtual void setColorAttachment(uint32_t index, Ref<Texture> texture) = 0;
 		virtual void clearAttachment(uint32_t attachmentIndex, int value) = 0;
 
 		virtual void attachCubemapFace(uint32_t attachmentIndex, CubemapFace face, uint32_t mipmapLevel = 0) = 0;

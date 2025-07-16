@@ -41,7 +41,7 @@ namespace Brickview
 
 			ImGui::PushID(itemName.c_str());
 
-			auto textureID = m_defaultLegoPartIcon->getTextureID();
+			auto textureID = m_defaultLegoPartIcon->getHandle();
 			if (ImGui::ImageButton((ImTextureID)textureID, { (float)m_iconWidth, (float)m_iconWidth }))
 			{
 				m_onFileLoadCallback(filePath);
