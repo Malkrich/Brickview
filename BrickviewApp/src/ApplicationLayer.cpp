@@ -61,6 +61,18 @@ namespace Brickview
 			}
 		}
 
+		void loadSphereOnlyScene(Ref<Scene> scene)
+		{
+			Ref<Mesh> smoothSphereMesh = Mesh::load("./data/Meshes/SmoothSphere.obj");
+			smoothSphereMesh->scale(0.1f);
+
+			RendererMaterial sphereMaterial;
+			sphereMaterial.Albedo = { 1.0f, 0.0f, 0.0f, 1.0f };
+			sphereMaterial.Roughness = 0.1f;
+			sphereMaterial.Metalness = 0.0f;
+			scene->createMeshEntity(smoothSphereMesh, glm::vec3(0.0f), sphereMaterial);
+		}
+
 	}
 
 	ApplicationLayer::ApplicationLayer()
@@ -78,7 +90,7 @@ namespace Brickview
 		// Scene
 		m_scene = createRef<Scene>();
 
-		ExampleScenes::loadSpheresAndPlaneScene(m_scene);
+		ExampleScenes::loadSphereOnlyScene(m_scene);
 
 		// Renderer
 		// Note: think about the dimensions, this is the native window size
@@ -89,7 +101,7 @@ namespace Brickview
 		CameraControllerSpecifications cameraControlSpecs;
 		cameraControlSpecs.Width = (float)m_viewportWidth;
 		cameraControlSpecs.Height = (float)m_viewportHeight;
-		cameraControlSpecs.DistanceFromObject = 0.2f;
+		cameraControlSpecs.DistanceFromObject = 0.5f;
 		cameraControlSpecs.CameraPosition = { 0.0f, 0.0f, cameraControlSpecs.DistanceFromObject };
 		cameraControlSpecs.LaptopMode = m_laptopMode;
 		m_cameraControl = createScope<CameraController>(cameraControlSpecs);
