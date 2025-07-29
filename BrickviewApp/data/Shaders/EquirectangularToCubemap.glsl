@@ -39,10 +39,5 @@ void main()
     vec3 normal = normalize(f_localPosition);
     
     vec2 uv = sampleSphericalMap(normal);
-    vec3 color = texture(u_equirectangularMap, uv).rgb;
-
-    // Tone mapping
-    color = color / (color + vec3(1.0));
-
-    o_color = color;
+    o_color = texture(u_equirectangularMap, uv).rgb;
 }

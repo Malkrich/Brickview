@@ -202,14 +202,14 @@ namespace Brickview
 
 		// Skybox cube mesh
 		const std::array<glm::vec3, 8> skyboxCubeMeshVertices = {
-			glm::vec3(-0.5f, -0.5f, -0.5f),
-			glm::vec3(0.5f, -0.5f, -0.5f),
-			glm::vec3(0.5f, -0.5f,  0.5f),
-			glm::vec3(-0.5f, -0.5f,  0.5f),
-			glm::vec3(-0.5f,  0.5f,  0.5f),
-			glm::vec3(-0.5f,  0.5f, -0.5f),
-			glm::vec3(0.5f,  0.5f, -0.5f),
-			glm::vec3(0.5f,  0.5f,  0.5f)
+			glm::vec3(-1.0f, -1.0f, -1.0f),
+			glm::vec3( 1.0f, -1.0f, -1.0f),
+			glm::vec3( 1.0f, -1.0f,  1.0f),
+			glm::vec3(-1.0f, -1.0f,  1.0f),
+			glm::vec3(-1.0f,  1.0f,  1.0f),
+			glm::vec3(-1.0f,  1.0f, -1.0f),
+			glm::vec3( 1.0f,  1.0f, -1.0f),
+			glm::vec3( 1.0f,  1.0f,  1.0f)
 		};
 		const std::array<uint32_t, 6 * 2 * 3> skyboxCubeMeshIndices = {
 			1, 0, 2, 2, 0, 3,

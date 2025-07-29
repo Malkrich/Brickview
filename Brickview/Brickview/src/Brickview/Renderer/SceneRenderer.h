@@ -101,7 +101,7 @@ namespace Brickview
 			float OutlineWidth = 1.0f;
 
 			// Skybox
-			SkyboxType Skybox = SkyboxType::EnvironmentMap;
+			SkyboxType Skybox = SkyboxType::IrradianceMap;
 			float SkyboxMipLevel = 0.0f;
 
 			Settings() = default;

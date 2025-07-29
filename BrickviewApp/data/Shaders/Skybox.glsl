@@ -42,6 +42,8 @@ void main()
     
     vec3 environmentColor = textureLod(u_cubeMap, normal, skyboxParam.mipLevel).rgb;
 
+    environmentColor = environmentColor / (environmentColor + vec3(1.0));
+
     // No tone mapping needed as it is already done in the 
     // equirectangular to cubemap shader
     // Therefore we only compute the gamma correction:

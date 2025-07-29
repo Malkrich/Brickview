@@ -30,28 +30,29 @@ layout (binding = 0) uniform samplerCube u_environmentMap;
 void main()
 {
     vec3 normal = normalize(f_localPosition);
+
+    
     vec3 up = vec3(0.0, 1.0, 0.0);
     vec3 right = normalize(cross(up, normal));
     up = normalize(cross(normal, right));
 
     vec3 irradiance = vec3(0.0);
-    float sampleDelta = 0.025;
-    uint sampleCount = 0; 
-    for(float phi = 0.0; phi < 2.0 * PI; phi += sampleDelta)
+    uint sampleCount = 128;
+    float phiSampleDelta = 2.0 * PI / sampleCount;
+    float thetaSampleDelta = PI / sampleCount;
+    for(float phi = 0.0; phi < 2.0 * PI; phi += phiSampleDelta)
     {
-        for(float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta)
+        for(float theta = 0.0; theta < 0.5 * PI; theta += thetaSampleDelta)
         {
             // spherical to cartesian (in tangent space)
             vec3 tangentSpaceSample = vec3(sin(theta) * cos(phi),  sin(theta) * sin(phi), cos(theta));
             // tangent space to world
             vec3 sampleVector = tangentSpaceSample.x * right + tangentSpaceSample.y * up + tangentSpaceSample.z * normal;
 
-            vec3 irradianceColor = textureLod(u_environmentMap, sampleVector, 0.0).rgb;
-            irradiance += irradianceColor * cos(theta) * sin(theta);
-            sampleCount++;
+            irradiance += textureLod(u_environmentMap, sampleVector, 0.0).rgb * cos(theta) * sin(theta);
         }
     }
 
-    irradiance = PI * irradiance * (1.0 / float(sampleCount));
+    irradiance = PI * irradiance / float(sampleCount * sampleCount);
     o_color = irradiance;
 }
