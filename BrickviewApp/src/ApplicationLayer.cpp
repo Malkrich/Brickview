@@ -347,7 +347,7 @@ namespace Brickview
 			// Selection outline width
 			ImGui::Text("Outline width");
 			ImGui::NextColumn();
-			ImGui::SliderFloat("##outlineWidthSlider", &rendererSettings.OutlineWidth, 1.0f, 10.0f);
+			ImGui::SliderFloat("##outlineWidthSlider", &rendererSettings.OutlineWidth, 0.01f, 1.0f);
 			ImGui::NextColumn();
 
 			// Skybox type

@@ -98,7 +98,7 @@ namespace Brickview
 			glm::vec3 GridColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
 			// Wireframe
-			float OutlineWidth = 3.5f;
+			float OutlineWidth = 1.0f;
 
 			// Skybox
 			SkyboxType Skybox = SkyboxType::EnvironmentMap;

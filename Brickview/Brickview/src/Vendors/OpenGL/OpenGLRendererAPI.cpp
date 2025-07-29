@@ -69,6 +69,9 @@ namespace Brickview
 		// TODO: remove from dist build
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback(openGLMessageCallback, nullptr);
+
+		GLfloat range[2];
+		glGetFloatv(GL_LINE_WIDTH_RANGE, range);
 	}
 
 	void OpenGLRendererAPI::shutdown()
