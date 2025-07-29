@@ -64,7 +64,7 @@ namespace Brickview::OpenGLTextureUtils
 		switch (mode)
 		{
 			case TextureWrapMode::Repeat:       return GL_REPEAT;
-			case TextureWrapMode::ClampToEdge:  return GL_CLAMP;
+			case TextureWrapMode::ClampToEdge:  return GL_CLAMP_TO_EDGE;
 		}
 
 		BV_ASSERT(false, "Unknown texture wrap mode!");
