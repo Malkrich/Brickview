@@ -13,7 +13,7 @@ project "Brickview"
         "src/Brickview/",
         "src/Vendors/",
         "../Vendors/glm/",
-        "../Vendors/GLFW/glfw-3.3.8/include",
+        "../Vendors/glfw/include",
         "../Vendors/glad/include",
         "../Vendors/spdlog/include",
         "../Vendors/imgui/",
