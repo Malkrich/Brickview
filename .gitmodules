@@ -4,3 +4,6 @@
 [submodule "Brickview/Vendors/spdlog"]
 	path = Brickview/Vendors/spdlog
 	url = https://github.com/Malkrich/spdlog.git
+[submodule "Brickview/Vendors/glfw"]
+	path = Brickview/Vendors/glfw
+	url = https://github.com/Malkrich/glfw.git
