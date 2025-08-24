@@ -7,3 +7,6 @@
 [submodule "Brickview/Vendors/glfw"]
 	path = Brickview/Vendors/glfw
 	url = https://github.com/Malkrich/glfw.git
+[submodule "Brickview/Vendors/OBJ-Loader"]
+	path = Brickview/Vendors/OBJ-Loader
+	url = https://github.com/Malkrich/OBJ-Loader.git
