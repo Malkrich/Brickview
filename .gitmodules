@@ -1,9 +1,6 @@
-[submodule "Brickview/vendors/imgui"]
-	path = Brickview/vendors/imgui
-	url = git@github.com:Malkrich/imgui.git
-[submodule "Brickview/vendors/spdlog"]
-	path = Brickview/vendors/spdlog
-	url = git@github.com:Malkrich/spdlog.git
-[submodule "Brickview/Vendors/OBJ-Loader"]
-	path = Brickview/Vendors/OBJ-Loader
-	url = git@github.com:Malkrich/OBJ-Loader.git
+[submodule "Brickview/Vendors/imgui"]
+	path = Brickview/Vendors/imgui
+	url = https://github.com/Malkrich/imgui.git
+[submodule "Brickview/Vendors/spdlog"]
+	path = Brickview/Vendors/spdlog
+	url = https://github.com/Malkrich/spdlog.git
