@@ -1,6 +1,6 @@
 # Brickview
 
-![brickviewAppPreview](res/BrickviewPreview.png)
+![brickviewAppPreview](Resources/BrickviewPreview.png)
 
 ## Introduction
 
