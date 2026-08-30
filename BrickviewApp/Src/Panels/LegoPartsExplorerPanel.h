@@ -1,14 +1,12 @@
 #pragma once
 
+#include "GUI/Panel.h"
 #include "Renderer/Texture2D.h"
-
-#include <filesystem>
-#include <functional>
 
 namespace Brickview
 {
 
-  class LegoPartsExplorerPanel
+  class LegoPartsExplorerPanel : public Soup::Panel
   {
   public:
     typedef std::function<void(const std::filesystem::path&)> OnFileLoadCallbackFn;
@@ -18,7 +16,8 @@ namespace Brickview
 
     void SetOnLoadCallbackFunction(OnFileLoadCallbackFn fn) { m_OnFileLoadCallback = fn; }
 
-    void OnGuiRender();
+  protected:
+    void RenderPanelContent() override;
 
   private:
     uint32_t m_FileOffset = 2000;

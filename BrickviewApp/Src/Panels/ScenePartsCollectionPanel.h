@@ -2,17 +2,20 @@
 
 #include "Scene/BrickviewScene.h"
 
+#include "GUI/Panel.h"
+
 namespace Brickview
 {
 
-  class ScenePartsListPanel
+  class ScenePartsCollectionPanel : public Soup::Panel
   {
   public:
-    ScenePartsListPanel(Soup::Ref<BrickviewScene> context);
+    ScenePartsCollectionPanel(Soup::Ref<BrickviewScene> context);
 
     const Soup::Ref<BrickviewScene>& GetContext() const { return m_SceneContext; }
 
-    void OnGuiRender();
+  protected:
+    void RenderPanelContent() override;
 
   private:
     Soup::Ref<BrickviewScene> m_SceneContext;
