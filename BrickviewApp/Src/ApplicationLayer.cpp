@@ -1,16 +1,21 @@
 #include "ApplicationLayer.h"
 
+#include "Panels/LegoPartPropertiesPanel.h"
+#include "Panels/LegoPartsExplorerPanel.h"
+#include "Panels/RendererSettingsPanel.h"
+#include "Panels/ScenePartsCollectionPanel.h"
+#include "Panels/ShadersPanel.h"
+#include "Panels/ViewportPanel.h"
+
 #include "Lego/LegoMeshReader.h"
 #include "Scene/BrickviewScene.h"
 
-#include "Core/Application.h"
 #include "Core/Input.h"
 #include "Core/KeyCodes.h"
 #include "Core/MouseButtons.h"
 #include "IO/MeshImporter.h"
 #include "Renderer/Renderer.h"
 
-#include <ImGuizmo.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -107,95 +112,71 @@ namespace Brickview
 
   }
 
-  ApplicationLayer::ApplicationLayer()
-    : m_ViewportWidth(Soup::Input::GetWindowSize().x)
-    , m_ViewportHeight(Soup::Input::GetWindowSize().y)
-  {
-  }
-
   void ApplicationLayer::OnAttach()
   {
     Soup::MeshImporter::AddReader<LegoMeshReader>(".dat");
 
     // Scene
     m_Scene = Soup::CreateRef<BrickviewScene>();
+    Soup::Ref<Soup::PerspectiveCamera> camera = Soup::CreateRef<Soup::PerspectiveCamera>();
+    m_Scene->CreateCameraEntity(camera, true);
+    m_CameraController.SetCamera(camera);
+    m_CameraController.SetLaptopMode(m_LaptopMode);
 
     // Renderer
     // Note: think about the dimensions, this is the native window size
     // not the actual ImGui viewport size
-    m_Renderer = Soup::CreateRef<Soup::SceneRenderer>(m_ViewportWidth, m_ViewportHeight);
-
-    // Editor camera
-    Soup::CameraControllerSpecifications cameraControlSpecs;
-    cameraControlSpecs.Width = (float)m_ViewportWidth;
-    cameraControlSpecs.Height = (float)m_ViewportHeight;
-    cameraControlSpecs.DistanceFromObject = 0.5f;
-    cameraControlSpecs.CameraPosition = { 0.0f, 0.0f, cameraControlSpecs.DistanceFromObject };
-    cameraControlSpecs.LaptopMode = m_LaptopMode;
-    m_CameraControl = Soup::CreateScope<Soup::CameraController>(cameraControlSpecs);
+    glm::ivec2 viewportDim = Soup::Input::GetWindowSize();
+    m_Renderer = Soup::CreateRef<Soup::SceneRenderer>(viewportDim.x, viewportDim.y);
 
     // Panels
-    m_LegoPartsExplorerPanel = Soup::CreateScope<LegoPartsExplorerPanel>("./data/LDraw/parts/");
-    m_LegoPartsExplorerPanel->SetOnLoadCallbackFunction(
+    m_PanelManager = Soup::CreateScope<Soup::PanelManager>();
+    m_PanelManager->AddPanel<LegoPartsExplorerPanel>("Lego parts explorer", "./data/LDraw/parts/");
+    m_PanelManager->GetPanel<LegoPartsExplorerPanel>()->SetOnLoadCallbackFunction(
       [&](const std::filesystem::path& filePath)
       {
         LegoPartID partID = filePath.stem().string();
         Soup::Ref<Soup::Mesh> mesh = Soup::MeshImporter::Import(filePath);
         m_Scene->CreateLegoPartEntity(partID, mesh);
       });
-    m_ScenePartsListPanel = Soup::CreateScope<ScenePartsListPanel>(m_Scene);
-    m_LegoPartPropertiesPanel = Soup::CreateScope<LegoPartPropertiesPanel>(m_Scene);
-
-    m_HdriFilePath = "./data/HDRI/bambanani_sunset_2k.hdr";
-    ImportHdriFile();
+    m_PanelManager->AddPanel<LegoPartPropertiesPanel>("Lego parts properties", m_Scene);
+    m_PanelManager->AddPanel<ScenePartsCollectionPanel>("Lego Parts Collection", m_Scene);
+    m_PanelManager->AddPanel<ViewportPanel>("Viewport", viewportDim.x, viewportDim.y);
+    m_PanelManager->GetPanel<ViewportPanel>()->GetGizmo().SetCamera(camera);
+    m_PanelManager->GetPanel<ViewportPanel>()->GetGizmo().SetManipulationType(Soup::Gizmo::ManipulationType::Translate);
+    m_PanelManager->AddPanel<RendererSettingsPanel>("Renderer Settings", m_Renderer);
+    m_PanelManager->AddPanel<ShadersPanel>("Shaders");
   }
 
   void ApplicationLayer::OnDetach() {}
 
-  void ApplicationLayer::OnEvent(Soup::Event& e)
+  void ApplicationLayer::OnEvent(Soup::Event& event)
   {
-    m_CameraControl->OnEvent(e);
+    m_CameraController.OnEvent(event);
 
-    Soup::EventDispatcher dispatcher(e);
-
-    dispatcher.Dispatch<Soup::MousePressedEvent>(SP_BIND_EVENT_FUNCTION(ApplicationLayer::OnMousePressed));
-    dispatcher.Dispatch<Soup::KeyPressedEvent>(SP_BIND_EVENT_FUNCTION(ApplicationLayer::OnKeyPressed));
+    Soup::EventDispatcher dispatcher(event);
+    dispatcher.Dispatch<Soup::KeyPressedEvent>([&](const Soup::KeyPressedEvent& event) { return OnKeyPressed(event); });
+    dispatcher.Dispatch<Soup::MousePressedEvent>(
+      [&](const Soup::MousePressedEvent& event) { return OnMousePressed(event); });
   }
 
-  bool ApplicationLayer::OnMousePressed(const Soup::MousePressedEvent& e)
+  bool ApplicationLayer::OnKeyPressed(const Soup::KeyPressedEvent& event)
   {
-    if (e.GetMouseButton() == Soup::MouseButton::Left && !(ImGuizmo::IsOver() && m_GizmoVisible))
-    {
-      ImVec2 screenPosition = { m_MousePosition.x - m_ViewportMinBound.x, m_MousePosition.y - m_ViewportMinBound.y };
-      // Flipping Y coordinate to make the bottom left corner (0, 0)
-      float viewportHeight = m_ViewportMaxBound.y - m_ViewportMinBound.y;
-      screenPosition.y = viewportHeight - screenPosition.y;
-
-      int32_t entityID = m_Renderer->GetEntityIDAt((uint32_t)screenPosition.x, (uint32_t)screenPosition.y);
-      Soup::Entity selectedEntity = entityID == -1 ? Soup::Entity() : m_Scene->GetEntity(entityID);
-      m_LegoPartPropertiesPanel->SetEntityContext(selectedEntity);
-      m_Renderer->SetSelectedEntity(selectedEntity);
-    }
-
-    return true;
-  }
-
-  bool ApplicationLayer::OnKeyPressed(const Soup::KeyPressedEvent& e)
-  {
-    switch (e.GetKeyCode())
+    Soup::Ref<ViewportPanel> viewportPanel = m_PanelManager->GetPanel<ViewportPanel>();
+    switch (event.GetKeyCode())
     {
       case Soup::KeyCode::Escape:
-        m_CurrentManipulationType = EditorManipulationType::None;
+        viewportPanel->GetGizmo().SetManipulationType(Soup::Gizmo::ManipulationType::None);
         break;
       case Soup::KeyCode::T:
-        m_CurrentManipulationType = EditorManipulationType::Translate;
+        viewportPanel->GetGizmo().SetManipulationType(Soup::Gizmo::ManipulationType::Translate);
         break;
       case Soup::KeyCode::R:
-        m_CurrentManipulationType = EditorManipulationType::Rotate;
+        viewportPanel->GetGizmo().SetManipulationType(Soup::Gizmo::ManipulationType::Rotate);
         break;
       case Soup::KeyCode::F:
       {
-        Soup::Entity selectedEntity = m_LegoPartPropertiesPanel->GetEntityContext();
+        Soup::Entity selectedEntity = m_PanelManager->GetPanel<LegoPartPropertiesPanel>()->GetEntityContext();
         if (selectedEntity)
           OnFocusEntity(selectedEntity);
         break;
@@ -207,23 +188,55 @@ namespace Brickview
     return true;
   }
 
+  bool ApplicationLayer::OnMousePressed(const Soup::MousePressedEvent& event)
+  {
+    Soup::Ref<ViewportPanel> viewportPanel = m_PanelManager->GetPanel<ViewportPanel>();
+    if (event.GetMouseButton() == Soup::MouseButton::Left && !viewportPanel->GetGizmo().IsHovered())
+    {
+      glm::ivec2 cursorPosition = viewportPanel->GetCursorPosition();
+      if (cursorPosition == glm::ivec2(-1, -1))
+        return false;
+
+      glm::ivec2 pixelPosition = { cursorPosition.x, viewportPanel->GetHeight() - cursorPosition.y };
+      int32_t entityID = m_Renderer->GetEntityIDImage()->GetPixelInteger(pixelPosition.x, pixelPosition.y);
+
+      Soup::Entity selectedEntity = entityID == -1 ? Soup::Entity() : m_Scene->GetEntity(entityID);
+
+      m_PanelManager->GetPanel<LegoPartPropertiesPanel>()->SetEntityContext(selectedEntity);
+      viewportPanel->GetGizmo().SetManipulatedEntity(selectedEntity);
+      m_Renderer->SetSelectedEntity(selectedEntity);
+
+      return true;
+    }
+    return false;
+  }
+
   void ApplicationLayer::OnUpdate(Soup::DeltaTime dt)
   {
     m_Dt = dt;
 
-    m_Renderer->ResizeViewport(m_ViewportWidth, m_ViewportHeight);
-    m_CameraControl->Resize((float)m_ViewportWidth, (float)m_ViewportHeight);
+    Soup::Ref<RendererSettingsPanel> rendererSettingsPanel = m_PanelManager->GetPanel<RendererSettingsPanel>();
+    rendererSettingsPanel->SetFrameDelta(dt);
 
-    if (!ImGuizmo::IsOver())
-      m_CameraControl->OnUpdate();
+    Soup::Ref<ViewportPanel> viewportPanel = m_PanelManager->GetPanel<ViewportPanel>();
 
-    const Soup::PerspectiveCamera& camera = m_CameraControl->GetCamera();
-    m_Renderer->Render(camera, m_Scene);
+    m_CameraController.Resize(viewportPanel->GetWidth(), viewportPanel->GetHeight());
+    m_Renderer->ResizeViewport(viewportPanel->GetWidth(), viewportPanel->GetHeight());
+
+    m_CameraController.SetInteractionPossible(viewportPanel->IsHovered() && !IsOnResizeRegion());
+    if (!viewportPanel->GetGizmo().IsHovered())
+      m_CameraController.OnUpdate();
+
+    m_Renderer->Render(m_Scene);
+    Soup::Ref<Soup::Texture2D> renderedImage = m_Renderer->GetRenderedImage();
+    viewportPanel->SetViewportImage(renderedImage);
   }
 
   void ApplicationLayer::OnGuiRender()
   {
     BeginDockspace();
+
+    m_PanelManager->OnGUIRender();
 
     // Menu
     if (ImGui::BeginMenuBar())
@@ -233,234 +246,12 @@ namespace Brickview
         if (ImGui::MenuItem("Laptop mode", nullptr, m_LaptopMode))
         {
           m_LaptopMode = !m_LaptopMode;
-          m_CameraControl->SetLaptopMode(m_LaptopMode);
+          m_CameraController.SetLaptopMode(m_LaptopMode);
         }
         ImGui::EndMenu();
       }
       ImGui::EndMenuBar();
     }
-
-    // Viewport
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-    ImGui::Begin("Viewport");
-    // Focus if middle mouse button clicked because it controls the viewport
-    if (ImGui::IsMouseClicked(ImGuiMouseButton_Middle))
-      ImGui::SetWindowFocus("Viewport");
-
-    if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && ImGui::IsWindowHovered())
-      ImGui::OpenPopup("rightClickViewportMenu");
-
-    if (ImGui::BeginPopup("rightClickViewportMenu"))
-    {
-      if (ImGui::Button("Light"))
-      {
-        m_Scene->CreateLightEntity();
-        ImGui::CloseCurrentPopup();
-      }
-      ImGui::EndPopup();
-    }
-
-    // Updates
-    bool viewportActive = ImGui::IsWindowHovered() && ImGui::IsWindowFocused();
-    Soup::Application::GetInstance().GetGuiLayer()->SetBlockEvent(!viewportActive);
-
-    // Resizing
-    // Save current size before new size computation to display the current frame properly
-    ImVec2 currentFrameViewportDim = { m_ViewportMaxBound.x - m_ViewportMinBound.x,
-      m_ViewportMaxBound.y - m_ViewportMinBound.y };
-    // Refresh resizing
-    m_CameraControl->SetViewportHovered(ImGui::IsWindowHovered());
-    ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
-    ImVec2 viewportDim = ImGui::GetContentRegionAvail();
-    ImVec2 viewportPos = ImGui::GetWindowPos();
-    m_MousePosition = ImGui::GetMousePos();
-    // viewportMinRegion essentially gives the tab bar dimensions if open
-    // (otherwise viewportMinRegion = (0, 0))
-    m_ViewportMinBound = { viewportPos.x + viewportMinRegion.x, viewportPos.y + viewportMinRegion.y };
-    m_ViewportMaxBound = { m_ViewportMinBound.x + viewportDim.x, m_ViewportMinBound.y + viewportDim.y };
-    m_ViewportWidth = (uint32_t)viewportDim.x;
-    m_ViewportHeight = (uint32_t)viewportDim.y;
-
-    // Render
-    ImGui::Image((ImTextureID)((uint64_t)m_Renderer->GetRenderedImage()->GetHandle()), currentFrameViewportDim,
-      ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
-
-    // Gizmo
-    m_GizmoVisible = false;
-    if (m_LegoPartPropertiesPanel->HasEntityContext() && m_CurrentManipulationType != EditorManipulationType::None)
-    {
-      Soup::Entity selectedEntity = m_LegoPartPropertiesPanel->GetEntityContext();
-      m_GizmoVisible = true;
-      // Window setup
-      ImGuizmo::SetAlternativeWindow(ImGui::GetCurrentWindow());
-      ImGuizmo::SetDrawlist(ImGui::GetForegroundDrawList());
-      ImGuizmo::SetOrthographic(false);
-
-      const Soup::PerspectiveCamera& camera = m_CameraControl->GetCamera();
-      Soup::TransformComponent& transform = selectedEntity.GetComponent<Soup::TransformComponent>();
-      glm::mat4 transformMatrix = transform.GetTransform();
-
-      ImGuizmo::SetRect(m_ViewportMinBound.x, m_ViewportMinBound.y, m_ViewportMaxBound.x - m_ViewportMinBound.x,
-        m_ViewportMaxBound.y - m_ViewportMinBound.y);
-
-      ImGuizmo::OPERATION guizmoManip;
-      switch (m_CurrentManipulationType)
-      {
-        case EditorManipulationType::Translate:
-          guizmoManip = ImGuizmo::TRANSLATE;
-          break;
-        case EditorManipulationType::Rotate:
-          guizmoManip = ImGuizmo::ROTATE;
-          break;
-        default:
-          SP_ASSERT(false, "Unknown manip type!");
-          break;
-      }
-      ImGuizmo::Manipulate(glm::value_ptr(camera.GetViewMatrix()), glm::value_ptr(camera.GetProjectionMatrix()),
-        guizmoManip, ImGuizmo::LOCAL, glm::value_ptr(transformMatrix));
-
-      glm::vec3 translation, rotation, scale;
-      ImGuizmo::DecomposeMatrixToComponents(
-        glm::value_ptr(transformMatrix), glm::value_ptr(translation), glm::value_ptr(rotation), glm::value_ptr(scale));
-      transform.Translation = translation;
-      transform.Rotation = glm::radians(rotation);
-    }
-
-    ImGui::End(); // Viewport
-    ImGui::PopStyleVar(3);
-
-    // Shader lib
-    ImGui::Begin("Shaders");
-
-    const Soup::Ref<Soup::ShaderLibrary>& shaderLibrary = Soup::Renderer::GetShaderLibrary();
-    for (const auto& [name, shaderData] : *shaderLibrary)
-    {
-      ImGui::Text("%s", name.c_str());
-      ImGui::SameLine();
-      ImGui::PushID(name.c_str());
-      if (ImGui::Button("Reload"))
-      {
-        std::filesystem::path shaderFilePath = shaderData.FilePath;
-        shaderData.ShaderProgram->Reload(shaderFilePath);
-      }
-      ImGui::PopID();
-    }
-
-    ImGui::End();
-
-    ImGui::Begin("Renderer");
-
-    ImGui::SeparatorText("Render statistics:");
-    ImGui::Text("ts: %.3f ms", m_Dt.GetMilliseconds());
-    ImGui::Text("Fps: %.3f", m_Dt.GetSeconds() == 0.0f ? 0.0f : 1.0f / m_Dt.GetSeconds());
-
-    ImGui::SeparatorText("Renderer Settings:");
-
-    ImGui::Columns(2);
-    {
-      Soup::SceneRenderer::Settings& rendererSettings = m_Renderer->GetRendererSettings();
-
-      // Render mode
-      ImGui::Text("Renderer Type");
-      ImGui::NextColumn();
-      Soup::RendererPreset rendererType = rendererSettings.RenderingPreset;
-      std::vector<std::string> rendererTypeStrings = { "Solid", "Lighted" };
-      std::string& selectedRendererTypeString = rendererTypeStrings[(int32_t)rendererType];
-      if (ImGui::BeginCombo("##rendererType", selectedRendererTypeString.c_str()))
-      {
-        for (size_t i = 0; i < rendererTypeStrings.size(); i++)
-        {
-          bool isSelected = selectedRendererTypeString == rendererTypeStrings[i];
-          if (ImGui::Selectable(rendererTypeStrings[i].c_str(), isSelected))
-          {
-            rendererSettings.RenderingPreset = (Soup::RendererPreset)i;
-          }
-
-          if (isSelected)
-            ImGui::SetItemDefaultFocus();
-        }
-
-        ImGui::EndCombo();
-      }
-      ImGui::NextColumn();
-
-      // Selection outline width
-      ImGui::Columns(1);
-      ImGui::SeparatorText("Outline");
-      ImGui::Columns(2);
-      ImGui::Text("Line width");
-      ImGui::NextColumn();
-      ImGui::SliderFloat("##outlineWidthSlider", &rendererSettings.OutlineWidth, 0.01f, 5.0f);
-      ImGui::NextColumn();
-      ImGui::Text("Outline color");
-      ImGui::NextColumn();
-      ImGui::ColorEdit3("##outlineColorPicker", glm::value_ptr(rendererSettings.OutlineColor));
-      ImGui::NextColumn();
-
-      // Skybox type
-      ImGui::Columns(1);
-      ImGui::SeparatorText("Environment");
-      ImGui::Columns(2);
-      ImGui::Text("HDR image: ");
-      ImGui::NextColumn();
-      std::string strHdriFilePath = m_HdriFilePath.string();
-      if (ImGui::InputText("##hdrImagePath", (char*)strHdriFilePath.c_str(), strHdriFilePath.capacity() + 1))
-        m_HdriFilePath = strHdriFilePath;
-      ImGui::NextColumn();
-      ImGui::Columns(1);
-      if (ImGui::Button("Import texture"))
-      {
-        ImportHdriFile();
-      }
-      ImGui::Columns(2);
-
-      ImGui::Text("Skybox Type");
-      ImGui::NextColumn();
-      Soup::RendererBackground background = rendererSettings.Background;
-      std::vector<std::string> rendererBackgroundStr = { "Clear color", "Environment Map", "Irradiance Map",
-        "PreFiltered Map" };
-      const std::string& currentRendererBackground = rendererBackgroundStr[(int32_t)background];
-      if (ImGui::BeginCombo("##skyboxType", currentRendererBackground.c_str()))
-      {
-        for (size_t i = 0; i < rendererBackgroundStr.size(); i++)
-        {
-          bool isSelected = currentRendererBackground == rendererBackgroundStr[i];
-          if (ImGui::Selectable(rendererBackgroundStr[i].c_str(), isSelected))
-          {
-            rendererSettings.Background = (Soup::RendererBackground)i;
-          }
-
-          if (isSelected)
-            ImGui::SetItemDefaultFocus();
-        }
-
-        ImGui::EndCombo();
-      }
-      ImGui::NextColumn();
-
-      // Specular skybox mipmap level
-      bool levelOptionEnabled = rendererSettings.Background == Soup::RendererBackground::PreFilteredMap ||
-        rendererSettings.Background == Soup::RendererBackground::EnvironmentMap;
-      if (!levelOptionEnabled)
-        rendererSettings.SkyboxMipFactor = 0.0f;
-
-      ImGui::BeginDisabled(!levelOptionEnabled);
-      ImGui::Text("Skybox Mip Factor:");
-      ImGui::NextColumn();
-      ImGui::SliderFloat("##SkyboxMipFactor", &rendererSettings.SkyboxMipFactor, 0.0f, 1.0f);
-      ImGui::NextColumn();
-      ImGui::EndDisabled();
-    }
-    ImGui::Columns(1);
-
-    ImGui::End(); // Renderer
-
-    m_LegoPartsExplorerPanel->OnGuiRender();
-    m_ScenePartsListPanel->OnGuiRender();
-    m_LegoPartPropertiesPanel->OnGuiRender();
 
     EndDockspace();
   }
@@ -525,25 +316,17 @@ namespace Brickview
   {
     ImGui::End();
   }
+  bool ApplicationLayer::IsOnResizeRegion() const
+  {
+    ImGuiMouseCursor cursor = ImGui::GetMouseCursor();
+    return cursor == ImGuiMouseCursor_ResizeNS || cursor == ImGuiMouseCursor_ResizeEW ||
+      cursor == ImGuiMouseCursor_ResizeNESW || cursor == ImGuiMouseCursor_ResizeNWSE;
+  }
 
   void ApplicationLayer::OnFocusEntity(Soup::Entity entity)
   {
     Soup::TransformComponent& transform = entity.GetComponent<Soup::TransformComponent>();
-    m_CameraControl->SetTargetPoint(transform.Translation);
-  }
-
-  void ApplicationLayer::ImportHdriFile()
-  {
-    // HDRI environment
-    Soup::Texture2DSpecifications hdriTextureSpecs;
-    hdriTextureSpecs.Format = Soup::TextureFormat::RGBFloat32;
-    hdriTextureSpecs.WrappingModeU = Soup::TextureWrapMode::ClampToEdge;
-    hdriTextureSpecs.WrappingModeV = Soup::TextureWrapMode::ClampToEdge;
-    Soup::Ref<Soup::Texture2D> hdriTexture = Soup::Texture2D::Create(hdriTextureSpecs, m_HdriFilePath);
-
-    Soup::EnvironmentCreateInfo environmentCreateInfo;
-
-    m_Renderer->SetEnvironment(hdriTexture, environmentCreateInfo);
+    m_CameraController.SetTargetPoint(transform.Translation);
   }
 
 }
