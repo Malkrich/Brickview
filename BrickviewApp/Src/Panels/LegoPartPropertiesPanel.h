@@ -2,12 +2,13 @@
 
 #include "Scene/BrickviewScene.h"
 
+#include "GUI/Panel.h"
 #include "Scene/Entity.h"
 
 namespace Brickview
 {
 
-  class LegoPartPropertiesPanel
+  class LegoPartPropertiesPanel : public Soup::Panel
   {
   public:
     LegoPartPropertiesPanel(Soup::Ref<BrickviewScene> scene);
@@ -16,8 +17,10 @@ namespace Brickview
     bool HasEntityContext() const { return (bool)m_EntityContext; }
     void SetEntityContext(Soup::Entity entity) { m_EntityContext = entity; }
 
-    void OnGuiRender();
+  protected:
+    void RenderPanelContent() override;
 
+  private:
     void DrawEntityComponents(Soup::Entity entity);
 
   private:

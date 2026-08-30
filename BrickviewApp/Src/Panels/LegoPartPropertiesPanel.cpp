@@ -43,18 +43,16 @@ namespace Brickview
   {
   }
 
-  void LegoPartPropertiesPanel::OnGuiRender()
+  void LegoPartPropertiesPanel::RenderPanelContent()
   {
     bool deleteEntity = false;
 
-    ImGui::Begin("Lego Part Properties");
     if (HasEntityContext())
     {
       deleteEntity = ImGui::Button("Delete");
       Soup::Entity entity = GetEntityContext();
       DrawEntityComponents(entity);
     }
-    ImGui::End();
 
     if (deleteEntity)
     {

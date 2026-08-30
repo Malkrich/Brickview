@@ -15,10 +15,8 @@ namespace Brickview
     m_DefaultLegoPartIcon = Soup::Texture2D::Create(legoPartIconSpecs, "./data/Icons/legoPartIcon.png");
   }
 
-  void LegoPartsExplorerPanel::OnGuiRender()
+  void LegoPartsExplorerPanel::RenderPanelContent()
   {
-    ImGui::Begin("Lego Part Explorer");
-
     if (!std::filesystem::exists(m_LegoPartsDirectory))
     {
       std::filesystem::path ldrawDatabasePath = std::filesystem::absolute(m_LegoPartsDirectory);
@@ -74,8 +72,6 @@ namespace Brickview
 
       fileIndex++;
     }
-
-    ImGui::End();
   }
 
 }

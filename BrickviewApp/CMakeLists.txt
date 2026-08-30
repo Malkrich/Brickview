@@ -1,21 +1,29 @@
-set(brickview_app_dir ${CMAKE_CURRENT_SOURCE_DIR}/Src)
+set(src_dir ${CMAKE_CURRENT_SOURCE_DIR}/Src)
 
-set(headers
-    ${brickview_app_dir}/ApplicationLayer.h
+set(headers)
+set(sources)
 
-    # Panels
-    ${brickview_app_dir}/Panels/LegoPartPropertiesPanel.h
-    ${brickview_app_dir}/Panels/LegoPartsExplorerPanel.h
-    ${brickview_app_dir}/Panels/ScenePartsListPanel.h)
+# Application
+list(APPEND sources
+    ${src_dir}/ApplicationLayer.cpp
+    ${src_dir}/BrickviewApp.cpp)
 
-set(sources
-    ${brickview_app_dir}/ApplicationLayer.cpp
-    ${brickview_app_dir}/BrickviewApp.cpp
+list(APPEND headers
+    ${src_dir}/ApplicationLayer.h)
 
-    # Panels
-    ${brickview_app_dir}/Panels/LegoPartPropertiesPanel.cpp
-    ${brickview_app_dir}/Panels/LegoPartsExplorerPanel.cpp
-    ${brickview_app_dir}/Panels/ScenePartsListPanel.cpp)
+# Panels
+set(panels_dir ${src_dir}/Panels)
+list(APPEND sources
+    ${panels_dir}/LegoPartPropertiesPanel.cpp
+    ${panels_dir}/LegoPartsExplorerPanel.cpp
+    ${panels_dir}/ScenePartsCollectionPanel.cpp
+    ${panels_dir}/ViewportPanel.cpp)
+
+list(APPEND headers
+    ${panels_dir}/LegoPartPropertiesPanel.h
+    ${panels_dir}/LegoPartsExplorerPanel.h
+    ${panels_dir}/ScenePartsCollectionPanel.h
+    ${panels_dir}/ViewportPanel.h)
 
 add_executable(BrickviewApp
     ${headers} ${sources})
