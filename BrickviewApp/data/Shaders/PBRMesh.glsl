@@ -45,5 +45,4 @@ void main()
 #include "includes/Material/PBRMaterial.glsl"
 #include "includes/PBR/Utils.glsl"
 
-// Implementation
-#include "implementations/PBRFragmentImplementation.glsl"
+#include "implementations/PBRImplementation_frag.glsl"
