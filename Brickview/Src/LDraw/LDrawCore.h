@@ -3,7 +3,7 @@
 namespace Brickview::LDrawCore
 {
 
-  void Init();
+  void Init(const std::filesystem::path& legoPartDataDirectory);
   void Shutdown();
 
 }

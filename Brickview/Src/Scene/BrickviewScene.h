@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Geometry/Mesh.h"
 #include "Lego/LegoPart.h"
 #include "Lego/LegoPartMeshRegistry.h"
 
@@ -12,7 +11,7 @@ namespace Brickview
   class BrickviewScene : public Soup::Scene
   {
   public:
-    Soup::Entity CreateLegoPartEntity(LegoPartID partID, Soup::Ref<Soup::Mesh> mesh);
+    Soup::Entity CreateLegoPartEntity(LegoPartID partID, Soup::AssetHandle assetHandle);
 
     const LegoPartMeshRegistry& GetLegoPartRegistry() const { return m_LegoPartMeshRegistry; }
 

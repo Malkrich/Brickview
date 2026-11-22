@@ -1,22 +1,17 @@
-
-
 #include "LegoPartMeshRegistry.h"
 
 namespace Brickview
 {
 
-  void LegoPartMeshRegistry::AddPart(LegoPartID id, Soup::Ref<Soup::Mesh> mesh)
+  void LegoPartMeshRegistry::AddPart(LegoPartID partId, Soup::AssetHandle assetHandle)
   {
-    if (m_Registry.contains(id))
-      return;
-
-    m_Registry[id] = CreateRef<Soup::GpuMesh>(mesh);
+    m_Registry[partId] = assetHandle;
   }
 
-  Soup::Ref<Soup::GpuMesh> LegoPartMeshRegistry::GetPart(LegoPartID id) const
+  Soup::AssetHandle LegoPartMeshRegistry::GetPart(LegoPartID partId) const
   {
-    SP_ASSERT(m_Registry.contains(id), "Lego Part ID does not exist!");
-    return m_Registry.at(id);
+    auto it = m_Registry.find(partId);
+    return it != m_Registry.end() ? it->second : Soup::AssetHandle(0);
   }
 
 }

@@ -21,12 +21,12 @@ namespace Brickview
 
   static LDrawFileManagerData* s_LdrawFileManagerData = nullptr;
 
-  void LDrawFileManager::Init()
+  void LDrawFileManager::Init(const std::filesystem::path& legoPartDataDirectory)
   {
     SP_ASSERT(!s_LdrawFileManagerData, "LDrawReader engine already initialized!");
 
     s_LdrawFileManagerData = new LDrawFileManagerData();
-    s_LdrawFileManagerData->BaseDirectory = "./data/LDraw/";
+    s_LdrawFileManagerData->BaseDirectory = legoPartDataDirectory;
     s_LdrawFileManagerData->PartsDirectory = "parts";
     s_LdrawFileManagerData->SubPartsDirectory = "s";
     s_LdrawFileManagerData->PrimitivesDirectory = "p";

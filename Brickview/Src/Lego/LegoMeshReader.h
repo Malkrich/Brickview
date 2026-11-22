@@ -1,20 +1,21 @@
 #pragma once
 
-#include "Geometry/Mesh.h"
-#include "IO/MeshReader.h"
+namespace Soup
+{
+  class Mesh;
+}
 
 namespace Brickview
 {
 
   struct LoadingQueueFileData;
 
-  class LegoMeshReader : public Soup::MeshReader
+  class LegoMeshReader
   {
   public:
     LegoMeshReader();
-    ~LegoMeshReader();
 
-    bool Read(const std::filesystem::path& filePath) override;
+    Soup::Ref<Soup::Mesh> Read(const std::filesystem::path& filePath);
 
   private:
     bool ReadFile(
