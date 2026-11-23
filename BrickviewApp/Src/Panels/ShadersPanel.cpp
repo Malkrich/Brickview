@@ -15,8 +15,7 @@ namespace Brickview
       ImGui::PushID(name.c_str());
       if (ImGui::Button("Reload"))
       {
-        std::filesystem::path shaderFilePath = shaderData.FilePath;
-        shaderData.ShaderProgram->Reload(shaderFilePath);
+        Soup::Renderer::GetShaderLibrary()->Reload(name);
       }
       ImGui::PopID();
     }

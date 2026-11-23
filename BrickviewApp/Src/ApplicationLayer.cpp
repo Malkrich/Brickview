@@ -1,5 +1,6 @@
 #include "ApplicationLayer.h"
 
+#include "Lego/LegoMeshImporter.h"
 #include "Panels/LegoPartPropertiesPanel.h"
 #include "Panels/LegoPartsExplorerPanel.h"
 #include "Panels/RendererSettingsPanel.h"
@@ -7,114 +8,27 @@
 #include "Panels/ShadersPanel.h"
 #include "Panels/ViewportPanel.h"
 
-#include "Lego/LegoMeshReader.h"
-#include "Scene/BrickviewScene.h"
-
-#include "Core/Input.h"
-#include "Core/KeyCodes.h"
-#include "Core/MouseButtons.h"
-#include "IO/MeshImporter.h"
-#include "Renderer/Renderer.h"
+#include <Asset/AssetManager.h>
+#include <Core/Input.h>
+#include <Core/KeyCodes.h>
+#include <Core/MouseButtons.h>
+#include <Project/Project.h>
+#include <Scene/BrickviewScene.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <imgui_internal.h>
+#include <imgui.h>
 
 namespace Brickview
 {
 
-  namespace ExampleScenes
+  ApplicationLayer::ApplicationLayer(const std::filesystem::path& projectPath)
   {
-
-    static void LoadSpheresAndPlaneScene(Soup::Ref<BrickviewScene> scene)
-    {
-      float xStart = -1.0f;
-      float xEnd = 1.0f;
-      uint32_t sphereCount = 8;
-
-      Soup::Ref<Soup::Mesh> smoothSphereMesh = Soup::MeshImporter::Import("./data/Meshes/SmoothSphere.obj");
-      smoothSphereMesh->Scale(0.1f);
-      Soup::Ref<Soup::Mesh> flatSphereMesh = Soup::MeshImporter::Import("./data/Meshes/FlatSphere.obj");
-      flatSphereMesh->Scale(0.1f);
-
-      // Plane ground
-      Soup::Ref<Soup::Mesh> planeMesh = Soup::MeshImporter::Import("./data/Meshes/Plane.obj");
-      Soup::RendererMaterial planeMaterial;
-      planeMaterial.Albedo = { 0.15f, 0.15f, 0.15f, 1.0f };
-      planeMaterial.Roughness = 0.1f;
-      scene->CreateMeshEntity(planeMesh, planeMaterial);
-
-      Soup::RendererMaterial sphereMaterial;
-      sphereMaterial.Albedo = { 1.0f, 0.0f, 0.0f, 1.0f };
-      sphereMaterial.Roughness = 0.1f;
-      sphereMaterial.Metalness = 0.0f;
-      glm::vec3 position = { -0.3f, 0.3f, -0.5f };
-      scene->CreateMeshEntity(smoothSphereMesh, position, sphereMaterial);
-
-      sphereMaterial.Albedo = { 0.2f, 0.8f, 0.2f, 1.0f };
-      sphereMaterial.Metalness = 1.0f;
-      sphereMaterial.Roughness = 0.5f;
-      position.x = 0.3f;
-      scene->CreateMeshEntity(flatSphereMesh, position, sphereMaterial);
-
-      const glm::vec3 white = glm::vec3(1.0f);
-      const glm::vec3 green = { 0.0f, 1.0f, 0.0 };
-      for (uint32_t i = 0; i < 4; i++)
-      {
-        float factor = (float)i / (4.0f - 1.0f);
-        float xPos = factor * -0.5f + (1.0f - factor) * 0.5f;
-        glm::vec3 lightPos = { 0.0f, 0.5f, 0.0f };
-        glm::vec3 lightColor = white * (1.0f - factor) + green * factor;
-        lightPos.x = xPos;
-        scene->CreateLightEntity(lightPos, lightColor);
-      }
-    }
-
-    static void LoadSphereOnlyScene(Soup::Ref<BrickviewScene> scene)
-    {
-      Soup::Ref<Soup::Mesh> smoothSphereMesh = Soup::MeshImporter::Import("./data/Meshes/SmoothSphere.obj");
-      smoothSphereMesh->Scale(0.1f);
-
-      Soup::RendererMaterial sphereMaterial;
-      sphereMaterial.Albedo = { 1.0f, 0.0f, 0.0f, 1.0f };
-      sphereMaterial.Roughness = 0.1f;
-      sphereMaterial.Metalness = 0.0f;
-      scene->CreateMeshEntity(smoothSphereMesh, glm::vec3(0.0f), sphereMaterial);
-    }
-
-    static void LoadPBRTestScene(Soup::Ref<BrickviewScene> scene)
-    {
-      Soup::Ref<Soup::Mesh> sphere = Soup::MeshImporter::Import("./data/Meshes/SmoothSphere.obj");
-      sphere->Scale(0.1f);
-
-      uint32_t rowCount = 5;
-      uint32_t columnCount = 5;
-      for (uint32_t i = 0; i < rowCount; i++)
-      {
-        float metallic = (float)i / (float)(rowCount - 1);
-        for (uint32_t j = 0; j < columnCount; j++)
-        {
-          float roughness = (float)j / (float)(columnCount - 1);
-          float x = -0.5f * (1.0f - roughness) + 0.5f * roughness;
-          float y = -0.0f * (1.0f - metallic) + 1.0f * metallic;
-          glm::vec3 position = { x, y, 0.0f };
-
-          Soup::RendererMaterial material;
-          material.Albedo = { 1.0f, 0.0f, 0.0f, 1.0f };
-          material.Metalness = metallic;
-          material.Roughness = roughness;
-          scene->CreateMeshEntity(sphere, position, material);
-        }
-      }
-      scene->CreateLightEntity({ 0.0f, 0.0f, -1.0f });
-    }
-
+    Soup::Project::Load(projectPath);
   }
 
   void ApplicationLayer::OnAttach()
   {
-    Soup::MeshImporter::AddReader<LegoMeshReader>(".dat");
+    Soup::AssetManager::AddExtensionSupport(Soup::AssetType::Mesh, ".dat", &LegoMeshImporter::ImportLegoMesh);
 
     // Scene
     m_Scene = Soup::CreateRef<BrickviewScene>();
@@ -131,13 +45,14 @@ namespace Brickview
 
     // Panels
     m_PanelManager = Soup::CreateScope<Soup::PanelManager>();
-    m_PanelManager->AddPanel<LegoPartsExplorerPanel>("Lego parts explorer", "./data/LDraw/parts/");
+    std::filesystem::path legoPartsDirectory = Soup::Project::GetActiveWorkingDirectory() / "data/LDraw/parts/";
+    m_PanelManager->AddPanel<LegoPartsExplorerPanel>("Lego parts explorer", legoPartsDirectory);
     m_PanelManager->GetPanel<LegoPartsExplorerPanel>()->SetOnLoadCallbackFunction(
       [&](const std::filesystem::path& filePath)
       {
         LegoPartID partID = filePath.stem().string();
-        Soup::Ref<Soup::Mesh> mesh = Soup::MeshImporter::Import(filePath);
-        m_Scene->CreateLegoPartEntity(partID, mesh);
+        Soup::Ref<Soup::Mesh> mesh = Soup::AssetManager::ImportAsset<Soup::Mesh>(filePath);
+        m_Scene->CreateLegoPartEntity(partID, mesh->Handle);
       });
     m_PanelManager->AddPanel<LegoPartPropertiesPanel>("Lego parts properties", m_Scene);
     m_PanelManager->AddPanel<ScenePartsCollectionPanel>("Lego Parts Collection", m_Scene);
@@ -148,7 +63,10 @@ namespace Brickview
     m_PanelManager->AddPanel<ShadersPanel>("Shaders");
   }
 
-  void ApplicationLayer::OnDetach() {}
+  void ApplicationLayer::OnDetach()
+  {
+    Soup::Project::SaveActiveProject();
+  }
 
   void ApplicationLayer::OnEvent(Soup::Event& event)
   {

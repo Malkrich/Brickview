@@ -1,10 +1,13 @@
 #include "RendererSettingsPanel.h"
 
+#include <IO/TextureReader.h>
+#include <Project/Project.h>
+
 namespace Brickview
 {
 
   RendererSettingsPanel::RendererSettingsPanel(Soup::Ref<Soup::SceneRenderer> renderer)
-   : m_Renderer(renderer)
+    : m_Renderer(renderer)
   {
     m_HdriFilePath = "./data/HDRI/bambanani_sunset_2k.hdr";
     ImportHdriFile(m_HdriFilePath);
@@ -118,15 +121,12 @@ namespace Brickview
 
   void RendererSettingsPanel::ImportHdriFile(const std::filesystem::path& filePath)
   {
-    // HDRI environment
-    Soup::Texture2DSpecifications hdriTextureSpecs;
-    hdriTextureSpecs.Format = Soup::TextureFormat::RGBFloat32;
-    hdriTextureSpecs.WrappingModeU = Soup::TextureWrapMode::ClampToEdge;
-    hdriTextureSpecs.WrappingModeV = Soup::TextureWrapMode::ClampToEdge;
-    Soup::Ref<Soup::Texture2D> hdriTexture = Soup::Texture2D::Create(hdriTextureSpecs, filePath);
+    // TODO: should be moved to proper application directory. Project should be the opened Brickview project.
+    std::filesystem::path fullPath = Soup::Project::GetActiveWorkingDirectory() / filePath;
+    Soup::Ref<Soup::Texture2D> hdriTexture =
+      std::dynamic_pointer_cast<Soup::Texture2D>(Soup::TextureReader::ImportHDRITexture(fullPath));
 
     Soup::EnvironmentCreateInfo environmentCreateInfo;
-
     m_Renderer->CreateEnvironment(hdriTexture, environmentCreateInfo);
   }
 

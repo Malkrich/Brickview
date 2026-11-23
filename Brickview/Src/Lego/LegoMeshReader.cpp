@@ -1,8 +1,9 @@
 #include "LegoMeshReader.h"
 
-#include "LDraw/LDrawCore.h"
 #include "LDraw/LDrawFileManager.h"
 #include "LDraw/LDrawReader.h"
+
+#include <Geometry/Mesh.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -26,8 +27,6 @@ namespace Brickview
 
   LegoMeshReader::LegoMeshReader()
   {
-    LDrawCore::Init();
-
     // Convert LDU to mm
     // 1 LDU = 0.4 mm
     // Convert mm to dm
@@ -40,20 +39,15 @@ namespace Brickview
     LDrawToBrickviewSpaceTransform = lDrawToBrickviewSpaceTransform;
   }
 
-  LegoMeshReader::~LegoMeshReader()
-  {
-    LDrawCore::Shutdown();
-  }
-
-  bool LegoMeshReader::Read(const std::filesystem::path& filePath)
+  Soup::Ref<Soup::Mesh> LegoMeshReader::Read(const std::filesystem::path& filePath)
   {
     if (!std::filesystem::exists(filePath))
     {
       SP_LOG_ERROR("Couldn't load: {}", filePath.generic_string());
-      return false;
+      return nullptr;
     }
 
-    m_Mesh = Soup::CreateRef<Soup::Mesh>();
+    Soup::Ref<Soup::Mesh> mesh = Soup::CreateRef<Soup::Mesh>();
     std::queue<LoadingQueueFileData> loadingQueue;
     LoadingQueueFileData initialFile(filePath, glm::mat4(1.0f));
     loadingQueue.push(initialFile);
@@ -61,16 +55,16 @@ namespace Brickview
     while (!loadingQueue.empty())
     {
       const LoadingQueueFileData& file = loadingQueue.front();
-      ReadFile(file, m_Mesh, loadingQueue);
+      ReadFile(file, mesh, loadingQueue);
       loadingQueue.pop();
     }
 
     // Convert to meter
-    m_Mesh->Transform(LDUToMeterTransform);
+    mesh->Transform(LDUToMeterTransform);
     // Convert LDraw space to Brickview space
-    m_Mesh->Transform(LDrawToBrickviewSpaceTransform);
+    mesh->Transform(LDrawToBrickviewSpaceTransform);
 
-    return true;
+    return mesh;
   }
 
   bool LegoMeshReader::ReadFile(

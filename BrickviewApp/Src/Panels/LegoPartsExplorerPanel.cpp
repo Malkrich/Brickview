@@ -1,6 +1,7 @@
 #include "LegoPartsExplorerPanel.h"
 
-#include "Renderer/TextureSpecifications.h"
+#include <IO/TextureReader.h>
+#include <Project/Project.h>
 
 #include <imgui.h>
 
@@ -10,9 +11,10 @@ namespace Brickview
   LegoPartsExplorerPanel::LegoPartsExplorerPanel(const std::filesystem::path& partsDirectory)
     : m_LegoPartsDirectory(partsDirectory)
   {
-    Soup::Texture2DSpecifications legoPartIconSpecs;
-    legoPartIconSpecs.Format = Soup::TextureFormat::RGBA;
-    m_DefaultLegoPartIcon = Soup::Texture2D::Create(legoPartIconSpecs, "./data/Icons/legoPartIcon.png");
+    // TODO: should be moved to proper application directory. Project should be the opened Brickview project.
+    std::filesystem::path iconFilePath = Soup::Project::GetActiveWorkingDirectory() / "data/Icons/legoPartIcon.png";
+    m_DefaultLegoPartIcon =
+      std::dynamic_pointer_cast<Soup::Texture2D>(Soup::TextureReader::ImportImageTexture(iconFilePath));
   }
 
   void LegoPartsExplorerPanel::RenderPanelContent()

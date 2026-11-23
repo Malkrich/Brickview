@@ -8,9 +8,9 @@
 namespace Brickview::LDrawCore
 {
 
-  void Init()
+  void Init(const std::filesystem::path& legoPartDataDirectory)
   {
-    LDrawFileManager::Init();
+    LDrawFileManager::Init(legoPartDataDirectory);
     LDrawCommandManager::Init();
   }
 

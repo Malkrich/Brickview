@@ -2,15 +2,12 @@
 
 #include "Scene/BrickviewScene.h"
 
-#include "Core/Event/KeyEvent.h"
-#include "Core/Event/MouseEvent.h"
-#include "Core/Layer/Layer.h"
-#include "GUI/Gizmo.h"
-#include "GUI/PanelManager.h"
-#include "Renderer/SceneRenderer.h"
-#include "Scene/CameraController.h"
-
-#include <imgui.h>
+#include <Core/Event/KeyEvent.h>
+#include <Core/Event/MouseEvent.h>
+#include <Core/Layer/Layer.h>
+#include <GUI/PanelManager.h>
+#include <Renderer/SceneRenderer.h>
+#include <Scene/CameraController.h>
 
 namespace Brickview
 {
@@ -18,6 +15,8 @@ namespace Brickview
   class ApplicationLayer : public Soup::Layer
   {
   public:
+    ApplicationLayer(const std::filesystem::path& projectPath);
+
     void OnAttach() override;
     void OnDetach() override;
     void OnEvent(Soup::Event& e) override;

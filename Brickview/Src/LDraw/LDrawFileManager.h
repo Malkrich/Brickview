@@ -28,7 +28,7 @@ namespace Brickview
   class LDrawFileManager
   {
   public:
-    static void Init();
+    static void Init(const std::filesystem::path& legoPartDataDirectory);
     static void Shutdown();
 
     static std::filesystem::path GetFullPartsDirectory();

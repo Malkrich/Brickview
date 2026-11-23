@@ -20,11 +20,13 @@ list(APPEND headers
 # Lego
 set(lego_dir ${src_dir}/Lego)
 list(APPEND sources
+    ${lego_dir}/LegoMeshImporter.cpp
     ${lego_dir}/LegoMeshReader.cpp
     ${lego_dir}/LegoPartMeshRegistry.cpp)
 
 list(APPEND headers
     ${lego_dir}/LegoMaterial.h
+    ${lego_dir}/LegoMeshImporter.h
     ${lego_dir}/LegoMeshReader.h
     ${lego_dir}/LegoPart.h
     ${lego_dir}/LegoPartMeshRegistry.h)
